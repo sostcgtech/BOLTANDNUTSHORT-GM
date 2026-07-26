@@ -10,6 +10,8 @@ public sealed class NutBoltSortPrototype : MonoBehaviour
 {
     const int Capacity = 4;
     const float NutStep = .48f;
+    [Header("Bolt Grid Layout")]
+    [SerializeField] BoltGridLayoutSettings boltGridLayout = new BoltGridLayoutSettings();
     readonly Dictionary<NutColor, Color> colors = new Dictionary<NutColor, Color>
     {
         { NutColor.Red, new Color(.95f,.19f,.20f) }, { NutColor.Blue, new Color(.12f,.48f,.96f) },
@@ -43,9 +45,9 @@ public sealed class NutBoltSortPrototype : MonoBehaviour
         bolts.Clear(); won = false;
         foreach (Transform root in boltsRoot)
         {
-            if (!root.name.StartsWith("Bolt ")) continue;
+            if (root == null || !root.gameObject.activeInHierarchy) continue;
             var collider = root.GetComponent<BoxCollider>();
-            if (collider == null) return false;
+            if (collider == null) continue;
             var bolt = new Bolt { root = root.gameObject, collider = collider, home = root.position, id = bolts.Count };
             foreach (Transform child in root)
             {
@@ -57,6 +59,7 @@ public sealed class NutBoltSortPrototype : MonoBehaviour
             bolt.nuts = bolt.nuts.OrderBy(n => n.root.transform.localPosition.y).ToList();
             bolts.Add(bolt);
         }
+        ApplyBoltGridLayout();
         return bolts.Count > 0;
     }
     Transform Group(string name)
@@ -91,26 +94,40 @@ public sealed class NutBoltSortPrototype : MonoBehaviour
         bolts.Clear(); selected = null; won = false;
         boltsRoot = Group("01_Bolts — Bottom (move bolt roots to arrange)");
         metal ??= Mat(new Color(.30f, .36f, .46f), .78f);
-        // Reference-style board: four working stacks across the rear; two clear maneuvering
-        // bolts across the lower row. Keep these roots editable in the scene hierarchy.
-        var locations = new[] {
-            new Vector3(-3.3f,0,1.15f), new Vector3(-1.1f,0,1.15f),
-            new Vector3(1.1f,0,1.15f), new Vector3(3.3f,0,1.15f),
-            new Vector3(-1.15f,0,-1.65f), new Vector3(1.15f,0,-1.65f)
-        };
         var data = Levels[index % Levels.Length];
-        for (int i=0;i<data.Length;i++) bolts.Add(CreateBolt(i, locations[i], data[i]));
+        for (int i=0;i<data.Length;i++) bolts.Add(CreateBolt(i, data[i]));
+        ApplyBoltGridLayout();
     }
-    Bolt CreateBolt(int id, Vector3 pos, NutColor[] initial)
+    Bolt CreateBolt(int id, NutColor[] initial)
     {
-        var root = new GameObject("Bolt " + (id+1) + " — replace visual children"); root.transform.SetParent(boltsRoot); root.transform.position = pos;
+        var root = new GameObject("Bolt " + (id+1) + " — replace visual children"); root.transform.SetParent(boltsRoot); root.transform.localPosition = Vector3.zero;
         var hit = root.AddComponent<BoxCollider>(); hit.center = new Vector3(0,1.25f,0); hit.size = new Vector3(1.35f,3.3f,1.35f);
         var click = root.AddComponent<BoltClick>(); click.owner = this;
         Primitive(PrimitiveType.Cylinder,"Bolt shaft",root.transform,new Vector3(0,1.2f,0),new Vector3(.26f,1.25f,.26f),metal);
         Primitive(PrimitiveType.Cylinder,"Bolt base",root.transform,new Vector3(0,.12f,0),new Vector3(.68f,.12f,.68f),metal);
-        var b = new Bolt { root=root, collider=hit, home=pos, id=id };
+        var b = new Bolt { root=root, collider=hit, home=root.transform.position, id=id };
         foreach(var c in initial) b.nuts.Add(CreateNut(root.transform,c,b.nuts.Count));
         return b;
+    }
+    /// <summary>
+    /// Repositions active bolt roots after a board is loaded or rebuilt. Call this method if a
+    /// level system intentionally enables or disables bolt roots outside the built-in flows.
+    /// </summary>
+    public void RefreshBoltGridLayout() => ApplyBoltGridLayout();
+
+    void ApplyBoltGridLayout()
+    {
+        var roots = new List<Transform>(bolts.Count);
+        foreach (var bolt in bolts)
+            if (bolt != null && bolt.root != null) roots.Add(bolt.root.transform);
+
+        BoltGridLayout.Apply(roots, boltGridLayout);
+
+        // Selection restores a bolt to this world-space home position. Refresh it after the
+        // local-space layout has moved the root, without changing rotation, scale, or parenting.
+        foreach (var bolt in bolts)
+            if (bolt != null && bolt.root != null && bolt.root.activeInHierarchy)
+                bolt.home = bolt.root.transform.position;
     }
     Nut CreateNut(Transform parent, NutColor color, int height)
     {
@@ -175,4 +192,55 @@ public sealed class NutBoltSortPrototype : MonoBehaviour
     sealed class Nut { public NutColor color; public GameObject root; }
     sealed class Bolt { public int id; public GameObject root; public BoxCollider collider; public Vector3 home; public List<Nut> nuts=new List<Nut>(); public bool locked; }
     sealed class BoltClick : MonoBehaviour { public NutBoltSortPrototype owner; void OnMouseUpAsButton(){owner.Tap(owner.bolts.FirstOrDefault(b=>b.root==gameObject));} }
+}
+
+/// <summary>Inspector settings for the local-space bolt root grid.</summary>
+[Serializable]
+public sealed class BoltGridLayoutSettings
+{
+    [Min(1)] public int MaximumColumns = 5;
+    [Min(0.01f)] public float HorizontalSpacing = 2.2f;
+    [Min(0.01f)] public float VerticalSpacing = 2.8f;
+    public Vector3 GridCenterOffset = new Vector3(0f, 0f, -0.25f);
+}
+
+/// <summary>
+/// Reusable local-space grid placement for ordered bolt root transforms. The column count grows
+/// from one to the configured maximum, keeping the compact two-row layouts used by the board.
+/// </summary>
+public static class BoltGridLayout
+{
+    public static void Apply(IList<Transform> orderedBoltRoots, BoltGridLayoutSettings settings)
+    {
+        if (orderedBoltRoots == null || settings == null) return;
+
+        var activeRoots = new List<Transform>(orderedBoltRoots.Count);
+        foreach (var root in orderedBoltRoots)
+            if (root != null && root.gameObject.activeInHierarchy)
+                activeRoots.Add(root);
+
+        if (activeRoots.Count == 0) return;
+
+        // This produces 3+2 for five bolts, 4+3 for seven, and 5+4 for nine (when allowed).
+        int columns = Mathf.Min(Mathf.Max(1, settings.MaximumColumns), Mathf.CeilToInt(activeRoots.Count * .5f));
+        int rowCount = Mathf.CeilToInt(activeRoots.Count / (float)columns);
+        float firstRowZ = settings.GridCenterOffset.z + (rowCount - 1) * settings.VerticalSpacing * .5f;
+        int nextRoot = 0;
+
+        for (int row = 0; row < rowCount; row++)
+        {
+            int boltsInRow = Mathf.Min(columns, activeRoots.Count - nextRoot);
+            float rowWidth = (boltsInRow - 1) * settings.HorizontalSpacing;
+            float rowZ = firstRowZ - row * settings.VerticalSpacing;
+
+            for (int column = 0; column < boltsInRow; column++)
+            {
+                // Set only local position. Rotation, scale, and hierarchy remain untouched.
+                activeRoots[nextRoot++].localPosition = new Vector3(
+                    settings.GridCenterOffset.x - rowWidth * .5f + column * settings.HorizontalSpacing,
+                    settings.GridCenterOffset.y,
+                    rowZ);
+            }
+        }
+    }
 }
