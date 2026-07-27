@@ -615,6 +615,7 @@ UnityEngine.GeometryUtility::Internal_ExtractPlanes_Injected
 UnityEngine.Gizmos::DrawIcon_Injected
 UnityEngine.Gizmos::DrawLine_Injected
 UnityEngine.Gizmos::DrawSphere_Injected
+UnityEngine.Gizmos::DrawWireCube_Injected
 UnityEngine.Gizmos::DrawWireSphere_Injected
 UnityEngine.Gizmos::set_color_Injected
 UnityEngine.Gizmos::set_matrix_Injected

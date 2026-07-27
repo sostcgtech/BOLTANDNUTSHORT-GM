@@ -36,6 +36,8 @@ namespace NutBoltSort
 
         public int BoltIndex { get; set; }
         public Vector3 HomePosition { get; set; }
+        /// <summary>Scale captured after prefab setup. Gameplay feedback always returns to this exact value.</summary>
+        public Vector3 RestingLocalScale { get; private set; }
         public bool IsLocked { get; private set; }
         public List<NutView> Nuts { get; } = new List<NutView>();
 
@@ -56,6 +58,7 @@ namespace NutBoltSort
 
         private void Awake()
         {
+            RestingLocalScale = transform.localScale;
             if (boxCollider == null)
                 boxCollider = GetComponent<BoxCollider>();
 
