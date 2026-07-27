@@ -1,0 +1,2 @@
+/home/sost-cgtech/Documents/QUADBIX/GAMEPROJECTS/NUTBOLT SORT GM/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/CMakeLists.txt
+/home/sost-cgtech/Documents/QUADBIX/GAMEPROJECTS/NUTBOLT SORT GM/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/GameActivity/CMakeLists.txt

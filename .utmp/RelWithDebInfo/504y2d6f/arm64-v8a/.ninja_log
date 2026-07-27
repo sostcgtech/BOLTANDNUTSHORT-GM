@@ -1,0 +1,10 @@
+# ninja log v5
+3	1579	1785123250601111801	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	47dfb6b8c95d91f8
+1	1738	1785123250783285869	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	a938471d7abca737
+8	1916	1785123250966113346	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	f50ec7d197c97b13
+8	2212	1785123251264114607	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	d2524001833ab65d
+1	2226	1785123251265261644	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	3e2738b8254a9693
+9	2512	1785123251563115873	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	acfde0a6bf4b2bbe
+4	2882	1785123251932235239	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	94b04076ffc3199b
+0	3008	1785123252059161474	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	fe9097e19eed1323
+3008	3060	1785123252119118226	/home/sost-cgtech/Documents/QUADBIX/GAMEPROJECTS/NUTBOLT SORT GM/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/504y2d6f/obj/arm64-v8a/libgame.so	cb25f7c499572107
