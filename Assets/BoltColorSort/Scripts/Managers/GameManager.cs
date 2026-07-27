@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace NutBoltSort
@@ -14,6 +15,7 @@ namespace NutBoltSort
     {
         [Header("Manager References")]
         [SerializeField] private LevelManager levelManager;
+        [SerializeField] private UIManager uiManager;
 
         [Header("Bolt Interaction Animation Settings")]
         [SerializeField, Min(0f)] private float selectionLiftHeight = .72f;
@@ -55,6 +57,15 @@ namespace NutBoltSort
                     levelManager = gameObject.AddComponent<LevelManager>();
                 }
             }
+
+            if (uiManager == null)
+            {
+                uiManager = GetComponent<UIManager>() ?? FindObjectOfType<UIManager>();
+                if (uiManager == null)
+                {
+                    uiManager = gameObject.AddComponent<UIManager>();
+                }
+            }
         }
 
         private void Start()
@@ -81,18 +92,23 @@ namespace NutBoltSort
                 }
             }
 
+            if (uiManager != null)
+            {
+                uiManager.UpdateLevelDisplay();
+            }
+
             inputLocked = false;
         }
 
         public void RestartLevel()
         {
-            if (inputLocked) return;
+            inputLocked = false;
             LoadCurrentLevel();
         }
 
         public void LoadNextLevel()
         {
-            if (inputLocked) return;
+            inputLocked = false;
             if (levelManager != null && levelManager.TotalLevels > 0)
             {
                 currentLevelIndex = (currentLevelIndex + 1) % levelManager.TotalLevels;
@@ -103,6 +119,10 @@ namespace NutBoltSort
         private void Update()
         {
             if (inputLocked || won) return;
+
+            // Block 3D raycasting when pointer is over UI element or a popup is open
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+            if (uiManager != null && uiManager.IsUIOpen) return;
 
             // Handle touch or mouse tap
             if (Input.GetMouseButtonDown(0))
@@ -327,7 +347,15 @@ namespace NutBoltSort
             if (destinationCompleted && destination != source) yield return PlayCompletionFeedback(destination);
             ClearSelection();
             moveRoutine = null;
-            inputLocked = false;
+
+            if (won)
+            {
+                if (uiManager != null) uiManager.ShowWinPopup();
+            }
+            else
+            {
+                inputLocked = false;
+            }
         }
 
         private IEnumerator ShakeInvalidDestination(BoltView bolt)
@@ -412,6 +440,8 @@ namespace NutBoltSort
 
         private void OnGUI()
         {
+            if (uiManager != null && uiManager.enabled) return;
+
             var old = GUI.matrix;
             float scale = Screen.width / 1080f;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1));

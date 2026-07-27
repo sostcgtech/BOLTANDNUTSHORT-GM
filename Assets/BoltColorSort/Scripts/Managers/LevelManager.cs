@@ -35,13 +35,33 @@ namespace NutBoltSort
 
         public IReadOnlyList<BoltView> ActiveBolts => activeBolts;
         public BoltGridLayoutSettings GridLayoutSettings => gridLayoutSettings;
-        public int TotalLevels => levelDataList != null ? levelDataList.Count : 0;
+        public int TotalLevels
+        {
+            get
+            {
+                EnsureLevelDataList();
+                return levelDataList != null ? levelDataList.Count : 0;
+            }
+        }
 
         private void Awake()
         {
             EnsureBoardRoot();
+            EnsureLevelDataList();
+        }
 
-            // Fallback default test levels if levelDataList is unassigned in Inspector
+        private void EnsureLevelDataList()
+        {
+            if (levelDataList == null || levelDataList.Count == 0)
+            {
+                var loadedLevels = Resources.LoadAll<LevelDataSO>("Levels");
+                if (loadedLevels != null && loadedLevels.Length > 0)
+                {
+                    levelDataList = new List<LevelDataSO>(loadedLevels);
+                    levelDataList.Sort((a, b) => a.levelNumber.CompareTo(b.levelNumber));
+                }
+            }
+
             if (levelDataList == null || levelDataList.Count == 0)
             {
                 CreateFallbackLevelData();
@@ -99,10 +119,12 @@ namespace NutBoltSort
         {
             loadedData = null;
             EnsureBoardRoot();
+            EnsureLevelDataList();
 
             if (levelDataList == null || levelDataList.Count == 0)
             {
-                CreateFallbackLevelData();
+                Debug.LogError("[LevelManager] Error: No LevelDataSO assets configured.");
+                return false;
             }
 
             int index = Mathf.Abs(levelIndex) % levelDataList.Count;
