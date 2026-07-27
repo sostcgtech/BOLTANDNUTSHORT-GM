@@ -5654,7 +5654,7 @@ GameObject:
   - component: {fileID: 900000002}
   - component: {fileID: 900000003}
   m_Layer: 0
-  m_Name: "NUT & BOLT SORT \u2014 Editable Prototype"
+  m_Name: NUT & BOLT SORT
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
