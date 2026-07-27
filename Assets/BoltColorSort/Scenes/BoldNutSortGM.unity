@@ -1547,17 +1547,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &205294319 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8886823225530323966, guid: a50ce0c9df5797903a7f0154b533ae83, type: 3}
-  m_PrefabInstance: {fileID: 4591964192073504398}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 45b2b0514ce17f85b89c1deaa7f31417, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.BoltView
 --- !u!1 &232801049
 GameObject:
   m_ObjectHideFlags: 0
@@ -2027,7 +2016,6 @@ MonoBehaviour:
   m_Script: {fileID: 148192966}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSortPrototype/BoltClick
-  owner: {fileID: 900000003}
 --- !u!65 &264259076
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5964,7 +5952,6 @@ MonoBehaviour:
   m_Script: {fileID: 148192966}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSortPrototype/BoltClick
-  owner: {fileID: 900000003}
 --- !u!65 &855763043
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6033,7 +6020,6 @@ MonoBehaviour:
   m_Script: {fileID: 148192966}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSortPrototype/BoltClick
-  owner: {fileID: 900000003}
 --- !u!65 &874046195
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6154,7 +6140,6 @@ MonoBehaviour:
   m_Script: {fileID: 148192966}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSortPrototype/BoltClick
-  owner: {fileID: 900000003}
 --- !u!65 &910028483
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6703,12 +6688,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5031ff04604068298aa722c3ba90a15c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.LevelManager
-  boltPrefab: {fileID: 205294319}
+  boltPrefab: {fileID: 8886823225530323966, guid: a50ce0c9df5797903a7f0154b533ae83, type: 3}
   nutPrefab: {fileID: 6738112415320462758, guid: 2a8c858255f5dc0b7a67172e97ad817b, type: 3}
   boardRoot: {fileID: 392807724}
   gridLayoutSettings:
     MaximumColumns: 5
-    HorizontalSpacing: 2.2
+    HorizontalSpacing: 1
     RowDepthSpacing: 2.8
     AlternateRowHorizontalOffset: 0
     GridCenterOffset: {x: 0, y: 0, z: -0.25}
@@ -10093,7 +10078,6 @@ MonoBehaviour:
   m_Script: {fileID: 148192966}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSortPrototype/BoltClick
-  owner: {fileID: 900000003}
 --- !u!65 &1456975184
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10653,7 +10637,6 @@ MonoBehaviour:
   m_Script: {fileID: 148192966}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSortPrototype/BoltClick
-  owner: {fileID: 900000003}
 --- !u!65 &1511828454
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15372,7 +15355,7 @@ Transform:
   m_GameObject: {fileID: 2075356786}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.916, y: 0.26622, z: -1.67973}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
