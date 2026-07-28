@@ -1118,6 +1118,7 @@ UnityEngine.Renderer::get_sortingLayerID_Injected
 UnityEngine.Renderer::get_sortingOrder_Injected
 UnityEngine.Renderer::GetMaterial_Injected
 UnityEngine.Renderer::GetSharedMaterial_Injected
+UnityEngine.Renderer::Internal_SetPropertyBlock_Injected
 UnityEngine.Renderer::SetMaterial_Injected
 UnityEngine.Renderer::set_allowGPUDrivenRendering_Injected
 UnityEngine.Renderer::set_enabled_Injected
@@ -1454,6 +1455,7 @@ UnityEngine.Rigidbody2D::set_position_Injected
 UnityEngine.ScalableBufferManager::get_heightScaleFactor
 UnityEngine.ScalableBufferManager::get_widthScaleFactor
 UnityEngine.ScalableBufferManager::ResizeBuffers
+UnityEngine.SceneManagement.Scene::IsValidInternal_Injected
 UnityEngine.SceneManagement.Scene::GetGUIDInternal_Injected
 UnityEngine.SceneManagement.SceneManager::GetActiveScene_Injected
 UnityEngine.Screen::get_fullScreen

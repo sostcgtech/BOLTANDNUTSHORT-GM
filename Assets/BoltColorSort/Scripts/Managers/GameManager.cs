@@ -45,20 +45,17 @@ namespace NutBoltSort
 
         // Travel ──────────────────────────────────────────────────────────────
         [Header("Travel")]
-        [Tooltip("Minimum flight duration regardless of distance.")]
+        [Tooltip("Duration of the vertical lift stage (followers only).")]
+        [SerializeField, Min(.01f)] private float liftDuration            = .20f;
+
+        [Tooltip("Minimum horizontal travel duration regardless of distance.")]
         [SerializeField, Min(.01f)] private float travelDurationMin       = .28f;
 
-        [Tooltip("Flight time added per world-unit of distance.")]
+        [Tooltip("Horizontal travel time added per world-unit of distance.")]
         [SerializeField, Min(.01f)] private float travelDurationPerUnit   = .12f;
-
-        [Tooltip("Extra height added to the arc midpoint during travel.")]
-        [SerializeField, Min(0f)]   private float travelArcHeight         = .58f;
 
         [Tooltip("Degrees per second the nut gently rotates during travel.")]
         [SerializeField, Min(0f)]   private float travelRotationSpeed     = 200f;
-
-        [Tooltip("Scale multiplier at peak of arc.")]
-        [SerializeField, Range(1f, 1.2f)] private float travelScale       = 1.07f;
 
         // Landing ─────────────────────────────────────────────────────────────
         [Header("Landing")]
@@ -400,43 +397,43 @@ namespace NutBoltSort
 
                 Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
 
-                // ── Phase 1: lift (followers only) ──────────────────────────
-                Vector3 travelOrigin;
+                // ── Shared hover height (world Y of SelectionHoverPoint) ─────
+                float   hoverWorldY    = source.GetHoverWorldPosition().y;
+
+                // ── Phase 1: Vertical Lift (followers only) ──────────────────
                 if (q == 0)
                 {
-                    // Leader: already at or near the hover world position.
-                    travelOrigin = source.GetHoverWorldPosition();
-                    tr.position  = travelOrigin; // snap away any hover drift
+                    // Leader: already at hover height — snap cleanly, no lift.
+                    Vector3 snapPos = tr.position;
+                    snapPos.y       = hoverWorldY;
+                    tr.position     = snapPos;
                 }
                 else
                 {
-                    // Follower: lift from stack to hover world position first.
-                    travelOrigin = source.GetHoverWorldPosition();
+                    // Follower: move straight up on Y only to reach hover height.
+                    Vector3 liftTarget = new Vector3(tr.position.x, hoverWorldY, tr.position.z);
 
                     Sequence liftSeq = DOTween.Sequence();
-                    liftSeq.Join(tr.DOMove(travelOrigin, selectionLiftDuration).SetEase(Ease.OutCubic));
+                    liftSeq.Join(tr.DOMove(liftTarget, liftDuration).SetEase(Ease.OutCubic));
                     liftSeq.Join(tr.DORotate(
-                        Vector3.up * (selectionRotationSpeed * selectionLiftDuration),
-                        selectionLiftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+                        Vector3.up * (selectionRotationSpeed * liftDuration),
+                        liftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                     nutSeq.Append(liftSeq);
                 }
 
-                // ── Phase 2: travel arc ─────────────────────────────────────
-                float   flightDist     = Vector3.Distance(travelOrigin, destWorld);
-                float   flightDuration = Mathf.Max(travelDurationMin, flightDist * travelDurationPerUnit);
-                float   rotDeg         = travelRotationSpeed * flightDuration;
-                Vector3 arcMid         = Vector3.Lerp(travelOrigin, destWorld, .5f) + Vector3.up * travelArcHeight;
+                // ── Phase 2: Horizontal Travel ───────────────────────────────
+                // Move only on X/Z — keep Y locked at hover height.
+                Vector3 horizontalDest = new Vector3(destWorld.x, hoverWorldY, destWorld.z);
+                float   horizDist      = Vector3.Distance(
+                    new Vector3(tr.position.x, 0f, tr.position.z),
+                    new Vector3(horizontalDest.x, 0f, horizontalDest.z));
+                float   horizDuration  = Mathf.Max(travelDurationMin, horizDist * travelDurationPerUnit);
+                float   rotDeg         = travelRotationSpeed * horizDuration;
 
                 Sequence travelSeq = DOTween.Sequence();
-                // DOPath starts from tr.position when travelSeq begins (= travelOrigin after lift).
-                travelSeq.Append(tr.DOPath(new[] { arcMid, destWorld }, flightDuration,
-                    PathType.CatmullRom, PathMode.Full3D).SetEase(Ease.InOutCubic));
-                travelSeq.Join(tr.DORotate(Vector3.up * rotDeg, flightDuration,
+                travelSeq.Append(tr.DOMove(horizontalDest, horizDuration).SetEase(Ease.InOutSine));
+                travelSeq.Join(tr.DORotate(Vector3.up * rotDeg, horizDuration,
                     RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                travelSeq.Insert(0f,
-                    tr.DOScale(nut.RestingLocalScale * travelScale, flightDuration * .5f).SetEase(Ease.OutQuad));
-                travelSeq.Insert(flightDuration * .5f,
-                    tr.DOScale(nut.RestingLocalScale, flightDuration * .5f).SetEase(Ease.InOutSine));
 
                 nutSeq.Append(travelSeq);
 
@@ -448,8 +445,10 @@ namespace NutBoltSort
 
                 nutSeq.AppendCallback(() => tr.SetParent(capturedDest.NutContainer, worldPositionStays: true));
 
+                // ── Phase 3: Vertical Drop ───────────────────────────────────
+                // Move straight down on Y only — no horizontal drift.
                 Sequence landSeq = DOTween.Sequence();
-                landSeq.Append(tr.DOMove(destWorld, landingDuration).SetEase(Ease.InOutCubic));
+                landSeq.Append(tr.DOMove(destWorld, landingDuration).SetEase(Ease.InCubic));
                 landSeq.Join(tr.DORotate(
                     Vector3.down * (selectionRotationSpeed * landingDuration),
                     landingDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
