@@ -32,3 +32,6 @@
 ehthumbs.db
 Thumbs.db
 .vscode/
+
+# Large asset packages — too big for GitHub (>100 MB)
+*.unitypackage
