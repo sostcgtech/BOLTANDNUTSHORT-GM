@@ -29,6 +29,10 @@ namespace NutBoltSort
         [Tooltip("Degrees per second the nut rotates while unscrewing (lift) or rethreading (land).")]
         [SerializeField, Min(0f)]   private float selectionRotationSpeed  = 260f;
 
+        [Header("Selection Switching")]
+        [Tooltip("Return duration used only when switching from one selected bolt to another. Lower is faster.")]
+        [SerializeField, Min(.01f)] private float selectionSwitchDuration = .18f;
+
         // Hover ───────────────────────────────────────────────────────────────
         [Header("Hover")]
         [SerializeField, Min(0f)]   private float hoverAmount             = .035f;
@@ -227,7 +231,10 @@ namespace NutBoltSort
             }
             else
             {
-                StartCoroutine(PulseInvalidDestination(tapped));
+                // A destination that cannot receive this group is still a useful
+                // one-tap selection switch. The current hover always rethreads
+                // before the next bolt is allowed to lift.
+                BeginSelectionSwitch(tapped);
             }
         }
 
@@ -254,6 +261,14 @@ namespace NutBoltSort
             StopHover();
             inputLocked = true;
             selectionRoutine = StartCoroutine(ReturnTopNut());
+        }
+
+        private void BeginSelectionSwitch(BoltView nextBolt)
+        {
+            if (selectionRoutine != null) StopCoroutine(selectionRoutine);
+            StopHover();
+            inputLocked = true;
+            selectionRoutine = StartCoroutine(ReturnThenSelect(nextBolt));
         }
 
         private void BeginMove(BoltView destination)
@@ -301,28 +316,54 @@ namespace NutBoltSort
 
         private IEnumerator ReturnTopNut()
         {
-            KillGameplayTweens();
-            if (liftedNut == null) { ClearSelection(); inputLocked = false; yield break; }
-
-            BoltView source   = selectedBolt;
-            int      stackIdx = source.Nuts.IndexOf(liftedNut);
-            Vector3  returnTarget = source.NutContainer.TransformPoint(source.GetStackPosition(stackIdx));
-
-            KillNutTween(liftedNut);
-            Sequence returnSeq = DOTween.Sequence().SetTarget(liftedNut.transform);
-            returnSeq.Join(liftedNut.transform.DOMove(returnTarget, selectionLiftDuration).SetEase(Ease.InOutCubic));
-            returnSeq.Join(liftedNut.transform.DORotate(
-                Vector3.down * (selectionRotationSpeed * selectionLiftDuration),
-                selectionLiftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-
-            gameplaySequence = DOTween.Sequence().SetTarget(this).Append(returnSeq);
-            yield return gameplaySequence.WaitForCompletion();
-
-            SnapNutToStack(source, liftedNut, stackIdx);
-            source.SetSelectionEffect(false);
+            yield return ReturnHoveredNutToStack(selectionLiftDuration);
             ClearSelection();
             gameplaySequence = null;
             inputLocked = false;
+        }
+
+        private IEnumerator ReturnThenSelect(BoltView nextBolt)
+        {
+            yield return ReturnHoveredNutToStack(selectionSwitchDuration);
+            ClearSelection();
+            gameplaySequence = null;
+            selectionRoutine = null;
+
+            // Empty/locked bolts cannot become a source selection, but the prior
+            // hover has still been cleanly returned instead of being left floating.
+            if (CanSelect(nextBolt))
+            {
+                PulseBoltSelection(nextBolt);
+                BeginSelection(nextBolt);
+            }
+            else
+            {
+                inputLocked = false;
+            }
+        }
+
+        private IEnumerator ReturnHoveredNutToStack(float returnDuration)
+        {
+            KillGameplayTweens();
+            if (liftedNut == null || selectedBolt == null) yield break;
+
+            BoltView source = selectedBolt;
+            NutView returningNut = liftedNut;
+            int stackIdx = source.Nuts.IndexOf(returningNut);
+            if (stackIdx < 0) yield break;
+
+            Vector3 returnTarget = source.NutContainer.TransformPoint(source.GetStackPosition(stackIdx));
+            KillNutTween(returningNut);
+            Sequence returnSeq = DOTween.Sequence().SetTarget(returningNut.transform);
+            returnSeq.Join(returningNut.transform.DOMove(returnTarget, returnDuration).SetEase(Ease.InOutCubic));
+            returnSeq.Join(returningNut.transform.DORotate(
+                Vector3.down * (selectionRotationSpeed * returnDuration),
+                returnDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+
+            gameplaySequence = DOTween.Sequence().SetTarget(this).Append(returnSeq);
+            yield return gameplaySequence.WaitForCompletion();
+            SnapNutToStack(source, returningNut, stackIdx);
+            source.SetSelectionEffect(false);
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -333,7 +374,9 @@ namespace NutBoltSort
         {
             KillGameplayTweens();
             BoltView      source             = selectedBolt;
-            List<NutView> moving             = new List<NutView>(selectedNuts);
+            int           moveCount          = GetMoveCount(destination, selectedNuts);
+            // selectedNuts is bottom-to-top; transfer the top portion only.
+            List<NutView> moving             = selectedNuts.Skip(selectedNuts.Count - moveCount).ToList();
             int           destStartIdx       = destination.Nuts.Count;
             source.SetSelectionEffect(false);
 
@@ -657,11 +700,26 @@ namespace NutBoltSort
             return group;
         }
 
+        private static bool CanSelect(BoltView bolt) =>
+            bolt != null && !bolt.IsLocked && bolt.Nuts.Count > 0;
+
+        private static int GetMoveCount(BoltView destination, List<NutView> matchingGroup)
+        {
+            if (destination == null || matchingGroup == null || matchingGroup.Count == 0 || destination.IsLocked)
+                return 0;
+
+            int availableSpaces = BoltView.Capacity - destination.Nuts.Count;
+            if (availableSpaces <= 0) return 0;
+
+            NutColor movingColor = matchingGroup[matchingGroup.Count - 1].Color;
+            if (destination.Nuts.Count > 0 && destination.Nuts[destination.Nuts.Count - 1].Color != movingColor)
+                return 0;
+
+            return Mathf.Min(matchingGroup.Count, availableSpaces);
+        }
+
         private bool CanMove(BoltView from, BoltView to, List<NutView> moving) =>
-            from != null && to != null && moving != null && moving.Count > 0 &&
-            !to.IsLocked &&
-            to.Nuts.Count + moving.Count <= BoltView.Capacity &&
-            (to.Nuts.Count == 0 || to.Nuts[to.Nuts.Count - 1].Color == moving[moving.Count - 1].Color);
+            from != null && GetMoveCount(to, moving) > 0;
 
         private void CheckWin()
         {

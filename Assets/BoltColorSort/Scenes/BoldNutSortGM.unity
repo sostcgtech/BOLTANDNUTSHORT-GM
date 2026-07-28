@@ -6015,10 +6015,11 @@ MonoBehaviour:
   levelManager: {fileID: 1035499216}
   uiManager: {fileID: 234032643}
   selectionLiftDuration: 0.22
-  selectionRotationSpeed: 260
+  selectionRotationSpeed: 360
+  selectionSwitchDuration: 0.16
   hoverAmount: 0.035
   hoverHalfCycleDuration: 0.32
-  followerDelay: 0.07
+  followerDelay: 0.05
   travelDurationMin: 0.28
   travelDurationPerUnit: 0.12
   travelArcHeight: 0.58
@@ -6028,14 +6029,14 @@ MonoBehaviour:
   landingBounceScale: 1.045
   entryHeightOffset: 0.5
   entryRotMin: 90
-  entryRotMax: 270
-  entryMaxDelay: 0.2
-  entryDuration: 0.27
+  entryRotMax: 360
+  entryMaxDelay: 0.017
+  entryDuration: 0.15
   capPopHeight: 0.18
   capStartScale: 0.75
   capPopDuration: 0.14
   capCloseDuration: 0.22
-  capBounceAmount: 0.06
+  capBounceAmount: 0.15
   boltSelectionScale: 1.045
   boltSelectionPulseDuration: 0.12
   boltAttachYScale: 0.965
