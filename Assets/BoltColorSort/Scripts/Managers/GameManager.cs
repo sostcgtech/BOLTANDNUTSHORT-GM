@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,84 +7,144 @@ using UnityEngine.EventSystems;
 
 namespace NutBoltSort
 {
-    /// <summary>Owns the single DOTween animation flow for nut selection and moves.</summary>
+    /// <summary>
+    /// Owns the single DOTween animation flow for nut selection, sequential follower transfer,
+    /// random entry animation, and per-bolt completion cap.
+    /// </summary>
     public class GameManager : MonoBehaviour
     {
+        // ─────────────────────────────────────────────────────────────────────
+        // Inspector
+        // ─────────────────────────────────────────────────────────────────────
+
         [Header("Manager References")]
         [SerializeField] private LevelManager levelManager;
-        [SerializeField] private UIManager uiManager;
+        [SerializeField] private UIManager    uiManager;
 
-        [Header("Nut Motion")]
-        [SerializeField, Min(0f)] private float selectionLiftHeight = .72f;
-        [SerializeField, Min(.01f)] private float selectionDuration = .22f;
-        [SerializeField, Min(0f)] private float hoverAmount = .035f;
-        [SerializeField, Min(.01f)] private float hoverHalfCycleDuration = .32f;
-        [SerializeField, Min(0f)] private float moveArcHeight = .58f;
-        [SerializeField, Min(.01f)] private float minimumFlightDuration = .28f;
-        [SerializeField, Min(.01f)] private float flightSecondsPerWorldUnit = .12f;
-        [SerializeField, Min(.01f)] private float landingDuration = .16f;
-        [SerializeField, Range(.05f, .08f)] private float queueMinimumGap = .06f;
-        [SerializeField, Min(0f)] private float threadedDegreesPerSecond = 260f;
-        [SerializeField, Range(1f, 1.2f)] private float flightScale = 1.07f;
+        // Selection ───────────────────────────────────────────────────────────
+        [Header("Selection")]
+        [Tooltip("Duration of the top nut lifting to the hover point.")]
+        [SerializeField, Min(.01f)] private float selectionLiftDuration   = .22f;
 
+        [Tooltip("Degrees per second the nut rotates while unscrewing (lift) or rethreading (land).")]
+        [SerializeField, Min(0f)]   private float selectionRotationSpeed  = 260f;
+
+        // Hover ───────────────────────────────────────────────────────────────
+        [Header("Hover")]
+        [SerializeField, Min(0f)]   private float hoverAmount             = .035f;
+        [SerializeField, Min(.01f)] private float hoverHalfCycleDuration  = .32f;
+
+        // Followers ───────────────────────────────────────────────────────────
+        [Header("Followers")]
+        [Tooltip("Seconds each following nut waits before starting its own lift + travel sequence.")]
+        [SerializeField, Range(.05f, .15f)] private float followerDelay   = .07f;
+
+        // Travel ──────────────────────────────────────────────────────────────
+        [Header("Travel")]
+        [Tooltip("Minimum flight duration regardless of distance.")]
+        [SerializeField, Min(.01f)] private float travelDurationMin       = .28f;
+
+        [Tooltip("Flight time added per world-unit of distance.")]
+        [SerializeField, Min(.01f)] private float travelDurationPerUnit   = .12f;
+
+        [Tooltip("Extra height added to the arc midpoint during travel.")]
+        [SerializeField, Min(0f)]   private float travelArcHeight         = .58f;
+
+        [Tooltip("Degrees per second the nut gently rotates during travel.")]
+        [SerializeField, Min(0f)]   private float travelRotationSpeed     = 200f;
+
+        [Tooltip("Scale multiplier at peak of arc.")]
+        [SerializeField, Range(1f, 1.2f)] private float travelScale       = 1.07f;
+
+        // Landing ─────────────────────────────────────────────────────────────
+        [Header("Landing")]
+        [SerializeField, Min(.01f)] private float landingDuration         = .16f;
+        [SerializeField, Range(1f, 1.2f)] private float landingBounceScale = 1.045f;
+
+        // Entry Animation ─────────────────────────────────────────────────────
+        [Header("Entry Animation")]
+        [Tooltip("Height above final slot each nut starts from.")]
+        [SerializeField, Range(.3f, .7f)]   private float entryHeightOffset  = .50f;
+
+        [Tooltip("Minimum random Y-rotation added to each nut at entry start.")]
+        [SerializeField, Range(90f, 360f)]  private float entryRotMin        = 90f;
+
+        [Tooltip("Maximum random Y-rotation added to each nut at entry start.")]
+        [SerializeField, Range(90f, 360f)]  private float entryRotMax        = 270f;
+
+        [Tooltip("Maximum random start delay per nut.")]
+        [SerializeField, Range(0f, .30f)]   private float entryMaxDelay      = .20f;
+
+        [Tooltip("Duration of each nut's drop animation.")]
+        [SerializeField, Range(.15f, .50f)] private float entryDuration      = .27f;
+
+        // Completion Cap ──────────────────────────────────────────────────────
+        [Header("Completion Cap")]
+        [Tooltip("Height the cap starts above CompletionCapPoint.")]
+        [SerializeField, Min(0f)]          private float capPopHeight    = .18f;
+
+        [Tooltip("Scale the cap starts at before popping.")]
+        [SerializeField, Range(.5f, 1f)]   private float capStartScale   = .75f;
+
+        [Tooltip("Duration of the initial upward pop.")]
+        [SerializeField, Min(.01f)]        private float capPopDuration  = .14f;
+
+        [Tooltip("Duration of the downward close motion.")]
+        [SerializeField, Min(.01f)]        private float capCloseDuration = .22f;
+
+        [Tooltip("Scale overshoot on landing bounce (0 = no bounce).")]
+        [SerializeField, Range(0f, .15f)]  private float capBounceAmount = .06f;
+
+        // Bolt Feedback ───────────────────────────────────────────────────────
         [Header("Bolt Feedback (scale only)")]
-        [SerializeField, Range(1f, 1.15f)] private float boltSelectionScale = 1.045f;
-        [SerializeField, Min(.01f)] private float boltSelectionPulseDuration = .12f;
-        [SerializeField, Range(.9f, 1f)] private float boltAttachYScale = .965f;
-        [SerializeField, Min(.01f)] private float boltAttachPulseDuration = .11f;
-        [SerializeField, Range(.9f, 1.1f)] private float invalidScalePulse = .965f;
-        [SerializeField, Min(.01f)] private float invalidPulseDuration = .16f;
-        [SerializeField, Range(1f, 1.1f)] private float completionScale = 1.03f;
+        [SerializeField, Range(1f, 1.15f)] private float boltSelectionScale       = 1.045f;
+        [SerializeField, Min(.01f)]        private float boltSelectionPulseDuration = .12f;
+        [SerializeField, Range(.9f, 1f)]   private float boltAttachYScale         = .965f;
+        [SerializeField, Min(.01f)]        private float boltAttachPulseDuration  = .11f;
+        [SerializeField, Range(.9f, 1.1f)] private float invalidScalePulse        = .965f;
+        [SerializeField, Min(.01f)]        private float invalidPulseDuration      = .16f;
 
-        private BoltView selectedBolt;
-        private List<NutView> selectedNuts = new List<NutView>(); // Logical order: bottom to top.
-        private Coroutine selectionRoutine;
-        private Coroutine moveRoutine;
-        private Sequence gameplaySequence;
-        private readonly List<Sequence> hoverSequences = new List<Sequence>();
+        // ─────────────────────────────────────────────────────────────────────
+        // Runtime State
+        // ─────────────────────────────────────────────────────────────────────
+
+        private BoltView         selectedBolt;
+        private List<NutView>    selectedNuts = new List<NutView>();
+        private NutView          liftedNut;        // Only the topmost nut is visually hovering.
+        private Coroutine        selectionRoutine;
+        private Coroutine        moveRoutine;
+        private Sequence         gameplaySequence;
+        private readonly List<Sequence>             hoverSequences = new List<Sequence>();
+        private readonly Dictionary<BoltView, Sequence> capSequences  = new Dictionary<BoltView, Sequence>();
+
         private bool inputLocked;
         private bool won;
-        private int currentLevelIndex;
+        private int  currentLevelIndex;
 
-        public bool IsWon => won;
-        public int CurrentLevelIndex => currentLevelIndex;
+        public bool IsWon             => won;
+        public int  CurrentLevelIndex => currentLevelIndex;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Unity Lifecycle
+        // ─────────────────────────────────────────────────────────────────────
 
         private void Awake()
         {
             Application.targetFrameRate = 60;
             Screen.orientation = ScreenOrientation.Portrait;
             if (levelManager == null) levelManager = GetComponent<LevelManager>() ?? FindObjectOfType<LevelManager>() ?? gameObject.AddComponent<LevelManager>();
-            if (uiManager == null) uiManager = GetComponent<UIManager>() ?? FindObjectOfType<UIManager>() ?? gameObject.AddComponent<UIManager>();
+            if (uiManager    == null) uiManager    = GetComponent<UIManager>()    ?? FindObjectOfType<UIManager>()    ?? gameObject.AddComponent<UIManager>();
         }
 
         private void Start() => LoadCurrentLevel();
 
-        public void LoadCurrentLevel()
-        {
-            StopAllCoroutines();
-            KillGameplayTweens();
-            inputLocked = true;
-            selectedBolt = null;
-            selectedNuts.Clear();
-            selectionRoutine = null;
-            moveRoutine = null;
-            won = false;
-            if (levelManager != null && levelManager.BuildLevel(currentLevelIndex, out _)) CheckWin();
-            if (uiManager != null) uiManager.UpdateLevelDisplay();
-            inputLocked = false;
-        }
-
-        public void RestartLevel() => LoadCurrentLevel();
-        public void LoadNextLevel()
-        {
-            if (levelManager != null && levelManager.TotalLevels > 0) currentLevelIndex = (currentLevelIndex + 1) % levelManager.TotalLevels;
-            LoadCurrentLevel();
-        }
-
         private void Update()
         {
-            if (inputLocked || won || (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) || (uiManager != null && uiManager.IsUIOpen)) return;
+            if (inputLocked || won ||
+                (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) ||
+                (uiManager != null && uiManager.IsUIOpen)) return;
             if (!Input.GetMouseButtonDown(0)) return;
+
             Ray ray = Camera.main != null ? Camera.main.ScreenPointToRay(Input.mousePosition) : default;
             if (Physics.Raycast(ray, out RaycastHit hit, 100f))
             {
@@ -94,9 +153,56 @@ namespace NutBoltSort
             }
         }
 
+        // ─────────────────────────────────────────────────────────────────────
+        // Level Loading
+        // ─────────────────────────────────────────────────────────────────────
+
+        public void LoadCurrentLevel()
+        {
+            StopAllCoroutines();
+            KillAllTweens();
+
+            inputLocked     = true;
+            selectedBolt    = null;
+            selectedNuts.Clear();
+            liftedNut       = null;
+            selectionRoutine = null;
+            moveRoutine      = null;
+            won              = false;
+
+            bool built = levelManager != null && levelManager.BuildLevel(currentLevelIndex, out _);
+            if (uiManager != null) uiManager.UpdateLevelDisplay();
+            if (!built) { inputLocked = false; return; }
+
+            // Silently lock any bolt that starts already complete. Cap shown AFTER entry animation.
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+            {
+                if (bolt != null && !bolt.IsLocked && bolt.IsComplete())
+                    bolt.LockBoltSilently();
+            }
+            CheckWin();
+
+            // Entry animation locks input until all nuts have settled.
+            StartCoroutine(PlayEntryAnimation());
+        }
+
+        public void RestartLevel() => LoadCurrentLevel();
+
+        public void LoadNextLevel()
+        {
+            if (levelManager != null && levelManager.TotalLevels > 0)
+                currentLevelIndex = (currentLevelIndex + 1) % levelManager.TotalLevels;
+            LoadCurrentLevel();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Tap Handling
+        // ─────────────────────────────────────────────────────────────────────
+
         public void TapBolt(BoltView tapped)
         {
             if (won || inputLocked || tapped == null) return;
+
             if (selectedBolt == null)
             {
                 if (!tapped.IsLocked && tapped.Nuts.Count > 0)
@@ -106,19 +212,40 @@ namespace NutBoltSort
                 }
                 return;
             }
-            if (selectedBolt == tapped) { PulseBoltSelection(tapped); BeginSelectionCancel(); return; }
-            if (CanMove(selectedBolt, tapped, selectedNuts)) { PulseBoltSelection(tapped); BeginMove(tapped); }
-            else StartCoroutine(PulseInvalidDestination(tapped));
+
+            if (selectedBolt == tapped)
+            {
+                PulseBoltSelection(tapped);
+                BeginSelectionCancel();
+                return;
+            }
+
+            if (CanMove(selectedBolt, tapped, selectedNuts))
+            {
+                PulseBoltSelection(tapped);
+                BeginMove(tapped);
+            }
+            else
+            {
+                StartCoroutine(PulseInvalidDestination(tapped));
+            }
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Selection — only the top nut lifts
+        // ─────────────────────────────────────────────────────────────────────
 
         private void BeginSelection(BoltView source)
         {
             selectedBolt = source;
             selectedNuts = TopMatchingGroup(source);
             if (selectedNuts.Count == 0) { selectedBolt = null; return; }
+
+            // Topmost nut only lifts visually. The rest stay at their stack positions.
+            liftedNut = selectedNuts[selectedNuts.Count - 1];
             source.SetSelectionEffect(true);
             inputLocked = true;
-            selectionRoutine = StartCoroutine(LiftSelectedNuts());
+            selectionRoutine = StartCoroutine(LiftTopNut());
         }
 
         private void BeginSelectionCancel()
@@ -126,7 +253,7 @@ namespace NutBoltSort
             if (selectionRoutine != null) StopCoroutine(selectionRoutine);
             StopHover();
             inputLocked = true;
-            selectionRoutine = StartCoroutine(ReturnSelectedNuts());
+            selectionRoutine = StartCoroutine(ReturnTopNut());
         }
 
         private void BeginMove(BoltView destination)
@@ -137,142 +264,353 @@ namespace NutBoltSort
             moveRoutine = StartCoroutine(MoveSelectedNuts(destination));
         }
 
-        private List<NutView> TopMatchingGroup(BoltView bolt)
-        {
-            var group = new List<NutView>();
-            if (bolt == null || bolt.Nuts.Count == 0) return group;
-            NutColor color = bolt.Nuts[bolt.Nuts.Count - 1].Color;
-            for (int i = bolt.Nuts.Count - 1; i >= 0 && bolt.Nuts[i].Color == color; i--) group.Insert(0, bolt.Nuts[i]);
-            return group;
-        }
+        // ─────────────────────────────────────────────────────────────────────
+        // Lift — single top nut to fixed SelectionHoverPoint
+        // ─────────────────────────────────────────────────────────────────────
 
-        private bool CanMove(BoltView from, BoltView to, List<NutView> moving) => from != null && to != null && moving != null && moving.Count > 0 && !to.IsLocked && to.Nuts.Count + moving.Count <= BoltView.Capacity && (to.Nuts.Count == 0 || to.Nuts[to.Nuts.Count - 1].Color == moving[moving.Count - 1].Color);
-
-        private IEnumerator LiftSelectedNuts()
+        private IEnumerator LiftTopNut()
         {
             KillGameplayTweens();
-            gameplaySequence = DOTween.Sequence().SetTarget(this);
-            float clearanceGap = Mathf.Max(queueMinimumGap, selectionDuration * .58f);
-            int queueOrder = 0;
-            // Top first prevents a lower nut clipping through the stack above it.
-            for (int i = selectedNuts.Count - 1; i >= 0; i--, queueOrder++)
-            {
-                NutView nut = selectedNuts[i];
-                int stackIndex = selectedBolt.Nuts.IndexOf(nut);
-                RestoreNutToStack(selectedBolt, nut, stackIndex);
-                float delay = queueOrder * clearanceGap;
-                Vector3 liftedPosition = nut.transform.position + Vector3.up * selectionLiftHeight;
-                Sequence nutSequence = DOTween.Sequence().SetTarget(nut.transform);
-                nutSequence.Join(nut.transform.DOMove(liftedPosition, selectionDuration).SetEase(Ease.OutCubic));
-                nutSequence.Join(nut.transform.DORotate(Vector3.up * (threadedDegreesPerSecond * selectionDuration), selectionDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                gameplaySequence.Insert(delay, nutSequence);
-            }
+            if (liftedNut == null) { inputLocked = false; yield break; }
+
+            // Snap to correct stack position first to ensure clean start.
+            int stackIdx = selectedBolt.Nuts.IndexOf(liftedNut);
+            RestoreNutToStack(selectedBolt, liftedNut, stackIdx);
+
+            // Fixed target world position — never depends on stack height or which nut.
+            Vector3 hoverTarget = selectedBolt.GetHoverWorldPosition();
+
+            Sequence liftSeq = DOTween.Sequence().SetTarget(liftedNut.transform);
+            liftSeq.Join(liftedNut.transform.DOMove(hoverTarget, selectionLiftDuration).SetEase(Ease.OutCubic));
+            liftSeq.Join(liftedNut.transform.DORotate(
+                Vector3.up * (selectionRotationSpeed * selectionLiftDuration),
+                selectionLiftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+
+            gameplaySequence = DOTween.Sequence().SetTarget(this).Append(liftSeq);
             yield return gameplaySequence.WaitForCompletion();
-            gameplaySequence = null;
+
+            gameplaySequence    = null;
+            selectionRoutine    = null;
             StartHover();
-            selectionRoutine = null;
             inputLocked = false;
         }
 
-        private void StartHover()
-        {
-            StopHover();
-            foreach (NutView nut in selectedNuts)
-            {
-                if (nut == null) continue;
-                Sequence hover = DOTween.Sequence().SetTarget(nut.transform);
-                hover.Append(nut.transform.DOMoveY(nut.transform.position.y + hoverAmount, hoverHalfCycleDuration).SetEase(Ease.InOutSine));
-                hover.Append(nut.transform.DOMoveY(nut.transform.position.y, hoverHalfCycleDuration).SetEase(Ease.InOutSine));
-                hover.SetLoops(-1);
-                hoverSequences.Add(hover);
-            }
-        }
+        // ─────────────────────────────────────────────────────────────────────
+        // Cancel — only the single hovering nut returns
+        // ─────────────────────────────────────────────────────────────────────
 
-        private void StopHover()
-        {
-            foreach (Sequence hover in hoverSequences) if (hover != null && hover.IsActive()) hover.Kill(false);
-            hoverSequences.Clear();
-        }
-
-        private IEnumerator ReturnSelectedNuts()
+        private IEnumerator ReturnTopNut()
         {
             KillGameplayTweens();
-            gameplaySequence = DOTween.Sequence().SetTarget(this);
-            BoltView source = selectedBolt;
-            foreach (NutView nut in selectedNuts)
-            {
-                int index = source.Nuts.IndexOf(nut);
-                KillNutTween(nut);
-                Sequence nutSequence = DOTween.Sequence().SetTarget(nut.transform);
-                nutSequence.Join(nut.transform.DOMove(source.NutContainer.TransformPoint(source.GetStackPosition(index)), selectionDuration).SetEase(Ease.InOutCubic));
-                nutSequence.Join(nut.transform.DORotate(Vector3.down * (threadedDegreesPerSecond * selectionDuration), selectionDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                gameplaySequence.Join(nutSequence);
-            }
+            if (liftedNut == null) { ClearSelection(); inputLocked = false; yield break; }
+
+            BoltView source   = selectedBolt;
+            int      stackIdx = source.Nuts.IndexOf(liftedNut);
+            Vector3  returnTarget = source.NutContainer.TransformPoint(source.GetStackPosition(stackIdx));
+
+            KillNutTween(liftedNut);
+            Sequence returnSeq = DOTween.Sequence().SetTarget(liftedNut.transform);
+            returnSeq.Join(liftedNut.transform.DOMove(returnTarget, selectionLiftDuration).SetEase(Ease.InOutCubic));
+            returnSeq.Join(liftedNut.transform.DORotate(
+                Vector3.down * (selectionRotationSpeed * selectionLiftDuration),
+                selectionLiftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+
+            gameplaySequence = DOTween.Sequence().SetTarget(this).Append(returnSeq);
             yield return gameplaySequence.WaitForCompletion();
-            RestoreNutsToStack(source, selectedNuts, source.Nuts.Count - selectedNuts.Count);
+
+            SnapNutToStack(source, liftedNut, stackIdx);
             source.SetSelectionEffect(false);
             ClearSelection();
             gameplaySequence = null;
             inputLocked = false;
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Move — leader departs first; followers lift and follow sequentially
+        // ─────────────────────────────────────────────────────────────────────
 
         private IEnumerator MoveSelectedNuts(BoltView destination)
         {
             KillGameplayTweens();
-            BoltView source = selectedBolt;
-            List<NutView> moving = new List<NutView>(selectedNuts);
-            int destinationStartIndex = destination.Nuts.Count;
+            BoltView      source             = selectedBolt;
+            List<NutView> moving             = new List<NutView>(selectedNuts);
+            int           destStartIdx       = destination.Nuts.Count;
             source.SetSelectionEffect(false);
+
             gameplaySequence = DOTween.Sequence().SetTarget(this);
 
-            int queueOrder = 0;
-            // Queue order is top-to-bottom: it is the order visibly lifted and attached.
-            for (int i = moving.Count - 1; i >= 0; i--, queueOrder++)
+            // Queue order: top-of-source first (queueOrder 0) → bottom-of-source last.
+            // queueOrder 0 is the leader (already hovering). Followers lift from stack.
+            for (int q = 0; q < moving.Count; q++)
             {
-                NutView nut = moving[i];
-                Transform tr = nut.transform;
+                int      srcIdx  = moving.Count - 1 - q; // Count-1 = top (leader), 0 = bottom
+                NutView  nut     = moving[srcIdx];
+                Transform tr     = nut.transform;
                 KillNutTween(nut);
-                int destinationIndex = destinationStartIndex + queueOrder;
-                Vector3 travelEnd = destination.NutContainer.TransformPoint(destination.GetStackPosition(destinationIndex)) + Vector3.up * selectionLiftHeight;
-                Vector3 start = tr.position;
-                float flightDuration = Mathf.Max(minimumFlightDuration, Vector3.Distance(start, travelEnd) * flightSecondsPerWorldUnit);
-                float delay = queueOrder * Mathf.Max(queueMinimumGap, selectionDuration * .32f);
-                float rotationDegrees = threadedDegreesPerSecond * flightDuration;
-                Vector3 arcMidpoint = Vector3.Lerp(start, travelEnd, .5f) + Vector3.up * moveArcHeight;
-                Sequence nutSequence = DOTween.Sequence().SetTarget(tr);
-                nutSequence.Append(tr.DOPath(new[] { arcMidpoint, travelEnd }, flightDuration, PathType.CatmullRom, PathMode.Full3D).SetEase(Ease.InOutCubic));
-                nutSequence.Join(tr.DORotate(Vector3.up * rotationDegrees, flightDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                nutSequence.Insert(0f, tr.DOScale(nut.RestingLocalScale * flightScale, flightDuration * .5f).SetEase(Ease.OutQuad));
-                nutSequence.Insert(flightDuration * .5f, tr.DOScale(nut.RestingLocalScale, flightDuration * .5f).SetEase(Ease.InOutSine));
-                nutSequence.AppendCallback(() => tr.SetParent(destination.NutContainer, true));
-                nutSequence.Append(tr.DOMove(destination.NutContainer.TransformPoint(destination.GetStackPosition(destinationIndex)), landingDuration).SetEase(Ease.InOutCubic));
-                nutSequence.Join(tr.DORotate(Vector3.down * (threadedDegreesPerSecond * landingDuration), landingDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                nutSequence.AppendCallback(() =>
+
+                int     destIdx      = destStartIdx + q;
+                Vector3 destWorld    = destination.NutContainer.TransformPoint(destination.GetStackPosition(destIdx));
+                float   seqStart     = q * followerDelay;
+
+                Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
+
+                // ── Phase 1: lift (followers only) ──────────────────────────
+                Vector3 travelOrigin;
+                if (q == 0)
                 {
-                    SnapNutToStack(destination, nut, destinationIndex);
-                    PulseBoltAttach(destination);
+                    // Leader: already at or near the hover world position.
+                    travelOrigin = source.GetHoverWorldPosition();
+                    tr.position  = travelOrigin; // snap away any hover drift
+                }
+                else
+                {
+                    // Follower: lift from stack to hover world position first.
+                    travelOrigin = source.GetHoverWorldPosition();
+
+                    Sequence liftSeq = DOTween.Sequence();
+                    liftSeq.Join(tr.DOMove(travelOrigin, selectionLiftDuration).SetEase(Ease.OutCubic));
+                    liftSeq.Join(tr.DORotate(
+                        Vector3.up * (selectionRotationSpeed * selectionLiftDuration),
+                        selectionLiftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+                    nutSeq.Append(liftSeq);
+                }
+
+                // ── Phase 2: travel arc ─────────────────────────────────────
+                float   flightDist     = Vector3.Distance(travelOrigin, destWorld);
+                float   flightDuration = Mathf.Max(travelDurationMin, flightDist * travelDurationPerUnit);
+                float   rotDeg         = travelRotationSpeed * flightDuration;
+                Vector3 arcMid         = Vector3.Lerp(travelOrigin, destWorld, .5f) + Vector3.up * travelArcHeight;
+
+                Sequence travelSeq = DOTween.Sequence();
+                // DOPath starts from tr.position when travelSeq begins (= travelOrigin after lift).
+                travelSeq.Append(tr.DOPath(new[] { arcMid, destWorld }, flightDuration,
+                    PathType.CatmullRom, PathMode.Full3D).SetEase(Ease.InOutCubic));
+                travelSeq.Join(tr.DORotate(Vector3.up * rotDeg, flightDuration,
+                    RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+                travelSeq.Insert(0f,
+                    tr.DOScale(nut.RestingLocalScale * travelScale, flightDuration * .5f).SetEase(Ease.OutQuad));
+                travelSeq.Insert(flightDuration * .5f,
+                    tr.DOScale(nut.RestingLocalScale, flightDuration * .5f).SetEase(Ease.InOutSine));
+
+                nutSeq.Append(travelSeq);
+
+                // ── Phase 3: reparent → land → rethread ────────────────────
+                // Capture loop vars for lambda.
+                NutView  capturedNut     = nut;
+                int      capturedDestIdx = destIdx;
+                BoltView capturedDest    = destination;
+
+                nutSeq.AppendCallback(() => tr.SetParent(capturedDest.NutContainer, worldPositionStays: true));
+
+                Sequence landSeq = DOTween.Sequence();
+                landSeq.Append(tr.DOMove(destWorld, landingDuration).SetEase(Ease.InOutCubic));
+                landSeq.Join(tr.DORotate(
+                    Vector3.down * (selectionRotationSpeed * landingDuration),
+                    landingDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
+                nutSeq.Append(landSeq);
+
+                nutSeq.AppendCallback(() =>
+                {
+                    SnapNutToStack(capturedDest, capturedNut, capturedDestIdx);
+                    PulseBoltAttach(capturedDest);
                 });
-                nutSequence.Append(tr.DOScale(nut.RestingLocalScale * 1.045f, .055f).SetEase(Ease.OutQuad));
-                nutSequence.Append(tr.DOScale(nut.RestingLocalScale, .085f).SetEase(Ease.InOutSine));
-                gameplaySequence.Insert(delay, nutSequence);
+                // Landing bounce
+                nutSeq.Append(tr.DOScale(nut.RestingLocalScale * landingBounceScale, .055f).SetEase(Ease.OutQuad));
+                nutSeq.Append(tr.DOScale(nut.RestingLocalScale, .085f).SetEase(Ease.InOutSine));
+
+                gameplaySequence.Insert(seqStart, nutSeq);
             }
+
             yield return gameplaySequence.WaitForCompletion();
 
+            // ── Update logical state ─────────────────────────────────────────
             source.Nuts.RemoveRange(source.Nuts.Count - moving.Count, moving.Count);
-            for (int queueOrderIndex = 0; queueOrderIndex < moving.Count; queueOrderIndex++) destination.Nuts.Add(moving[moving.Count - 1 - queueOrderIndex]);
-            // Reassert exact stack references after the soft landing bounce.
-            for (int i = 0; i < moving.Count; i++) RestoreNutToStack(destination, moving[moving.Count - 1 - i], destinationStartIndex + i);
+            for (int q = 0; q < moving.Count; q++)
+                destination.Nuts.Add(moving[moving.Count - 1 - q]);
 
-            bool sourceCompleted = LockCompletedBolt(source);
-            bool destinationCompleted = LockCompletedBolt(destination);
+            // Reassert exact transforms after bounce.
+            for (int q = 0; q < moving.Count; q++)
+                RestoreNutToStack(destination, moving[moving.Count - 1 - q], destStartIdx + q);
+
+            // ── Check completion ─────────────────────────────────────────────
+            bool srcCompleted  = TryLockCompleted(source);
+            bool destCompleted = TryLockCompleted(destination);
+
+            // Win state updates immediately; popup waits for cap animations.
             CheckWin();
-            if (sourceCompleted) yield return PlayCompletionFeedback(source);
-            if (destinationCompleted && destination != source) yield return PlayCompletionFeedback(destination);
+
+            Coroutine srcCapRoutine  = srcCompleted                          ? StartCoroutine(PlayCapAnimation(source))      : null;
+            Coroutine destCapRoutine = (destCompleted && destination != source) ? StartCoroutine(PlayCapAnimation(destination)) : null;
+            if (srcCapRoutine  != null) yield return srcCapRoutine;
+            if (destCapRoutine != null) yield return destCapRoutine;
+
             ClearSelection();
             gameplaySequence = null;
-            moveRoutine = null;
-            if (won) uiManager?.ShowWinPopup(); else inputLocked = false;
+            moveRoutine      = null;
+
+            if (won) uiManager?.ShowWinPopup();
+            else     inputLocked = false;
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Entry Animation
+        // ─────────────────────────────────────────────────────────────────────
+
+        private IEnumerator PlayEntryAnimation()
+        {
+            inputLocked = true;
+
+            if (levelManager == null || levelManager.ActiveBolts.Count == 0)
+            {
+                ShowSilentCaps(); // Show caps for already-locked bolts.
+                inputLocked = false;
+                yield break;
+            }
+
+            Sequence entrySeq = DOTween.Sequence();
+
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+            {
+                if (bolt == null) continue;
+                for (int i = 0; i < bolt.Nuts.Count; i++)
+                {
+                    NutView nut = bolt.Nuts[i];
+                    if (nut == null) continue;
+
+                    Vector3 finalWorld  = bolt.NutContainer.TransformPoint(bolt.GetStackPosition(i));
+                    Vector3 startWorld  = finalWorld + Vector3.up * entryHeightOffset;
+                    float   randomYRot  = Random.Range(entryRotMin, entryRotMax);
+                    float   delay       = Random.Range(0f, entryMaxDelay);
+
+                    // Set the nut's start state immediately (before sequence plays).
+                    nut.transform.position     = startWorld;
+                    nut.transform.localRotation = Quaternion.Euler(
+                        nut.RestingLocalRotation.eulerAngles.x,
+                        nut.RestingLocalRotation.eulerAngles.y + randomYRot,
+                        nut.RestingLocalRotation.eulerAngles.z);
+
+                    // Capture for lambda.
+                    BoltView capturedBolt  = bolt;
+                    NutView  capturedNut   = nut;
+                    int      capturedIdx   = i;
+
+                    Sequence nutEntry = DOTween.Sequence().SetTarget(nut.transform);
+                    nutEntry.Append(nut.transform.DOMove(finalWorld, entryDuration).SetEase(Ease.OutCubic));
+                    nutEntry.Join(nut.transform.DOLocalRotateQuaternion(
+                        nut.RestingLocalRotation, entryDuration).SetEase(Ease.OutCubic));
+                    nutEntry.OnComplete(() => SnapNutToStack(capturedBolt, capturedNut, capturedIdx));
+
+                    entrySeq.Insert(delay, nutEntry);
+                }
+            }
+
+            yield return entrySeq.WaitForCompletion();
+
+            // After entry animation, silently show caps for pre-locked bolts (no pop animation).
+            ShowSilentCaps();
+
+            inputLocked = false;
+        }
+
+        /// <summary>
+        /// Instantly places caps at rest on any bolt that was locked before the level entry animation.
+        /// No pop, bounce, or particle — just appears at CompletionCapPoint.
+        /// </summary>
+        private void ShowSilentCaps()
+        {
+            if (levelManager == null) return;
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+            {
+                if (bolt == null || !bolt.IsLocked) continue;
+                Color capColor = GetTopNutColor(bolt);
+                bolt.ActivateCap(capColor);
+                if (bolt.CompletionCapTransform != null)
+                {
+                    bolt.CompletionCapTransform.position   = bolt.GetCapWorldPosition();
+                    bolt.CompletionCapTransform.localScale = bolt.CompletionCapRestingLocalScale;
+                }
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Completion Cap Animation
+        // ─────────────────────────────────────────────────────────────────────
+
+        private bool TryLockCompleted(BoltView bolt)
+        {
+            if (bolt == null || bolt.IsLocked || !bolt.IsComplete()) return false;
+            bolt.LockBoltSilently();
+            return true;
+        }
+
+        private IEnumerator PlayCapAnimation(BoltView bolt)
+        {
+            if (bolt == null || bolt.CompletionCapTransform == null) yield break;
+
+            Color     capColor   = GetTopNutColor(bolt);
+            Transform capTr      = bolt.CompletionCapTransform;
+            Vector3   capScale   = bolt.CompletionCapRestingLocalScale;
+            Vector3   restPos    = bolt.GetCapWorldPosition();
+            Vector3   startPos   = restPos + Vector3.up * capPopHeight;
+            Vector3   popPos     = restPos + Vector3.up * (capPopHeight * .45f);
+
+            // Kill any existing cap tween for this bolt.
+            if (capSequences.TryGetValue(bolt, out Sequence prev) && prev != null && prev.IsActive())
+                prev.Kill(false);
+
+            bolt.ActivateCap(capColor);
+            capTr.position   = startPos;
+            capTr.localScale = capScale * capStartScale;
+
+            Sequence capSeq = DOTween.Sequence().SetTarget(capTr);
+
+            // Pop up + scale open
+            capSeq.Append(capTr.DOScale(capScale * 1.08f, capPopDuration).SetEase(Ease.OutBack));
+            capSeq.Join(capTr.DOMove(popPos, capPopDuration).SetEase(Ease.OutQuad));
+
+            // Close down onto bolt
+            capSeq.Append(capTr.DOMove(restPos, capCloseDuration).SetEase(Ease.InCubic));
+
+            // Soft landing bounce
+            capSeq.Append(capTr.DOScale(capScale * (1f + capBounceAmount), .06f).SetEase(Ease.OutQuad));
+            capSeq.Append(capTr.DOScale(capScale * (1f - capBounceAmount * .5f), .07f).SetEase(Ease.InOutSine));
+            capSeq.Append(capTr.DOScale(capScale, .07f).SetEase(Ease.InOutSine));
+
+            capSequences[bolt] = capSeq;
+            yield return capSeq.WaitForCompletion();
+        }
+
+        private Color GetTopNutColor(BoltView bolt)
+        {
+            if (bolt == null || bolt.Nuts.Count == 0) return Color.white;
+            return NutView.NutColorToUnityColor(bolt.Nuts[bolt.Nuts.Count - 1].Color);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Hover
+        // ─────────────────────────────────────────────────────────────────────
+
+        private void StartHover()
+        {
+            StopHover();
+            if (liftedNut == null) return;
+            float baseY = liftedNut.transform.position.y;
+            Sequence hover = DOTween.Sequence().SetTarget(liftedNut.transform);
+            hover.Append(liftedNut.transform.DOMoveY(baseY + hoverAmount, hoverHalfCycleDuration).SetEase(Ease.InOutSine));
+            hover.Append(liftedNut.transform.DOMoveY(baseY, hoverHalfCycleDuration).SetEase(Ease.InOutSine));
+            hover.SetLoops(-1);
+            hoverSequences.Add(hover);
+        }
+
+        private void StopHover()
+        {
+            foreach (Sequence h in hoverSequences) if (h != null && h.IsActive()) h.Kill(false);
+            hoverSequences.Clear();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Bolt Feedback
+        // ─────────────────────────────────────────────────────────────────────
 
         private IEnumerator PulseInvalidDestination(BoltView bolt)
         {
@@ -282,35 +620,53 @@ namespace NutBoltSort
             inputLocked = false;
         }
 
-        private void PulseBoltSelection(BoltView bolt) => PulseBoltScale(bolt, Vector3.one * boltSelectionScale, boltSelectionPulseDuration);
-        private void PulseBoltAttach(BoltView bolt) => PulseBoltScale(bolt, new Vector3(1.012f, boltAttachYScale, 1.012f), boltAttachPulseDuration);
+        private void PulseBoltSelection(BoltView bolt) =>
+            PulseBoltScale(bolt, Vector3.one * boltSelectionScale, boltSelectionPulseDuration);
+
+        private void PulseBoltAttach(BoltView bolt) =>
+            PulseBoltScale(bolt, new Vector3(1.012f, boltAttachYScale, 1.012f), boltAttachPulseDuration);
 
         private void PulseBoltScale(BoltView bolt, Vector3 multiplier, float duration)
         {
             if (bolt == null) return;
             Transform tr = bolt.transform;
             DOTween.Kill(tr, false);
-            tr.localPosition = tr.localPosition; // Feedback never changes root position or rotation.
-            tr.localRotation = tr.localRotation;
             tr.localScale = bolt.RestingLocalScale;
             Sequence pulse = DOTween.Sequence().SetTarget(tr);
             pulse.Append(tr.DOScale(Vector3.Scale(bolt.RestingLocalScale, multiplier), duration * .45f).SetEase(Ease.OutQuad));
             pulse.Append(tr.DOScale(bolt.RestingLocalScale, duration * .55f).SetEase(Ease.InOutSine));
         }
 
-        private bool LockCompletedBolt(BoltView bolt)
+        // ─────────────────────────────────────────────────────────────────────
+        // Helpers — logic unchanged from original
+        // ─────────────────────────────────────────────────────────────────────
+
+        private List<NutView> TopMatchingGroup(BoltView bolt)
         {
-            if (bolt == null || bolt.IsLocked || !bolt.IsComplete()) return false;
-            bolt.LockBoltSilently();
-            bolt.SetCompletionEffect(true);
-            return true;
+            var group = new List<NutView>();
+            if (bolt == null || bolt.Nuts.Count == 0) return group;
+            NutColor color = bolt.Nuts[bolt.Nuts.Count - 1].Color;
+            for (int i = bolt.Nuts.Count - 1; i >= 0 && bolt.Nuts[i].Color == color; i--)
+                group.Insert(0, bolt.Nuts[i]);
+            return group;
         }
 
-        private IEnumerator PlayCompletionFeedback(BoltView bolt)
+        private bool CanMove(BoltView from, BoltView to, List<NutView> moving) =>
+            from != null && to != null && moving != null && moving.Count > 0 &&
+            !to.IsLocked &&
+            to.Nuts.Count + moving.Count <= BoltView.Capacity &&
+            (to.Nuts.Count == 0 || to.Nuts[to.Nuts.Count - 1].Color == moving[moving.Count - 1].Color);
+
+        private void CheckWin()
         {
-            PulseBoltScale(bolt, Vector3.one * completionScale, .16f);
-            yield return new WaitForSeconds(.16f);
+            if (won || levelManager == null) return;
+            won = levelManager.ActiveBolts.All(b =>
+                b.Nuts.Count == 0 || (b.Nuts.Count == BoltView.Capacity && b.IsComplete()));
         }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Tween Safety
+        // ─────────────────────────────────────────────────────────────────────
 
         private void KillGameplayTweens()
         {
@@ -319,32 +675,17 @@ namespace NutBoltSort
             StopHover();
         }
 
+        private void KillAllTweens()
+        {
+            KillGameplayTweens();
+            foreach (var kv in capSequences)
+                if (kv.Value != null && kv.Value.IsActive()) kv.Value.Kill(false);
+            capSequences.Clear();
+        }
+
         private static void KillNutTween(NutView nut)
         {
             if (nut != null) DOTween.Kill(nut.transform, false);
-        }
-
-        private void RestoreNutsToStack(BoltView bolt, List<NutView> nuts, int startIndex)
-        {
-            for (int i = 0; i < nuts.Count; i++) RestoreNutToStack(bolt, nuts[i], startIndex + i);
-        }
-
-        private static void RestoreNutToStack(BoltView bolt, NutView nut, int index)
-        {
-            if (bolt == null || nut == null) return;
-            KillNutTween(nut);
-            SnapNutToStack(bolt, nut, index);
-        }
-
-        // Used from inside a nut's active sequence: do not kill that sequence here.
-        private static void SnapNutToStack(BoltView bolt, NutView nut, int index)
-        {
-            if (bolt == null || nut == null) return;
-            Transform tr = nut.transform;
-            if (tr.parent != bolt.NutContainer) tr.SetParent(bolt.NutContainer, false);
-            tr.localPosition = bolt.GetStackPosition(index);
-            tr.localRotation = nut.RestingLocalRotation;
-            tr.localScale = nut.RestingLocalScale;
         }
 
         private void ClearSelection()
@@ -353,23 +694,43 @@ namespace NutBoltSort
             if (selectedBolt != null) selectedBolt.SetSelectionEffect(false);
             selectedBolt = null;
             selectedNuts.Clear();
+            liftedNut = null;
         }
 
-        private void CheckWin()
+        // ─────────────────────────────────────────────────────────────────────
+        // Stack Snapping
+        // ─────────────────────────────────────────────────────────────────────
+
+        private static void RestoreNutToStack(BoltView bolt, NutView nut, int index)
         {
-            if (won || levelManager == null) return;
-            won = levelManager.ActiveBolts.All(b => b.Nuts.Count == 0 || (b.Nuts.Count == BoltView.Capacity && b.IsComplete()));
+            if (bolt == null || nut == null) return;
+            KillNutTween(nut);
+            SnapNutToStack(bolt, nut, index);
         }
 
-        // Retain the project's no-UI-manager fallback controls.
+        // Used from inside active sequences — does NOT kill the tween.
+        private static void SnapNutToStack(BoltView bolt, NutView nut, int index)
+        {
+            if (bolt == null || nut == null) return;
+            Transform tr = nut.transform;
+            if (tr.parent != bolt.NutContainer) tr.SetParent(bolt.NutContainer, false);
+            tr.localPosition = bolt.GetStackPosition(index);
+            tr.localRotation = nut.RestingLocalRotation;
+            tr.localScale    = nut.RestingLocalScale;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Fallback GUI (no UIManager)
+        // ─────────────────────────────────────────────────────────────────────
+
         private void OnGUI()
         {
             if (uiManager != null && uiManager.enabled) return;
-            Matrix4x4 old = GUI.matrix;
-            float scale = Screen.width / 1080f;
+            Matrix4x4 old   = GUI.matrix;
+            float     scale = Screen.width / 1080f;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1));
             var style = new GUIStyle(GUI.skin.button) { fontSize = 32, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-            if (GUI.Button(new Rect(50, 50, 190, 68), "↻  RESTART", style) && !inputLocked) RestartLevel();
+            if (GUI.Button(new Rect(50,  50, 190, 68), "↻  RESTART",             style) && !inputLocked) RestartLevel();
             if (GUI.Button(new Rect(840, 50, 190, 68), "LEVEL " + (currentLevelIndex + 1), style) && !inputLocked) LoadNextLevel();
             if (won)
             {

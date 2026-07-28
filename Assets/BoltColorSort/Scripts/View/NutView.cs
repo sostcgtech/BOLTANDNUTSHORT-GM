@@ -59,5 +59,25 @@ namespace NutBoltSort
                 optionalHighlight.SetActive(active);
             }
         }
+
+        /// <summary>
+        /// Returns the Unity Color associated with this nut's NutColor enum value.
+        /// </summary>
+        public UnityEngine.Color GetUnityColor() => NutColorToUnityColor(Color);
+
+        /// <summary>
+        /// Static lookup matching LevelManager's default palette. Used by cap coloring via MaterialPropertyBlock.
+        /// </summary>
+        public static UnityEngine.Color NutColorToUnityColor(NutColor color)
+        {
+            switch (color)
+            {
+                case NutColor.Red:    return new UnityEngine.Color(.95f, .19f, .20f);
+                case NutColor.Blue:   return new UnityEngine.Color(.12f, .48f, .96f);
+                case NutColor.Green:  return new UnityEngine.Color(.16f, .76f, .43f);
+                case NutColor.Yellow: return new UnityEngine.Color(1f,   .68f, .08f);
+                default:              return UnityEngine.Color.white;
+            }
+        }
     }
 }

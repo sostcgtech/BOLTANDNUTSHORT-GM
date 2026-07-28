@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4137866852244608752}
-  - component: {fileID: 1207241938170482933}
   m_Layer: 0
   m_Name: NutPrefab
   m_TagString: Untagged
@@ -33,21 +32,6 @@ Transform:
   - {fileID: 8306003830936562309}
   m_Father: {fileID: 7100126567787492103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1207241938170482933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1023844987626633523}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d480cf9710c8275e8c1b55d36f9006e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.NutView
-  mainRenderer: {fileID: 8516068330599101534}
-  bevelRenderer: {fileID: 0}
-  optionalHighlight: {fileID: 0}
 --- !u!1 &2759998005329911042
 GameObject:
   m_ObjectHideFlags: 0
@@ -119,6 +103,8 @@ Transform:
   - {fileID: 5089579032129841747}
   - {fileID: 4685282081851878146}
   - {fileID: 2180577437617902748}
+  - {fileID: 6866606377967864730}
+  - {fileID: 25533757019967231}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8886823225530323966
@@ -145,6 +131,9 @@ MonoBehaviour:
   slotSpacing: 0.24
   bottomOffset: 0.14
   autoAlignStackSlots: 1
+  selectionHoverPoint: {fileID: 6866606377967864730}
+  completionCapPoint: {fileID: 25533757019967231}
+  completionCap: {fileID: 4495049775032493148, guid: 6dea5535abc2a9cd6a5a666e294d1442, type: 3}
   showSlotPreview: 1
   previewOnlyWhenSelected: 0
   nutPreviewRadius: 0.23
@@ -170,6 +159,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.6758856, y: 1.2099987, z: 0.67127144}
   m_Center: {x: 0, y: 0.56849533, z: 0}
+--- !u!1 &3379432456266294185
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6866606377967864730}
+  m_Layer: 0
+  m_Name: SelectionHoverPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6866606377967864730
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3379432456266294185}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.365, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7100126567787492103}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3604952127595417617
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,7 +199,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5089579032129841747}
-  - component: {fileID: 8253242687596655527}
   m_Layer: 0
   m_Name: NutPrefab (1)
   m_TagString: Untagged
@@ -203,21 +222,6 @@ Transform:
   - {fileID: 2671622532199057735}
   m_Father: {fileID: 7100126567787492103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8253242687596655527
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3604952127595417617}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d480cf9710c8275e8c1b55d36f9006e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.NutView
-  mainRenderer: {fileID: 5406372120702951258}
-  bevelRenderer: {fileID: 0}
-  optionalHighlight: {fileID: 0}
 --- !u!1 &3740858110364786533
 GameObject:
   m_ObjectHideFlags: 0
@@ -317,7 +321,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4685282081851878146}
-  - component: {fileID: 7967514405476508187}
   m_Layer: 0
   m_Name: NutPrefab (2)
   m_TagString: Untagged
@@ -341,21 +344,6 @@ Transform:
   - {fileID: 6584593607745204594}
   m_Father: {fileID: 7100126567787492103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7967514405476508187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4008512152175999504}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d480cf9710c8275e8c1b55d36f9006e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.NutView
-  mainRenderer: {fileID: 70441339003100426}
-  bevelRenderer: {fileID: 0}
-  optionalHighlight: {fileID: 0}
 --- !u!1 &4012894734512213665
 GameObject:
   m_ObjectHideFlags: 0
@@ -697,7 +685,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2180577437617902748}
-  - component: {fileID: 3181249440027948528}
   m_Layer: 0
   m_Name: NutPrefab (3)
   m_TagString: Untagged
@@ -721,21 +708,6 @@ Transform:
   - {fileID: 8004158048735476337}
   m_Father: {fileID: 7100126567787492103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3181249440027948528
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7305939970394159909}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d480cf9710c8275e8c1b55d36f9006e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.NutView
-  mainRenderer: {fileID: 9157946278916069311}
-  bevelRenderer: {fileID: 0}
-  optionalHighlight: {fileID: 0}
 --- !u!1 &7469580613694053354
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,6 +894,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4435412730781770108}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8356754579191499878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 25533757019967231}
+  m_Layer: 0
+  m_Name: CompletionCapPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &25533757019967231
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8356754579191499878}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.14, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7100126567787492103}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8807761441305695023
 GameObject:
