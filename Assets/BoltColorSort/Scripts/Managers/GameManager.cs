@@ -36,8 +36,8 @@ namespace NutBoltSort
 
         // Followers ───────────────────────────────────────────────────────────
         [Header("Followers")]
-        [Tooltip("Seconds each following nut waits before starting its own lift + travel sequence.")]
-        [SerializeField, Range(.05f, .15f)] private float followerDelay   = .07f;
+        [Tooltip("Minimum clearance time before the next nut starts. The move also enforces enough time for the prior nut to clear the shared hover point.")]
+        [SerializeField, Range(.05f, .30f)] private float followerDelay   = .14f;
 
         // Travel ──────────────────────────────────────────────────────────────
         [Header("Travel")]
@@ -72,7 +72,7 @@ namespace NutBoltSort
         [Tooltip("Maximum random Y-rotation added to each nut at entry start.")]
         [SerializeField, Range(90f, 360f)]  private float entryRotMax        = 270f;
 
-        [Tooltip("Maximum random start delay per nut.")]
+        [Tooltip("Bottom-to-top gap used by the ordered startup queue on each bolt.")]
         [SerializeField, Range(0f, .30f)]   private float entryMaxDelay      = .20f;
 
         [Tooltip("Duration of each nut's drop animation.")]
@@ -338,6 +338,9 @@ namespace NutBoltSort
             source.SetSelectionEffect(false);
 
             gameplaySequence = DOTween.Sequence().SetTarget(this);
+            // Every follower targets the same hover point. This spacing makes the
+            // previous nut visibly clear it before the next one can arrive.
+            float followerClearanceDelay = Mathf.Max(followerDelay, selectionLiftDuration * .65f);
 
             // Queue order: top-of-source first (queueOrder 0) → bottom-of-source last.
             // queueOrder 0 is the leader (already hovering). Followers lift from stack.
@@ -350,7 +353,7 @@ namespace NutBoltSort
 
                 int     destIdx      = destStartIdx + q;
                 Vector3 destWorld    = destination.NutContainer.TransformPoint(destination.GetStackPosition(destIdx));
-                float   seqStart     = q * followerDelay;
+                float   seqStart     = q * followerClearanceDelay;
 
                 Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
 
@@ -480,7 +483,10 @@ namespace NutBoltSort
                     Vector3 finalWorld  = bolt.NutContainer.TransformPoint(bolt.GetStackPosition(i));
                     Vector3 startWorld  = finalWorld + Vector3.up * entryHeightOffset;
                     float   randomYRot  = Random.Range(entryRotMin, entryRotMax);
-                    float   delay       = Random.Range(0f, entryMaxDelay);
+                    // Each bolt enters bottom-to-top. A nut starts only after the
+                    // one below has substantially settled, avoiding stack overlap.
+                    float   entryClearanceDelay = Mathf.Max(entryMaxDelay, entryDuration * .65f);
+                    float   delay = i * entryClearanceDelay;
 
                     // Set the nut's start state immediately (before sequence plays).
                     nut.transform.position     = startWorld;
