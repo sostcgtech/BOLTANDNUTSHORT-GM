@@ -20,6 +20,36 @@ namespace NutBoltSort
         [Tooltip("List of bolt stack configurations for this level (ordered bottom to top).")]
         public List<BoltNutStackData> bolts = new List<BoltNutStackData>();
 
+        // Runtime procedural metadata. These fields are deliberately logical only:
+        // layout, transforms and materials remain the responsibility of existing systems.
+        [Header("Procedural Metadata")]
+        public bool isProcedural;
+        public int seed;
+        public int generatorVersion;
+        public string difficultyTier;
+        public NutColor[] activeColors;
+        [TextArea] public string puzzleSignature;
+
         public int BoltCount => bolts != null ? bolts.Count : 0;
+
+        public LevelDataSO DeepCopy()
+        {
+            var copy = CreateInstance<LevelDataSO>();
+            copy.levelNumber = levelNumber;
+            copy.isProcedural = isProcedural;
+            copy.seed = seed;
+            copy.generatorVersion = generatorVersion;
+            copy.difficultyTier = difficultyTier;
+            copy.puzzleSignature = puzzleSignature;
+            copy.activeColors = activeColors != null ? (NutColor[])activeColors.Clone() : Array.Empty<NutColor>();
+            copy.bolts = new List<BoltNutStackData>(bolts != null ? bolts.Count : 0);
+            if (bolts != null)
+                foreach (var bolt in bolts)
+                    copy.bolts.Add(new BoltNutStackData
+                    {
+                        nutColors = bolt != null && bolt.nutColors != null ? (NutColor[])bolt.nutColors.Clone() : Array.Empty<NutColor>()
+                    });
+            return copy;
+        }
     }
 }

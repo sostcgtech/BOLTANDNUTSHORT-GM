@@ -130,9 +130,17 @@ namespace NutBoltSort
             int index = Mathf.Abs(levelIndex) % levelDataList.Count;
             LevelDataSO data = levelDataList[index];
 
+            return BuildLevel(data, out loadedData);
+        }
+
+        /// <summary>Builds supplied logical data unchanged; procedural generation never assigns positions.</summary>
+        public bool BuildLevel(LevelDataSO data, out LevelDataSO loadedData)
+        {
+            loadedData = null;
+            EnsureBoardRoot();
             if (!ValidateLevelData(data))
             {
-                Debug.LogError($"[LevelManager] Level loading aborted: LevelDataSO validation failed for level index {index}.");
+                Debug.LogError("[LevelManager] Level loading aborted: LevelDataSO validation failed.");
                 return false;
             }
 
@@ -350,6 +358,11 @@ namespace NutBoltSort
 
             foreach (var boltData in data.bolts)
             {
+                if (boltData == null)
+                {
+                    Debug.LogError($"[LevelManager] Validation Failed: Level {data.levelNumber} contains a null bolt stack.");
+                    return false;
+                }
                 if (boltData.nutColors != null && boltData.nutColors.Length > BoltView.Capacity)
                 {
                     Debug.LogError($"[LevelManager] Validation Failed: Bolt stack exceeds capacity ({boltData.nutColors.Length} > {BoltView.Capacity}) in Level {data.levelNumber}.");

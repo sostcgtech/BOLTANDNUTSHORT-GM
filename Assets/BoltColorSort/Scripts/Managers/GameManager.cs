@@ -20,6 +20,7 @@ namespace NutBoltSort
         [Header("Manager References")]
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private UIManager    uiManager;
+        [SerializeField] private ProceduralLevelGenerator proceduralLevelGenerator;
 
         // Selection ───────────────────────────────────────────────────────────
         [Header("Selection")]
@@ -135,6 +136,7 @@ namespace NutBoltSort
             Screen.orientation = ScreenOrientation.Portrait;
             if (levelManager == null) levelManager = GetComponent<LevelManager>() ?? FindObjectOfType<LevelManager>() ?? gameObject.AddComponent<LevelManager>();
             if (uiManager    == null) uiManager    = GetComponent<UIManager>()    ?? FindObjectOfType<UIManager>()    ?? gameObject.AddComponent<UIManager>();
+            if (proceduralLevelGenerator == null) proceduralLevelGenerator = GetComponent<ProceduralLevelGenerator>() ?? FindObjectOfType<ProceduralLevelGenerator>() ?? gameObject.AddComponent<ProceduralLevelGenerator>();
         }
 
         private void Start() => LoadCurrentLevel();
@@ -171,7 +173,10 @@ namespace NutBoltSort
             moveRoutine      = null;
             won              = false;
 
-            bool built = levelManager != null && levelManager.BuildLevel(currentLevelIndex, out _);
+            LevelDataSO currentData = proceduralLevelGenerator != null
+                ? proceduralLevelGenerator.GetOrGenerateCurrentLevel(currentLevelIndex, BoltView.Capacity)
+                : null;
+            bool built = levelManager != null && currentData != null && levelManager.BuildLevel(currentData, out _);
             if (uiManager != null) uiManager.UpdateLevelDisplay();
             if (!built) { inputLocked = false; return; }
 
@@ -187,12 +192,13 @@ namespace NutBoltSort
             StartCoroutine(PlayEntryAnimation());
         }
 
+        // LoadCurrentLevel reads the generator's deep-copied snapshot; it never generates on restart.
         public void RestartLevel() => LoadCurrentLevel();
 
         public void LoadNextLevel()
         {
-            if (levelManager != null && levelManager.TotalLevels > 0)
-                currentLevelIndex = (currentLevelIndex + 1) % levelManager.TotalLevels;
+            currentLevelIndex++;
+            if (proceduralLevelGenerator != null) proceduralLevelGenerator.AdvanceToNextLevel(currentLevelIndex);
             LoadCurrentLevel();
         }
 

@@ -18,7 +18,7 @@ The project currently contains one playable scene:
 6. A completed bolt remains visible in its current position and locks from further moves.
 7. The level ends when every bolt is either empty or complete.
 
-There is no failure state or undo in V1. Use **Restart** to reload the current scene.
+There is no failure state or undo. **Restart** reloads the exact saved procedural puzzle.
 
 ## Camera and platform
 
@@ -26,6 +26,19 @@ There is no failure state or undo in V1. Use **Restart** to reload the current s
 - Fixed orthographic 3D camera
 - No player camera movement
 - Tap/click interaction works through the bolt colliders
+
+## Procedural levels setup
+
+Levels are generated at runtime by `ProceduralLevelGenerator`; authored `LevelDataSO` assets are no longer required for normal play. The generator creates only bottom-to-top logical nut lists and passes them unchanged to `LevelManager`, which continues to instantiate the board and apply `BoltGridLayout`.
+
+1. Open `Assets/Scenes/SampleScene.unity` and select the object that has `GameManager` and `LevelManager` (or add `ProceduralLevelGenerator` to that same object).
+2. Assign the generator to **Game Manager → Procedural Level Generator**. If omitted, it is added automatically at runtime.
+3. In **Procedural Level Generator**, configure `Supported Colors` with the existing `NutColor` enum entries and create level-range `Difficulty Tiers`. Every tier must use at least one empty bolt and no more colors than the supported list.
+4. Keep `BoltView.Capacity` as the single capacity source. The supplied game uses four slots; each selected color is generated exactly four times.
+5. Press Play. Restart reads a deep-copied current-level snapshot. Next Level advances the endless index and creates a new seed.
+6. For tuning, use the component context-menu commands: Generate New Level, Generate Using Seed, Reload Saved Current Level, Validate Current Puzzle, Replay Guaranteed Solution Logically, and Batch Generate 100 Levels. Enable deterministic test seed to reproduce a result.
+
+Do not add bolt placement code to the generator. Logical bolt ordering may vary, but the existing staggered grid is still the only system assigning bolt positions.
 
 ## Scene authoring
 
@@ -69,19 +82,18 @@ The current level data and gameplay logic are in:
 
 Three hardcoded test layouts are included in that script and can be loaded through the in-game **Level** button. The scene itself remains manually editable and is used as-is when Play starts.
 
-## V1 boundaries
+## Boundaries
 
 Included:
 
 - Bolt sorting and grouped moves
 - Bolt completion detection
 - Completed bolts remain locked in place
-- Restart button
-- Three test layouts
+- Restart button with exact current-puzzle restore
+- Endless deterministic procedural levels with inverse-move replay validation
 
 Not included:
 
-- Procedural level generation
 - Undo
 - Locked or special nuts
 - Menus, progression, ads, currency, audio polish, or monetisation
