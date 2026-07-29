@@ -9406,6 +9406,33 @@ struct MeshInfo_tE55C4A8846CC2C399CCC3FE989476D987B86AB2F_marshaled_com
 	int32_t ___applySDF;
 	int32_t ___glyphRenderMode;
 };
+struct MoveRecord_tCE9680364670DFF58AB2EB26088BB518E1E2AFBF 
+{
+	int32_t ___sourceBoltIndex;
+	int32_t ___destinationBoltIndex;
+	int32_t ___movedColor;
+	int32_t ___movedNutCount;
+	bool ___sourceWasCompletedAfter;
+	bool ___destinationWasCompletedAfter;
+};
+struct MoveRecord_tCE9680364670DFF58AB2EB26088BB518E1E2AFBF_marshaled_pinvoke
+{
+	int32_t ___sourceBoltIndex;
+	int32_t ___destinationBoltIndex;
+	int32_t ___movedColor;
+	int32_t ___movedNutCount;
+	int32_t ___sourceWasCompletedAfter;
+	int32_t ___destinationWasCompletedAfter;
+};
+struct MoveRecord_tCE9680364670DFF58AB2EB26088BB518E1E2AFBF_marshaled_com
+{
+	int32_t ___sourceBoltIndex;
+	int32_t ___destinationBoltIndex;
+	int32_t ___movedColor;
+	int32_t ___movedNutCount;
+	int32_t ___sourceWasCompletedAfter;
+	int32_t ___destinationWasCompletedAfter;
+};
 struct NativeHandleAllocator_t47E1DB0A5AB93147ABE2C4AE681132799EE2022B 
 {
 	UnsafeList_1_t6C5E84D303190B625F3759C244502E1735453718 ___m_StructData;
@@ -18843,6 +18870,16 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Array_InternalArray__ICollection_Add_Tis
 }
 // Method Definition Index: 2604
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Array_InternalArray__ICollection_Add_TisModifiableContactPair_t8D3CA3E20AF1718A5421A6098D633DDA67399960_mE0CEF2D49811CBAFE9B6E6504C375C569C3E5EE6_gshared (RuntimeArray* __this, ModifiableContactPair_t8D3CA3E20AF1718A5421A6098D633DDA67399960 ___0_item, const RuntimeMethod* method) 
+{
+	//<source_info:<no-source>:1>
+	{
+		NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* L_0 = (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var)));
+		NotSupportedException__ctor_mE174750CF0247BBB47544FFD71D66BB89630945B(L_0, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteralE609303EB41E0119BB804EB107C7CCDF29D97D5B)), NULL);
+		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, method);
+	}
+}
+// Method Definition Index: 2604
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Array_InternalArray__ICollection_Add_TisMoveRecord_tCE9680364670DFF58AB2EB26088BB518E1E2AFBF_m2B7EC49FEBB3967DB86A0519511BA4E70CAFE4BD_gshared (RuntimeArray* __this, MoveRecord_tCE9680364670DFF58AB2EB26088BB518E1E2AFBF ___0_item, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
 	{

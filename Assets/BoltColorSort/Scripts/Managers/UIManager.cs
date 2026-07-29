@@ -8,6 +8,7 @@ namespace NutBoltSort
 {
     /// <summary>
     /// UIManager handles TopBar level display, Restart button, Win Popup, and UI Input Blocker.
+    /// Uses TextMeshPro (TMP) for all text rendering.
     /// Supports procedural UI construction fallback if Inspector references are unassigned.
     /// </summary>
     public class UIManager : MonoBehaviour
@@ -24,11 +25,15 @@ namespace NutBoltSort
         [Header("Top Bar Components")]
         [SerializeField] private Button restartButton;
         [SerializeField] private TMP_Text levelDisplayTextTMP;
-        [SerializeField] private Text levelDisplayTextUGUI;
 
         [Header("Win Popup")]
         [SerializeField] private UIPopup winPopup;
         [SerializeField] private Button nextLevelWinButton;
+
+        [Header("Gameplay Action Buttons")]
+        [SerializeField] private Button undoButton;
+        [SerializeField] private Button expandBoltButton;
+        [SerializeField] private Button unlockBoltButton;
 
         public bool IsUIOpen => (winPopup != null && winPopup.IsOpen) ||
                                 (uiBlocker != null && uiBlocker.blocksRaycasts && uiBlocker.alpha > 0f);
@@ -55,11 +60,10 @@ namespace NutBoltSort
 
         public void UpdateLevelDisplay()
         {
-            int levelNum = (gameManager != null) ? gameManager.CurrentLevelIndex + 1 : 1;
-            string text = $"LEVEL {levelNum}";
+            int levelNum = (gameManager != null) ? gameManager.CurrentLevelNumber : 1;
+            string text  = $"LEVEL {levelNum}";
 
             if (levelDisplayTextTMP != null) levelDisplayTextTMP.text = text;
-            if (levelDisplayTextUGUI != null) levelDisplayTextUGUI.text = text;
         }
 
         public void OnRestartButtonPressed()
@@ -68,6 +72,32 @@ namespace NutBoltSort
             CloseAllPopups();
             gameManager.RestartLevel();
             UpdateLevelDisplay();
+            RefreshActionButtonStates();
+        }
+
+        public void OnUndoButtonPressed()
+        {
+            if (gameManager == null) return;
+            gameManager.UndoLastMove();
+        }
+
+        public void OnExpandBoltButtonPressed()
+        {
+            if (gameManager == null) return;
+            gameManager.ExpandFirstAvailableBolt();
+        }
+
+        public void OnUnlockBoltButtonPressed()
+        {
+            if (gameManager == null) return;
+            gameManager.UnlockFirstLockedBolt();
+        }
+
+        /// <summary>Updates Undo button interactability. Call after each move or state change.</summary>
+        public void RefreshActionButtonStates()
+        {
+            if (undoButton != null)
+                undoButton.interactable = gameManager != null && gameManager.CanUndo;
         }
 
         public void ShowWinPopup()
@@ -124,6 +154,22 @@ namespace NutBoltSort
             {
                 nextLevelWinButton.onClick.RemoveAllListeners();
                 nextLevelWinButton.onClick.AddListener(OnNextLevelWinPressed);
+            }
+            if (undoButton != null)
+            {
+                undoButton.onClick.RemoveAllListeners();
+                undoButton.onClick.AddListener(OnUndoButtonPressed);
+                undoButton.interactable = false; // starts disabled (no moves yet)
+            }
+            if (expandBoltButton != null)
+            {
+                expandBoltButton.onClick.RemoveAllListeners();
+                expandBoltButton.onClick.AddListener(OnExpandBoltButtonPressed);
+            }
+            if (unlockBoltButton != null)
+            {
+                unlockBoltButton.onClick.RemoveAllListeners();
+                unlockBoltButton.onClick.AddListener(OnUnlockBoltButtonPressed);
             }
         }
 
@@ -186,6 +232,27 @@ namespace NutBoltSort
             restartButton = CreateSimpleButton(topBar.transform, "RestartButton", "↻", new Vector2(60, -60), new Vector2(120, 100), new Color(0.2f, 0.4f, 0.8f));
             restartButton.onClick.AddListener(OnRestartButtonPressed);
 
+            // Undo Button
+            undoButton = CreateSimpleButton(topBar.transform, "UndoButton", "↩", new Vector2(200, -60), new Vector2(120, 100), new Color(0.4f, 0.3f, 0.6f));
+            undoButton.onClick.AddListener(OnUndoButtonPressed);
+            undoButton.interactable = false;
+
+            // Expand Bolt Button (bottom-left)
+            var bottomBar = new GameObject("BottomBar", typeof(RectTransform));
+            bottomBar.transform.SetParent(safeAreaGO.transform, false);
+            var bottomRect = bottomBar.GetComponent<RectTransform>();
+            bottomRect.anchorMin = new Vector2(0f, 0f);
+            bottomRect.anchorMax = new Vector2(1f, 0f);
+            bottomRect.pivot     = new Vector2(0.5f, 0f);
+            bottomRect.anchoredPosition = new Vector2(0, 30);
+            bottomRect.sizeDelta = new Vector2(0, 110);
+
+            expandBoltButton = CreateSimpleButton(bottomBar.transform, "ExpandBoltButton", "▲ EXPAND", new Vector2(55, 55), new Vector2(240, 90), new Color(0.15f, 0.55f, 0.80f));
+            expandBoltButton.onClick.AddListener(OnExpandBoltButtonPressed);
+
+            unlockBoltButton = CreateSimpleButton(bottomBar.transform, "UnlockBoltButton", "🔓 UNLOCK", new Vector2(320, 55), new Vector2(240, 90), new Color(0.70f, 0.50f, 0.10f));
+            unlockBoltButton.onClick.AddListener(OnUnlockBoltButtonPressed);
+
             // Level Display
             var displayGO = new GameObject("LevelDisplay", typeof(RectTransform));
             displayGO.transform.SetParent(topBar.transform, false);
@@ -194,12 +261,12 @@ namespace NutBoltSort
             displayRect.anchorMax = new Vector2(0.5f, 0.5f);
             displayRect.anchoredPosition = Vector2.zero;
             displayRect.sizeDelta = new Vector2(500, 100);
-            levelDisplayTextUGUI = displayGO.AddComponent<Text>();
-            levelDisplayTextUGUI.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-            levelDisplayTextUGUI.fontSize = 48;
-            levelDisplayTextUGUI.alignment = TextAnchor.MiddleCenter;
-            levelDisplayTextUGUI.color = Color.white;
-            levelDisplayTextUGUI.fontStyle = FontStyle.Bold;
+            levelDisplayTextTMP = displayGO.AddComponent<TextMeshProUGUI>();
+            levelDisplayTextTMP.text = "LEVEL 1";
+            levelDisplayTextTMP.fontSize = 48;
+            levelDisplayTextTMP.alignment = TextAlignmentOptions.Center;
+            levelDisplayTextTMP.color = Color.white;
+            levelDisplayTextTMP.fontStyle = FontStyles.Bold;
 
             // WinPopup
             winPopup = CreateProceduralWinPopup(safeAreaGO.transform, "WinPopup", out nextLevelWinButton);
@@ -244,13 +311,12 @@ namespace NutBoltSort
             txtRect.offsetMin = Vector2.zero;
             txtRect.offsetMax = Vector2.zero;
 
-            var txt = txtGO.AddComponent<Text>();
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-            txt.text = label;
-            txt.fontSize = 32;
-            txt.alignment = TextAnchor.MiddleCenter;
-            txt.color = Color.white;
-            txt.fontStyle = FontStyle.Bold;
+            var tmp = txtGO.AddComponent<TextMeshProUGUI>();
+            tmp.text = label;
+            tmp.fontSize = 32;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.color = Color.white;
+            tmp.fontStyle = FontStyles.Bold;
 
             return btn;
         }
@@ -290,13 +356,12 @@ namespace NutBoltSort
             var titleRect = titleGO.GetComponent<RectTransform>();
             titleRect.anchoredPosition = new Vector2(0, 150);
             titleRect.sizeDelta = new Vector2(700, 80);
-            var titleTxt = titleGO.AddComponent<Text>();
-            titleTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var titleTxt = titleGO.AddComponent<TextMeshProUGUI>();
             titleTxt.text = "EXCELLENT!";
             titleTxt.fontSize = 54;
-            titleTxt.alignment = TextAnchor.MiddleCenter;
+            titleTxt.alignment = TextAlignmentOptions.Center;
             titleTxt.color = new Color(1f, 0.84f, 0f);
-            titleTxt.fontStyle = FontStyle.Bold;
+            titleTxt.fontStyle = FontStyles.Bold;
 
             // LevelCompleteText
             var subTitleGO = new GameObject("LevelCompleteText", typeof(RectTransform));
@@ -304,13 +369,12 @@ namespace NutBoltSort
             var subRect = subTitleGO.GetComponent<RectTransform>();
             subRect.anchoredPosition = new Vector2(0, 60);
             subRect.sizeDelta = new Vector2(700, 60);
-            var subTxt = subTitleGO.AddComponent<Text>();
-            subTxt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var subTxt = subTitleGO.AddComponent<TextMeshProUGUI>();
             subTxt.text = "LEVEL COMPLETE!";
             subTxt.fontSize = 36;
-            subTxt.alignment = TextAnchor.MiddleCenter;
+            subTxt.alignment = TextAlignmentOptions.Center;
             subTxt.color = Color.white;
-            subTxt.fontStyle = FontStyle.Bold;
+            subTxt.fontStyle = FontStyles.Bold;
 
             // NextLevelButton
             nextBtn = CreateSimpleButton(panelGO.transform, "NextLevelButton", "NEXT LEVEL", new Vector2(0, -100), new Vector2(400, 100), new Color(0.2f, 0.75f, 0.35f));

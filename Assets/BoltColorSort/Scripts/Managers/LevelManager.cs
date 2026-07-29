@@ -22,10 +22,12 @@ namespace NutBoltSort
 
         private readonly Dictionary<NutColor, Color> defaultColors = new Dictionary<NutColor, Color>
         {
-            { NutColor.Red, new Color(.95f, .19f, .20f) },
-            { NutColor.Blue, new Color(.12f, .48f, .96f) },
-            { NutColor.Green, new Color(.16f, .76f, .43f) },
-            { NutColor.Yellow, new Color(1f, .68f, .08f) }
+            { NutColor.Red,    new Color(.95f, .19f, .20f) },
+            { NutColor.Blue,   new Color(.12f, .48f, .96f) },
+            { NutColor.Green,  new Color(.16f, .76f, .43f) },
+            { NutColor.Yellow, new Color(1f,   .68f, .08f) },
+            { NutColor.Purple, new Color(.58f, .12f, .90f) },
+            { NutColor.Orange, new Color(1f,   .50f, .10f) }
         };
 
         private readonly Dictionary<NutColor, Material> cachedMaterials = new Dictionary<NutColor, Material>();
@@ -34,6 +36,8 @@ namespace NutBoltSort
         private readonly List<BoltView> activeBolts = new List<BoltView>();
 
         public IReadOnlyList<BoltView> ActiveBolts => activeBolts;
+        /// <summary>Returns the logical board index without exposing the mutable bolt list.</summary>
+        public int IndexOfBolt(BoltView bolt) => bolt != null ? activeBolts.IndexOf(bolt) : -1;
         public BoltGridLayoutSettings GridLayoutSettings => gridLayoutSettings;
         public int TotalLevels
         {
@@ -157,6 +161,22 @@ namespace NutBoltSort
                 if (bolt == null) continue;
 
                 activeBolts.Add(bolt);
+
+                // ── Attach special-bolt controller based on bolt type ────────
+                if (boltData != null)
+                {
+                    switch (boltData.boltType)
+                    {
+                        case BoltType.Expandable:
+                            var exp = bolt.gameObject.AddComponent<ExpandableBoltController>();
+                            exp.Initialize(boltData.expandableStartCapacity);
+                            break;
+                        case BoltType.Locked:
+                            var lck = bolt.gameObject.AddComponent<LockedBoltController>();
+                            lck.Initialize();
+                            break;
+                    }
+                }
 
                 if (boltData != null && boltData.nutColors != null)
                 {

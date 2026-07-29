@@ -39,6 +39,12 @@ namespace NutBoltSort
         [Tooltip("World position the completion cap rests at. Auto-created if null.")]
         [SerializeField] private Transform completionCapPoint;
 
+        [Tooltip("Optional point used by the tutorial hand. If omitted, the first (bottom) nut slot is used.")]
+        [SerializeField] private Transform tutorialPointerPoint;
+
+        [Tooltip("Fine adjustment for the fallback tutorial target below Slot 0.")]
+        [SerializeField] private Vector3 tutorialPointerFallbackOffset = new Vector3(0f, -0.22f, 0f);
+
         [Tooltip("A child cap instance, or a cap prefab asset to instantiate for every bolt.")]
         [SerializeField] private GameObject completionCap;
 
@@ -92,6 +98,16 @@ namespace NutBoltSort
         {
             EnsureSpecialPoints();
             return completionCapPoint != null ? completionCapPoint.position : transform.position + Vector3.up * (bottomOffset + (Capacity - 1) * slotSpacing + 0.25f);
+        }
+
+        /// <summary>World target for tutorial guidance; this never affects gameplay placement.</summary>
+        public Vector3 GetTutorialPointerWorldPosition()
+        {
+            return tutorialPointerPoint != null
+                ? tutorialPointerPoint.position
+                // Level 1 teaches the player where a nut begins on the bolt, so
+                // the fallback deliberately uses Slot 0, not the high hover point.
+                : NutContainer.TransformPoint(GetStackPosition(0) + tutorialPointerFallbackOffset);
         }
 
         // ── Cap Control ────────────────────────────────────────────────────────
@@ -296,6 +312,13 @@ namespace NutBoltSort
         {
             IsLocked = true;
             if (Collider != null) Collider.enabled = false;
+        }
+
+        /// <summary>Reverses LockBoltSilently — re-enables the bolt for interaction without clearing Nuts or effects.</summary>
+        public void UnlockSilently()
+        {
+            IsLocked = false;
+            if (Collider != null) Collider.enabled = true;
         }
 
         /// <summary>Resets runtime state for reuse or initialization.</summary>

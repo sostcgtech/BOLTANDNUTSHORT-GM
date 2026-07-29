@@ -9,6 +9,13 @@ namespace NutBoltSort
     {
         [Tooltip("Nut colors ordered from Bottom (index 0) to Top (index 3). Empty array indicates an empty bolt.")]
         public NutColor[] nutColors;
+
+        [Tooltip("Bolt classification. Normal bolts behave as standard 4-slot targets.")]
+        public BoltType boltType = BoltType.Normal;
+
+        [Tooltip("Starting capacity for Expandable bolts (0 = fully covered, 4 = same as Normal).")]
+        [Range(0, 4)]
+        public int expandableStartCapacity = 0;
     }
 
     [CreateAssetMenu(fileName = "Level_01", menuName = "NutBoltSort/Level Data", order = 1)]
@@ -47,7 +54,9 @@ namespace NutBoltSort
                 foreach (var bolt in bolts)
                     copy.bolts.Add(new BoltNutStackData
                     {
-                        nutColors = bolt != null && bolt.nutColors != null ? (NutColor[])bolt.nutColors.Clone() : Array.Empty<NutColor>()
+                        nutColors               = bolt != null && bolt.nutColors != null ? (NutColor[])bolt.nutColors.Clone() : Array.Empty<NutColor>(),
+                        boltType                = bolt != null ? bolt.boltType : BoltType.Normal,
+                        expandableStartCapacity = bolt != null ? bolt.expandableStartCapacity : 0
                     });
             return copy;
         }
