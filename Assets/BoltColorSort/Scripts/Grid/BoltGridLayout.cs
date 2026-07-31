@@ -5,6 +5,54 @@ using UnityEngine.Serialization;
 
 namespace NutBoltSort
 {
+    [Serializable]
+    public class BoardLayoutPreset
+    {
+        public string presetId;
+        public int totalPositions;
+        public int[] boltsPerRow;
+        public float horizontalSpacing = 2.2f;
+        public float rowDepthSpacing = 2.8f;
+        public float rowHeightOffset;
+        public Vector3 centerOffset = new Vector3(0f, 0f, -.25f);
+        public float cameraSizeMultiplier = 1f;
+    }
+
+    [Serializable]
+    public class CameraFramingPreset
+    {
+        public string presetId;
+        public int minimumPositions;
+        public int maximumPositions;
+        public float orthographicSizeMultiplier = 1f;
+        public Vector3 boardCenterOffset;
+    }
+
+    /// <summary>Curated, centered row distributions used by procedural levels.</summary>
+    public static class BoardLayoutPresets
+    {
+        public static BoardLayoutPreset Find(string id)
+        {
+            foreach (var preset in Defaults)
+                if (preset.presetId == id) return preset;
+            return null;
+        }
+
+        public static readonly BoardLayoutPreset[] Defaults =
+        {
+            P("six_3_3", 6, new[] { 3, 3 }, 1f), P("six_4_2", 6, new[] { 4, 2 }, 1f),
+            P("seven_4_3", 7, new[] { 4, 3 }, 1.03f), P("seven_3_4", 7, new[] { 3, 4 }, 1.03f),
+            P("eight_4_4", 8, new[] { 4, 4 }, 1.06f), P("eight_3_3_2", 8, new[] { 3, 3, 2 }, 1.04f),
+            P("nine_5_4", 9, new[] { 5, 4 }, 1.10f), P("nine_3_3_3", 9, new[] { 3, 3, 3 }, 1.08f),
+            P("ten_5_5", 10, new[] { 5, 5 }, 1.14f), P("ten_4_3_3", 10, new[] { 4, 3, 3 }, 1.12f),
+            P("eleven_4_4_3", 11, new[] { 4, 4, 3 }, 1.17f), P("eleven_5_3_3", 11, new[] { 5, 3, 3 }, 1.17f),
+            P("twelve_4_4_4", 12, new[] { 4, 4, 4 }, 1.20f), P("twelve_5_4_3", 12, new[] { 5, 4, 3 }, 1.20f)
+        };
+
+        private static BoardLayoutPreset P(string id, int total, int[] rows, float camera) => new BoardLayoutPreset
+        { presetId = id, totalPositions = total, boltsPerRow = rows, cameraSizeMultiplier = camera };
+    }
+
     /// <summary>
     /// Inspector settings for the local-space staggered perspective bolt grid.
     /// </summary>
@@ -72,6 +120,27 @@ namespace NutBoltSort
                         rowY,
                         rowZ);
                 }
+            }
+        }
+
+        /// <summary>Places each explicit row around its own centre; no row inherits another row's width.</summary>
+        public static void Apply(IList<Transform> orderedBoltRoots, BoardLayoutPreset preset)
+        {
+            if (orderedBoltRoots == null || preset == null || preset.boltsPerRow == null) return;
+            var active = new List<Transform>();
+            foreach (var root in orderedBoltRoots)
+                if (root != null && root.gameObject.activeInHierarchy) active.Add(root);
+            if (active.Count != preset.totalPositions) return;
+
+            int next = 0;
+            for (int row = 0; row < preset.boltsPerRow.Length; row++)
+            {
+                int count = preset.boltsPerRow[row];
+                float width = (count - 1) * preset.horizontalSpacing;
+                float z = preset.centerOffset.z + (preset.boltsPerRow.Length - 1) * preset.rowDepthSpacing * .5f - row * preset.rowDepthSpacing;
+                float y = preset.centerOffset.y + (preset.boltsPerRow.Length - 1) * preset.rowHeightOffset * .5f - row * preset.rowHeightOffset;
+                for (int column = 0; column < count; column++)
+                    active[next++].localPosition = new Vector3(preset.centerOffset.x - width * .5f + column * preset.horizontalSpacing, y, z);
             }
         }
     }

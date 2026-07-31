@@ -44,6 +44,9 @@ namespace NutBoltSort
         [Tooltip("Starting capacity for each expandable bolt (0 = fully covered).")]
         [Range(0, 4)] public int expandableStartingCapacity = 0;
 
+        [Tooltip("Optional per-bolt starting stages. When supplied, these override the shared stage in order.")]
+        [Range(0, 4)] public int[] expandableStartingCapacities;
+
         [Tooltip("When true the puzzle can be fully solved without unlocking. Unlocking only makes it easier.")]
         public bool lockedBoltOptional = true;
 
@@ -65,6 +68,10 @@ namespace NutBoltSort
 
         // ── Computed helpers ──────────────────────────────────────────────
         public int TotalBoltCount => filledBoltCount + normalEmptyBoltCount + lockedBoltCount + expandableBoltCount;
+        public int GetExpandableStartingCapacity(int index) =>
+            expandableStartingCapacities != null && index >= 0 && index < expandableStartingCapacities.Length
+                ? Mathf.Clamp(expandableStartingCapacities[index], 0, 4)
+                : expandableStartingCapacity;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -128,7 +135,7 @@ namespace NutBoltSort
         [SerializeField] private bool useTemplateSystem = true;
 
         [Tooltip("Maximum number of bolt positions that may ever appear on the board.")]
-        [SerializeField, Min(2)] private int maximumBoardPositions = 8;
+        [SerializeField, Min(2)] private int maximumBoardPositions = 12;
 
         [Tooltip("Difficulty-wave cycle. The generator cycles through this list indefinitely to pick the " +
                  "target difficulty for each procedural level.")]
@@ -139,7 +146,7 @@ namespace NutBoltSort
             DifficultyRating.Medium,
             DifficultyRating.Medium,
             DifficultyRating.Hard,
-            DifficultyRating.Easy,
+            DifficultyRating.Recovery,
             DifficultyRating.Medium,
             DifficultyRating.Hard,
             DifficultyRating.Medium,
@@ -285,7 +292,10 @@ namespace NutBoltSort
 
         [Tooltip("Full pool of colours the generator may use. Templates restrict to a subset.")]
         [SerializeField] private List<NutColor> supportedColors = new List<NutColor>
-            { NutColor.Red, NutColor.Blue, NutColor.Green, NutColor.Yellow, NutColor.Purple };
+        {
+            NutColor.Red, NutColor.Blue, NutColor.Green, NutColor.Yellow, NutColor.Purple, NutColor.Orange,
+            NutColor.Pink, NutColor.Cyan, NutColor.Lime, NutColor.White, NutColor.DarkBlue, NutColor.Magenta
+        };
 
         [SerializeField, Min(1)] private int maximumGenerationAttempts = 32;
         [SerializeField, Min(1)] private int maximumInverseMoveAttemptsPerStep = 24;
@@ -293,6 +303,8 @@ namespace NutBoltSort
         [SerializeField, Min(1)] private int maximumSolverDepth = 96;
         [SerializeField, Min(1)] private int maximumSolverMilliseconds = 150;
         [SerializeField, Range(1, 50)] private int recentSignatureHistorySize = 20;
+        [SerializeField, Range(1, 12)] private int recentColorSubsetHistorySize = 5;
+        [SerializeField, Range(0f, 1f)] private float maximumSimilarityScore = .75f;
         [SerializeField] private bool enableDebugLogging = true;
         [SerializeField] private bool useDeterministicTestSeed;
         [SerializeField] private int testSeed = 12345;
@@ -300,6 +312,9 @@ namespace NutBoltSort
         // ── Runtime state ──────────────────────────────────────────────────────
         private readonly Queue<string> recentSignatures = new Queue<string>();
         private readonly Queue<string> recentTemplateIds = new Queue<string>();
+        private readonly Queue<string> recentColorSubsets = new Queue<string>();
+        private readonly Queue<string> recentLayoutPresetIds = new Queue<string>();
+        private LevelDataSO previousAcceptedLevel;
         private LevelDataSO currentSnapshot;
         private List<LogicalMove> currentSolution = new List<LogicalMove>();
         private int currentLevelIndex = -1;
@@ -316,7 +331,7 @@ namespace NutBoltSort
         /// </summary>
         public bool UsesTemplateSystem => useTemplateSystem;
 
-        private const int CurrentTemplateSchemaVersion = 4;
+        private const int CurrentTemplateSchemaVersion = 5;
         [SerializeField, HideInInspector] private int serializedTemplateSchemaVersion;
 
         private void Awake() { MigrateTemplateConfigurationIfRequired(); ValidateTemplateConfiguration(); }
@@ -460,6 +475,11 @@ namespace NutBoltSort
             var failures   = new Dictionary<GenerationFailure, int>();
             var templateUsage = new Dictionary<string, int>();
             var diffDist  = new Dictionary<DifficultyRating, int>();
+            var positionDist = new Dictionary<int, int>();
+            var layoutUsage = new Dictionary<string, int>();
+            var colorCountDist = new Dictionary<int, int>();
+            var subsetUsage = new Dictionary<string, int>();
+            var expandableDist = new Dictionary<int, int>();
             var orderErrors = 0;
             var capacityErrors = 0;
 
@@ -491,6 +511,17 @@ namespace NutBoltSort
                     // Difficulty tracking
                     DifficultyRating dr = data.difficultyBand;
                     diffDist[dr] = diffDist.ContainsKey(dr) ? diffDist[dr] + 1 : 1;
+                    AddCount(positionDist, data.BoltCount);
+                    AddCount(layoutUsage, data.layoutPresetId ?? "none");
+                    AddCount(colorCountDist, data.activeColors.Length);
+                    AddCount(subsetUsage, ColorSubsetKey(data.activeColors));
+                    AddCount(expandableDist, CountExpandable(data));
+                    // Batch generation intentionally advances the same anti-repetition history
+                    // used by real sequential play.
+                    RememberSignature(data.puzzleSignature);
+                    RememberColorSubset(data.activeColors);
+                    RememberLayoutId(data.layoutPresetId);
+                    previousAcceptedLevel = data.DeepCopy();
 
                     // Locked-bolt ordering: locked bolts must be at the end
                     bool orderOk = ValidateLockedBoltOrdering(data);
@@ -518,7 +549,23 @@ namespace NutBoltSort
             sb.Append("  Failures: "); foreach (var kv in failures) sb.Append($"{kv.Key}={kv.Value} "); sb.AppendLine();
             sb.Append("  Templates: "); foreach (var kv in templateUsage) sb.Append($"{kv.Key}={kv.Value} "); sb.AppendLine();
             sb.Append("  Difficulty: "); foreach (var kv in diffDist) sb.Append($"{kv.Key}={kv.Value} ");
+            sb.AppendLine();
+            sb.Append("  Positions: "); AppendCounts(sb, positionDist); sb.AppendLine();
+            sb.Append("  Layouts: "); AppendCounts(sb, layoutUsage); sb.AppendLine();
+            sb.Append("  ActiveColors: "); AppendCounts(sb, colorCountDist); sb.AppendLine();
+            sb.Append("  ColorSubsets: "); AppendCounts(sb, subsetUsage); sb.AppendLine();
+            sb.Append("  Expandables: "); AppendCounts(sb, expandableDist);
             Debug.Log(sb.ToString());
+        }
+
+        private static void AddCount<TKey>(Dictionary<TKey, int> counts, TKey key)
+        {
+            counts[key] = counts.TryGetValue(key, out int value) ? value + 1 : 1;
+        }
+
+        private static void AppendCounts<TKey>(StringBuilder sb, Dictionary<TKey, int> counts)
+        {
+            foreach (var pair in counts) sb.Append($"{pair.Key}={pair.Value} ");
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -541,7 +588,7 @@ namespace NutBoltSort
             Debug.LogError($"[ProceduralLevelGenerator] Generation failed at level {level}: {reason}. Using safe fallback template.");
 
             // Fallback: use the solver-validated safe standard template.
-            var fallback = GetFallbackTemplate();
+            var fallback = GetProgressionFallback(level);
             if (TryGenerateWithTemplate(level, capacity, candidateSeed, fallback, out data, out path, out reason))
             {
                 SaveAccepted(level, candidateSeed, data, path);
@@ -609,7 +656,7 @@ namespace NutBoltSort
             {
                 if (t == null) continue;
                 if (levelNumber < t.minimumLevel || levelNumber > t.maximumLevel) continue;
-                if (!IsTemplateValid(t, false)) continue;
+                if (!IsTemplateValid(t, false) || !IsAllowedByProgression(t, levelNumber)) continue;
                 if (recentTemplateIds.Contains(t.templateId)) continue;
                 eligible.Add(t);
             }
@@ -622,7 +669,7 @@ namespace NutBoltSort
                 {
                     if (t == null) continue;
                     if (levelNumber < t.minimumLevel || levelNumber > t.maximumLevel) continue;
-                    if (!IsTemplateValid(t, false)) continue;
+                    if (!IsTemplateValid(t, false) || !IsAllowedByProgression(t, levelNumber)) continue;
                     relaxed.Add(t);
                 }
                 if (relaxed.Count == 0) return GetFallbackTemplate();
@@ -657,6 +704,24 @@ namespace NutBoltSort
             return difficultyWavePattern[wavePos];
         }
 
+        private static void GetProgressionLimits(int level, out int minPositions, out int maxPositions,
+            out int minColors, out int maxColors)
+        {
+            if (level <= 10)       { minPositions = 6;  maxPositions = 7;  minColors = maxColors = 4; }
+            else if (level <= 20)  { minPositions = 7;  maxPositions = 8;  minColors = 4; maxColors = 5; }
+            else if (level <= 40)  { minPositions = 8;  maxPositions = 9;  minColors = maxColors = 5; }
+            else if (level <= 70)  { minPositions = 9;  maxPositions = 10; minColors = 5; maxColors = 6; }
+            else if (level <= 120) { minPositions = 10; maxPositions = 11; minColors = 6; maxColors = 7; }
+            else                   { minPositions = 10; maxPositions = 12; minColors = 6; maxColors = 8; }
+        }
+
+        private bool IsAllowedByProgression(LevelGenerationTemplate template, int level)
+        {
+            GetProgressionLimits(level, out int minPositions, out int maxPositions, out int minColors, out int maxColors);
+            return template.TotalBoltCount >= minPositions && template.TotalBoltCount <= Math.Min(maxPositions, maximumBoardPositions) &&
+                   template.activeColorCount >= minColors && template.activeColorCount <= maxColors;
+        }
+
         private LevelGenerationTemplate GetFallbackTemplate()
         {
             foreach (var t in levelTemplates)
@@ -669,6 +734,16 @@ namespace NutBoltSort
                 targetInverseSteps = 18, minimumAcceptedSteps = 6, minimumMixedBolts = 1, minimumColorTransitions = 2,
                 minimumGuaranteedSolutionLength = 6, maximumCompletedBoltsAtStart = 2, selectionWeight = 1
             };
+        }
+
+        private LevelGenerationTemplate GetProgressionFallback(int level)
+        {
+            foreach (var t in levelTemplates)
+                if (IsTemplateValid(t, false) && IsAllowedByProgression(t, level) && t.difficulty == DifficultyRating.Recovery)
+                    return t;
+            foreach (var t in levelTemplates)
+                if (IsTemplateValid(t, false) && IsAllowedByProgression(t, level)) return t;
+            return GetFallbackTemplate();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -688,6 +763,8 @@ namespace NutBoltSort
             for (int attempt = 0; attempt < Math.Max(1, maximumGenerationAttempts); attempt++)
             {
                 var colors = PickColors(random, template.activeColorCount);
+                if (recentColorSubsets.Contains(ColorSubsetKey(colors)))
+                { failure = GenerationFailure.DuplicateSignature; continue; }
                 var board  = CreateSolvedBoard(colors, template.filledBoltCount, template.normalEmptyBoltCount, capacity, random);
 
                 // ── Apply inverse scramble ────────────────────────────────────
@@ -732,11 +809,13 @@ namespace NutBoltSort
                 if (data == null || !ValidateFinalComposition(data, template, capacity)) { failure = GenerationFailure.InvalidConfiguration; continue; }
                 data.proceduralTemplateId = template.templateId;
                 data.difficultyBand = template.difficulty;
+                data.layoutPresetId = PickLayoutPresetId(data.bolts.Count, random);
                 data.validatedSolutionLength = solver.path.Count;
                 data.validatedSolverNodes = solver.nodes;
                 data.validatedSolverMilliseconds = solver.milliseconds;
                 data.puzzleSignature = Signature(data, template.templateId);
                 if (recentSignatures.Contains(data.puzzleSignature)) { failure = GenerationFailure.DuplicateSignature; continue; }
+                if (IsTooSimilarToPrevious(data)) { failure = GenerationFailure.DuplicateSignature; continue; }
                 // The independently found path honours completed-bolt locking. The
                 // remapped reverse path above remains an explicit index-remap check.
                 forwardPath = RemapNormalPathToFinalOrder(solver.path, template);
@@ -788,7 +867,7 @@ namespace NutBoltSort
 
             // 4. Expandable bolts are always the final logical positions.
             for (int i = 0; i < template.expandableBoltCount; i++)
-                d.bolts.Add(new BoltNutStackData { boltType = BoltType.Expandable, expandableStartCapacity = template.expandableStartingCapacity, nutColors = Array.Empty<NutColor>() });
+                d.bolts.Add(new BoltNutStackData { boltType = BoltType.Expandable, expandableStartCapacity = template.GetExpandableStartingCapacity(i), nutColors = Array.Empty<NutColor>() });
 
             // ── Structural assertion ───────────────────────────────────────────
             if (d.bolts.Count > maximumBoardPositions)
@@ -967,12 +1046,12 @@ namespace NutBoltSort
         private bool ValidateLockedBoltOrdering(LevelDataSO data)
         {
             if (data == null || data.bolts == null) return false;
-            bool seenLocked = false;
+            bool seenSpecial = false;
             foreach (var b in data.bolts)
             {
                 if (b == null) return false;
-                if (seenLocked && b.boltType != BoltType.Locked) return false;
-                if (b.boltType == BoltType.Locked) seenLocked = true;
+                if (seenSpecial && b.boltType != BoltType.Expandable) return false;
+                if (b.boltType == BoltType.Expandable) seenSpecial = true;
             }
             return true;
         }
@@ -1023,29 +1102,44 @@ namespace NutBoltSort
         {
             levelTemplates = new List<LevelGenerationTemplate>
             {
-                Template("level_6_safe_standard", "Level 6: fixed 4-color procedural introduction", 6, 6, DifficultyRating.Medium, 4, 2, 28, 14, 4, 7, 1, 0, 12, 1),
-                Template("recovery_standard", "4 colors, lower complexity recovery puzzle", 7, int.MaxValue, DifficultyRating.Recovery, 4, 2, 18, 8, 2, 3, 2, 1, 8, 3),
-                Template("standard_4_medium", "4 colors, standard medium puzzle", 7, int.MaxValue, DifficultyRating.Medium, 4, 2, 28, 14, 3, 5, 1, 0, 12, 5),
-                Template("standard_4_hard", "4 colors, strongly mixed hard puzzle", 10, int.MaxValue, DifficultyRating.Hard, 4, 2, 38, 18, 3, 6, 1, 0, 15, 4),
-                Template("standard_5_medium", "5 colors, 5 filled and 2 empty", 21, int.MaxValue, DifficultyRating.Medium, 5, 2, 38, 18, 4, 7, 1, 0, 15, 4),
-                Template("standard_5_hard", "5 colors, strongly mixed hard puzzle", 31, int.MaxValue, DifficultyRating.Hard, 5, 2, 48, 22, 4, 8, 1, 0, 18, 4),
-                Template("standard_5_challenge", "5 colors, high-mixing challenge", 41, int.MaxValue, DifficultyRating.Challenge, 5, 2, 56, 25, 4, 9, 1, 0, 20, 2),
-                Template("safe_standard_fallback", "Guaranteed safe fallback", 6, int.MaxValue, DifficultyRating.Recovery, 4, 2, 14, 6, 1, 2, 1, 1, 6, 1)
+                T("level_6_safe_standard", 6, 6, DifficultyRating.Recovery, 4, 1, 1, 2, 16, 8, 4, 6, 1),
+                T("small_standard", 7, 10, DifficultyRating.Easy, 4, 2, 1, 1, 22, 10, 4, 6, 3),
+                T("small_tight", 7, 10, DifficultyRating.Medium, 4, 1, 1, 1, 30, 14, 4, 6, 2),
+                T("medium_standard", 11, 20, DifficultyRating.Recovery, 5, 2, 1, 2, 26, 12, 5, 8, 3),
+                T("medium_expandable", 11, 20, DifficultyRating.Medium, 5, 1, 2, 1, 36, 18, 5, 8, 3),
+                T("large_standard", 21, 40, DifficultyRating.Medium, 5, 2, 1, 1, 42, 20, 5, 10, 3),
+                T("large_expandable", 21, 40, DifficultyRating.Hard, 6, 1, 2, 0, 50, 24, 6, 11, 2),
+                T("expert_standard", 41, 70, DifficultyRating.Medium, 6, 2, 1, 1, 52, 24, 6, 12, 3),
+                T("expert_board", 41, 70, DifficultyRating.Hard, 7, 1, 2, 0, 62, 30, 7, 14, 2),
+                T("expert_medium", 71, 120, DifficultyRating.Medium, 7, 1, 2, 1, 58, 28, 7, 13, 2),
+                T("expert_recovery", 71, 120, DifficultyRating.Recovery, 6, 2, 2, 2, 42, 20, 6, 11, 2),
+                T("expert_expanded", 71, 120, DifficultyRating.Challenge, 7, 1, 3, 0, 70, 34, 7, 15, 1),
+                T("maximum_challenge", 121, int.MaxValue, DifficultyRating.Challenge, 8, 1, 3, 0, 78, 38, 8, 17, 1),
+                T("endless_recovery", 121, int.MaxValue, DifficultyRating.Recovery, 6, 2, 2, 2, 40, 18, 6, 10, 2),
+                T("safe_standard_fallback", 6, int.MaxValue, DifficultyRating.Recovery, 4, 2, 1, 2, 16, 6, 2, 4, 1)
             };
         }
 
-        private static LevelGenerationTemplate Template(string id, string description, int min, int max, DifficultyRating difficulty,
-            int colors, int empty, int inverse, int accepted, int mixed, int transitions, int minLegal, int maxCompleted, int minPath, int weight)
+        private static LevelGenerationTemplate T(string id, int min, int max, DifficultyRating difficulty,
+            int colors, int empty, int expandable, int stage, int inverse, int accepted, int mixed, int transitions, int weight)
         {
             return new LevelGenerationTemplate
             {
-                templateId = id, description = description, minimumLevel = min, maximumLevel = max, difficulty = difficulty,
+                templateId = id, description = id, minimumLevel = min, maximumLevel = max, difficulty = difficulty,
                 activeColorCount = colors, filledBoltCount = colors, normalEmptyBoltCount = empty,
-                lockedBoltCount = 0, expandableBoltCount = 1, expandableStartingCapacity = 0, lockedBoltOptional = true,
+                lockedBoltCount = 0, expandableBoltCount = expandable, expandableStartingCapacity = stage, lockedBoltOptional = true,
+                expandableStartingCapacities = ExpandableStages(expandable, stage),
                 targetInverseSteps = inverse, minimumAcceptedSteps = accepted, minimumMixedBolts = mixed, minimumColorTransitions = transitions,
-                minimumStartingLegalMoves = minLegal, maximumStartingLegalMoves = 0, maximumCompletedBoltsAtStart = maxCompleted,
-                minimumGuaranteedSolutionLength = minPath, selectionWeight = weight
+                minimumStartingLegalMoves = 1, maximumStartingLegalMoves = 0, maximumCompletedBoltsAtStart = difficulty == DifficultyRating.Recovery ? 1 : 0,
+                minimumGuaranteedSolutionLength = accepted, selectionWeight = weight
             };
+        }
+
+        private static int[] ExpandableStages(int count, int stage)
+        {
+            var stages = new int[count];
+            for (int i = 0; i < count; i++) stages[i] = Mathf.Max(0, stage - i);
+            return stages;
         }
 
         private static void ReorderNormalBoard(List<List<NutColor>> source, List<LogicalMove> path,
@@ -1264,6 +1358,50 @@ namespace NutBoltSort
             return pool.GetRange(0, count);
         }
 
+        private string PickLayoutPresetId(int positions, System.Random random)
+        {
+            var candidates = new List<BoardLayoutPreset>();
+            foreach (var preset in BoardLayoutPresets.Defaults)
+                if (preset.totalPositions == positions && !recentLayoutPresetIds.Contains(preset.presetId)) candidates.Add(preset);
+            if (candidates.Count == 0)
+                foreach (var preset in BoardLayoutPresets.Defaults)
+                    if (preset.totalPositions == positions) candidates.Add(preset);
+            return candidates.Count == 0 ? string.Empty : candidates[random.Next(candidates.Count)].presetId;
+        }
+
+        private static string ColorSubsetKey(IEnumerable<NutColor> colors)
+        {
+            var values = new List<int>(); foreach (var color in colors) values.Add((int)color);
+            values.Sort(); return string.Join(",", values);
+        }
+
+        private bool IsTooSimilarToPrevious(LevelDataSO candidate)
+        {
+            if (previousAcceptedLevel == null) return false;
+            int matches = 0, checks = 7;
+            if (candidate.BoltCount == previousAcceptedLevel.BoltCount) matches++;
+            if (candidate.layoutPresetId == previousAcceptedLevel.layoutPresetId) matches++;
+            if (candidate.activeColors != null && previousAcceptedLevel.activeColors != null &&
+                ColorSubsetKey(candidate.activeColors) == ColorSubsetKey(previousAcceptedLevel.activeColors)) matches++;
+            if (CountNormalEmpty(candidate) == CountNormalEmpty(previousAcceptedLevel)) matches++;
+            if (CountExpandable(candidate) == CountExpandable(previousAcceptedLevel)) matches++;
+            if (TopSequence(candidate) == TopSequence(previousAcceptedLevel)) matches++;
+            if (NutSimilarity(candidate, previousAcceptedLevel) >= .75f) matches++;
+            return matches / (float)checks > maximumSimilarityScore;
+        }
+
+        private static int CountNormalEmpty(LevelDataSO data) { int n = 0; foreach (var b in data.bolts) if (b.boltType == BoltType.Normal && b.nutColors.Length == 0) n++; return n; }
+        private static int CountExpandable(LevelDataSO data) { int n = 0; foreach (var b in data.bolts) if (b.boltType == BoltType.Expandable) n++; return n; }
+        private static string TopSequence(LevelDataSO data) { var sb = new StringBuilder(); foreach (var b in data.bolts) sb.Append(b.nutColors.Length == 0 ? "_" : ((int)b.nutColors[b.nutColors.Length - 1]).ToString()).Append(','); return sb.ToString(); }
+        private static float NutSimilarity(LevelDataSO a, LevelDataSO b)
+        {
+            int same = 0, total = Math.Max(1, Math.Max(a.BoltCount, b.BoltCount) * BoltView.Capacity);
+            for (int i = 0; i < Math.Min(a.BoltCount, b.BoltCount); i++)
+                for (int j = 0; j < Math.Min(a.bolts[i].nutColors.Length, b.bolts[i].nutColors.Length); j++)
+                    if (a.bolts[i].nutColors[j] == b.bolts[i].nutColors[j]) same++;
+            return same / (float)total;
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         // Snapshot management
         // ─────────────────────────────────────────────────────────────────────
@@ -1275,6 +1413,9 @@ namespace NutBoltSort
             currentSnapshot   = data.DeepCopy();
             currentSolution   = new List<LogicalMove>(path);
             RememberSignature(data.puzzleSignature);
+            RememberColorSubset(data.activeColors);
+            if (!string.IsNullOrEmpty(data.layoutPresetId)) RememberLayoutId(data.layoutPresetId);
+            previousAcceptedLevel = data.DeepCopy();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -1318,7 +1459,7 @@ namespace NutBoltSort
 
         private string Signature(LevelDataSO data, string templateId)
         {
-            var sb = new StringBuilder("V").Append(generatorVersion).Append('|').Append(templateId).Append('|');
+            var sb = new StringBuilder("V").Append(generatorVersion).Append('|').Append(templateId).Append('|').Append(data.layoutPresetId).Append('|');
             if (data.activeColors != null) foreach (var color in data.activeColors) sb.Append((int)color).Append(',');
             sb.Append('|');
             foreach (var bolt in data.bolts)
@@ -1340,6 +1481,18 @@ namespace NutBoltSort
         {
             recentTemplateIds.Enqueue(templateId);
             while (recentTemplateIds.Count > recentTemplateHistorySize) recentTemplateIds.Dequeue();
+        }
+
+        private void RememberColorSubset(IEnumerable<NutColor> colors)
+        {
+            recentColorSubsets.Enqueue(ColorSubsetKey(colors));
+            while (recentColorSubsets.Count > recentColorSubsetHistorySize) recentColorSubsets.Dequeue();
+        }
+
+        private void RememberLayoutId(string id)
+        {
+            recentLayoutPresetIds.Enqueue(id);
+            while (recentLayoutPresetIds.Count > recentTemplateHistorySize) recentLayoutPresetIds.Dequeue();
         }
 
         // ─────────────────────────────────────────────────────────────────────

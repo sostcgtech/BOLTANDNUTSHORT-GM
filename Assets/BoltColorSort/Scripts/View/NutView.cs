@@ -78,6 +78,12 @@ namespace NutBoltSort
                 case NutColor.Yellow: return new UnityEngine.Color(1f,   .68f, .08f);
                 case NutColor.Purple: return new UnityEngine.Color(.58f, .12f, .90f);
                 case NutColor.Orange: return new UnityEngine.Color(1f,   .50f, .10f);
+                case NutColor.Pink:   return new UnityEngine.Color(.96f, .30f, .58f);
+                case NutColor.Cyan:   return new UnityEngine.Color(.08f, .78f, .90f);
+                case NutColor.Lime:   return new UnityEngine.Color(.55f, .86f, .14f);
+                case NutColor.White:  return new UnityEngine.Color(.88f, .91f, .95f);
+                case NutColor.DarkBlue:return new UnityEngine.Color(.15f, .27f, .66f);
+                case NutColor.Magenta:return new UnityEngine.Color(.84f, .12f, .72f);
                 default:              return UnityEngine.Color.white;
             }
         }

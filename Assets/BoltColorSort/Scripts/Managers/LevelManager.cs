@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 namespace NutBoltSort
@@ -17,6 +18,12 @@ namespace NutBoltSort
         [Header("Grid Layout Settings")]
         [SerializeField] private BoltGridLayoutSettings gridLayoutSettings = new BoltGridLayoutSettings();
 
+        [Header("Board Entry")]
+        [SerializeField, Range(.1f, .5f)] private float boardEntryDuration = .26f;
+        [SerializeField, Range(.03f, .06f)] private float boardEntryStagger = .045f;
+        [SerializeField] private float boardEntryDropOffset = .28f;
+        [SerializeField, Range(.8f, 1f)] private float boardEntryStartScale = .9f;
+
         [Header("Level Data Assets")]
         [SerializeField] private List<LevelDataSO> levelDataList = new List<LevelDataSO>();
 
@@ -27,7 +34,13 @@ namespace NutBoltSort
             { NutColor.Green,  new Color(.16f, .76f, .43f) },
             { NutColor.Yellow, new Color(1f,   .68f, .08f) },
             { NutColor.Purple, new Color(.58f, .12f, .90f) },
-            { NutColor.Orange, new Color(1f,   .50f, .10f) }
+            { NutColor.Orange, new Color(1f,   .50f, .10f) },
+            { NutColor.Pink,   new Color(.96f, .30f, .58f) },
+            { NutColor.Cyan,   new Color(.08f, .78f, .90f) },
+            { NutColor.Lime,   new Color(.55f, .86f, .14f) },
+            { NutColor.White,  new Color(.88f, .91f, .95f) },
+            { NutColor.DarkBlue, new Color(.15f, .27f, .66f) },
+            { NutColor.Magenta,new Color(.84f, .12f, .72f) }
         };
 
         private readonly Dictionary<NutColor, Material> cachedMaterials = new Dictionary<NutColor, Material>();
@@ -189,7 +202,7 @@ namespace NutBoltSort
             }
 
             // Apply staggered perspective layout
-            ApplyGridLayout();
+            ApplyGridLayout(data);
 
             // Silently lock pre-completed bolts on load
             foreach (var bolt in activeBolts)
@@ -220,7 +233,9 @@ namespace NutBoltSort
             activeBolts.Clear();
         }
 
-        public void ApplyGridLayout()
+        public void ApplyGridLayout() => ApplyGridLayout(null);
+
+        public void ApplyGridLayout(LevelDataSO data)
         {
             var boltTransforms = new List<Transform>(activeBolts.Count);
             foreach (var bolt in activeBolts)
@@ -228,7 +243,26 @@ namespace NutBoltSort
                 if (bolt != null) boltTransforms.Add(bolt.transform);
             }
 
-            BoltGridLayout.Apply(boltTransforms, gridLayoutSettings);
+            BoardLayoutPreset preset = data != null && data.isProcedural
+                ? BoardLayoutPresets.Find(data.layoutPresetId) : null;
+            if (preset != null)
+            {
+                // Procedural boards keep their explicit row shape, but deliberately inherit
+                // the same spacing and centering controls used by Levels 1–5.
+                var resolvedPreset = new BoardLayoutPreset
+                {
+                    presetId = preset.presetId,
+                    totalPositions = preset.totalPositions,
+                    boltsPerRow = preset.boltsPerRow,
+                    horizontalSpacing = gridLayoutSettings.HorizontalSpacing,
+                    rowDepthSpacing = gridLayoutSettings.RowDepthSpacing,
+                    rowHeightOffset = gridLayoutSettings.OptionalRowHeightOffset,
+                    centerOffset = gridLayoutSettings.GridCenterOffset,
+                    cameraSizeMultiplier = 1f
+                };
+                BoltGridLayout.Apply(boltTransforms, resolvedPreset);
+            }
+            else BoltGridLayout.Apply(boltTransforms, gridLayoutSettings);
 
             foreach (var bolt in activeBolts)
             {
@@ -236,6 +270,28 @@ namespace NutBoltSort
                 {
                     bolt.HomePosition = bolt.transform.position;
                 }
+            }
+
+            // Keep the camera exactly where Levels 1–5 leave it. Procedural layouts only
+            // control bolt positions, never camera position or orthographic size.
+            if (data != null && data.isProcedural) PlayBoardEntry();
+        }
+
+        private void PlayBoardEntry()
+        {
+            for (int index = 0; index < activeBolts.Count; index++)
+            {
+                BoltView bolt = activeBolts[index];
+                if (bolt == null) continue;
+                Transform tr = bolt.transform;
+                Vector3 finalPosition = tr.localPosition;
+                Vector3 finalScale = bolt.RestingLocalScale;
+                tr.localPosition = finalPosition + Vector3.down * boardEntryDropOffset;
+                tr.localScale = finalScale * boardEntryStartScale;
+                Sequence sequence = DOTween.Sequence().SetTarget(tr);
+                sequence.SetDelay(index * boardEntryStagger);
+                sequence.Join(tr.DOLocalMove(finalPosition, boardEntryDuration).SetEase(Ease.OutCubic));
+                sequence.Join(tr.DOScale(finalScale, boardEntryDuration).SetEase(Ease.OutBack));
             }
         }
 

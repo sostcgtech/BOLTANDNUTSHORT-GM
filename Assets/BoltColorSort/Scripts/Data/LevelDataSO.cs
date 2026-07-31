@@ -39,6 +39,8 @@ namespace NutBoltSort
         public int validatedSolverNodes;
         public long validatedSolverMilliseconds;
         public string difficultyTier;
+        [Tooltip("Selected visual layout. Placement remains owned by LevelManager/BoltGridLayout.")]
+        public string layoutPresetId;
         public NutColor[] activeColors;
         [TextArea] public string puzzleSignature;
 
@@ -57,6 +59,7 @@ namespace NutBoltSort
             copy.validatedSolverNodes = validatedSolverNodes;
             copy.validatedSolverMilliseconds = validatedSolverMilliseconds;
             copy.difficultyTier = difficultyTier;
+            copy.layoutPresetId = layoutPresetId;
             copy.puzzleSignature = puzzleSignature;
             copy.activeColors = activeColors != null ? (NutColor[])activeColors.Clone() : Array.Empty<NutColor>();
             copy.bolts = new List<BoltNutStackData>(bolts != null ? bolts.Count : 0);
