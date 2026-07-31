@@ -90,10 +90,6 @@ namespace NutBoltSort
             {
                 StartExpandableTutorial();
             }
-            else if (levelNumber == 5 && PlayerPrefs.GetInt(KEY_LOCKED_TUTORIAL, 0) == 0)
-            {
-                StartLockedTutorial();
-            }
         }
 
         /// <summary>Returns true if the given bolt tap is allowed in the current tutorial step.</summary>

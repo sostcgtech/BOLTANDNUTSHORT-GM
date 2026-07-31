@@ -171,10 +171,6 @@ namespace NutBoltSort
                             var exp = bolt.gameObject.AddComponent<ExpandableBoltController>();
                             exp.Initialize(boltData.expandableStartCapacity);
                             break;
-                        case BoltType.Locked:
-                            var lck = bolt.gameObject.AddComponent<LockedBoltController>();
-                            lck.Initialize();
-                            break;
                     }
                 }
 

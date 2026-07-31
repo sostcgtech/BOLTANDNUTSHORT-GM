@@ -9,7 +9,9 @@ namespace NutBoltSort
     /// Levels 1–5 are hand-authored fixed introductory levels.
     /// Levels 6+ are delegated to the existing ProceduralLevelGenerator
     ///   (Assets/BoltColorSort/Scripts/Generation/ProceduralLevelGenerator.cs)
-    ///   via its GetOrGenerateCurrentLevel() API.
+    ///   via its GetOrGenerateCurrentLevel() API when UseTemplateSystem is true
+    ///   (the default). The legacy interval-based locked-bolt scheduler is
+    ///   disabled in that case.
     ///
     /// Also owns the deep-copy snapshot used by Restart to restore the exact
     /// starting board without regenerating.
@@ -36,7 +38,7 @@ namespace NutBoltSort
         {
             if (config    == null) config    = Resources.Load<LevelProgressionConfig>("LevelProgressionConfig");
             if (generator == null) generator = GetComponent<ProceduralLevelGenerator>()
-                                               ?? FindObjectOfType<ProceduralLevelGenerator>()
+                                               ?? FindAnyObjectByType<ProceduralLevelGenerator>()
                                                ?? gameObject.AddComponent<ProceduralLevelGenerator>();
         }
 
@@ -121,8 +123,8 @@ namespace NutBoltSort
             data.bolts.Add(MakeBolt(NutColor.Red,   NutColor.Red,   NutColor.Green, NutColor.Green));
             data.bolts.Add(MakeBolt(NutColor.Green,  NutColor.Green, NutColor.Blue,  NutColor.Blue));
             data.bolts.Add(MakeBolt(NutColor.Blue,   NutColor.Blue,  NutColor.Red,   NutColor.Red));
-            data.bolts.Add(MakeExpandableBolt(0));  // expandable, starts locked
-            data.bolts.Add(MakeBolt());              // empty, last
+            data.bolts.Add(MakeBolt());              // normal empty
+            data.bolts.Add(MakeExpandableBolt(0));   // expandable is always final
             return ValidateOrFallback(data, 3);
         }
 
@@ -136,29 +138,36 @@ namespace NutBoltSort
             data.bolts.Add(MakeBolt(NutColor.Red,   NutColor.Green, NutColor.Blue,  NutColor.Red));
             data.bolts.Add(MakeBolt(NutColor.Green,  NutColor.Blue,  NutColor.Red,   NutColor.Green));
             data.bolts.Add(MakeBolt(NutColor.Blue,   NutColor.Red,   NutColor.Green, NutColor.Blue));
-            data.bolts.Add(MakeExpandableBolt(0));
             data.bolts.Add(MakeBolt()); // empty
             data.bolts.Add(MakeBolt()); // empty
+            data.bolts.Add(MakeExpandableBolt(0)); // expandable is final
             return ValidateOrFallback(data, 4);
         }
 
         // ── Level 5 — Locked Bolt Introduction ────────────────────────────────
-        // 4 filled (Latin-square: one of each colour per bolt) + 1 expandable
-        // (cap=0) + 1 locked + 2 empty (last).
+        // 4 filled mixed bolts (Latin-square: one of each colour per bolt)
+        // + 2 normal empty bolts
+        // + 1 locked bolt (always last, index 6)
+        // Total: 7 positions. No expandable bolt.
         private LevelDataSO BuildLevel5()
         {
             var data = MakeLevelData(5);
             data.activeColors = new[] { NutColor.Red, NutColor.Green, NutColor.Blue, NutColor.Yellow };
 
+            // Index 0–3: filled mixed bolts (4 colours × 4 nuts each = 16 nuts)
             data.bolts.Add(MakeBolt(NutColor.Red,    NutColor.Green,  NutColor.Blue,   NutColor.Yellow));
             data.bolts.Add(MakeBolt(NutColor.Green,  NutColor.Blue,   NutColor.Yellow, NutColor.Red));
             data.bolts.Add(MakeBolt(NutColor.Blue,   NutColor.Yellow, NutColor.Red,    NutColor.Green));
             data.bolts.Add(MakeBolt(NutColor.Yellow, NutColor.Red,    NutColor.Green,  NutColor.Blue));
+
+            // Index 4–5: normal empty bolts (immediately usable)
+            data.bolts.Add(MakeBolt()); // normal empty
+            data.bolts.Add(MakeBolt()); // normal empty
+
+            // Index 6: expandable bolt — MUST be the final logical entry
             data.bolts.Add(MakeExpandableBolt(0));
-            data.bolts.Add(MakeBolt()); // normal empty
-            data.bolts.Add(MakeBolt()); // normal empty
-            data.bolts.Add(MakeLockedBolt()); // locked is always the final logical/grid item
-            return ValidateLevel5(data);
+
+            return ValidateOrFallback(data, 5);
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -173,15 +182,14 @@ namespace NutBoltSort
                 return null;
             }
 
-            // The existing generator uses a 0-based index internally; pass 0-based.
-            LevelDataSO data = generator.GetOrGenerateCurrentLevel(levelNumber - 1, BoltView.Capacity);
+            // This is the only generator boundary: the displayed one-based number is passed unchanged.
+            LevelDataSO data = generator.GetOrGenerateLevelByNumber(levelNumber, BoltView.Capacity);
             if (data == null)
             {
                 Debug.LogError($"[StructuredLevelProvider] ProceduralLevelGenerator returned null for level {levelNumber}.");
             }
             else
             {
-                ApplyProceduralSpecialBoltSchedule(data, levelNumber);
                 int empty = 0;
                 foreach (var bolt in data.bolts) if (bolt.nutColors == null || bolt.nutColors.Length == 0) empty++;
                 Debug.Log($"[StructuredLevelProvider] Level {levelNumber}: tier={data.difficultyTier}, seed={data.seed}, bolts={data.bolts.Count}, colors={data.activeColors.Length}, empty={empty}, validation=ready");
@@ -189,16 +197,6 @@ namespace NutBoltSort
             return data;
         }
 
-        private void ApplyProceduralSpecialBoltSchedule(LevelDataSO data, int levelNumber)
-        {
-            if (config == null || !config.addOptionalLockedBoltToProceduralLevels || data == null || data.bolts == null) return;
-            bool scheduled = levelNumber >= config.firstOptionalLockedBoltLevel &&
-                             (levelNumber - config.firstOptionalLockedBoltLevel) % config.optionalLockedBoltInterval == 0;
-            if (!scheduled || data.bolts.Count >= config.maximumBoardPositions) return;
-            // Appending makes the locked bolt the final logical item, hence final grid position.
-            // It is optional: the verified normal-board solution remains valid without unlocking it.
-            data.bolts.Add(MakeLockedBolt());
-        }
 
         // ─────────────────────────────────────────────────────────────────────
         // Validation
@@ -227,26 +225,69 @@ namespace NutBoltSort
 
         private LevelDataSO ValidateLevel5(LevelDataSO data)
         {
-            if (data == null || data.bolts == null || data.bolts.Count != 8)
+            // ── Structural check ──────────────────────────────────────────────
+            if (data == null || data.bolts == null || data.bolts.Count != 7)
             {
-                Debug.LogError("[StructuredLevelProvider] Level 5 must contain exactly eight board positions.");
+                Debug.LogError($"[StructuredLevelProvider] Level 5 VALIDATION FAILED: expected 7 board positions, got {(data?.bolts?.Count.ToString() ?? "null")}.");
                 return BuildLevel1();
             }
-            int normalFilled = 0, normalEmpty = 0, expandable = 0, locked = 0;
+
+            int normalFilled = 0, normalEmpty = 0, expandable = 0, locked = 0, totalNuts = 0;
             for (int i = 0; i < data.bolts.Count; i++)
             {
                 BoltNutStackData bolt = data.bolts[i];
-                if (bolt.boltType == BoltType.Expandable) expandable++;
-                else if (bolt.boltType == BoltType.Locked) locked++;
+                if (bolt == null) { Debug.LogError($"[StructuredLevelProvider] Level 5 VALIDATION FAILED: bolt at index {i} is null."); return BuildLevel1(); }
+                if      (bolt.boltType == BoltType.Expandable) expandable++;
+                else if (bolt.boltType == BoltType.Locked)     locked++;
                 else if (bolt.nutColors == null || bolt.nutColors.Length == 0) normalEmpty++;
-                else normalFilled++;
+                else    normalFilled++;
+                if (bolt.nutColors != null) totalNuts += bolt.nutColors.Length;
             }
-            bool valid = normalFilled == 4 && expandable == 1 && normalEmpty == 2 && locked == 1 && data.bolts[7].boltType == BoltType.Locked;
-            if (!valid)
+
+            bool lockedIsLast   = data.bolts[6].boltType == BoltType.Locked;
+            bool structureValid = normalFilled == 4 && expandable == 0 && normalEmpty == 2 && locked == 1 && lockedIsLast && totalNuts == 16;
+
+            if (!structureValid)
             {
-                Debug.LogError($"[StructuredLevelProvider] Invalid Level 5: filled={normalFilled}, expandable={expandable}, empty={normalEmpty}, locked={locked}, lockedLast={data.bolts[7].boltType == BoltType.Locked}.");
+                Debug.LogError(
+                    $"[StructuredLevelProvider] Level 5 VALIDATION FAILED: " +
+                    $"filled={normalFilled} (expected 4), " +
+                    $"empty={normalEmpty} (expected 2), " +
+                    $"locked={locked} (expected 1), " +
+                    $"expandable={expandable} (expected 0), " +
+                    $"lockedIsLast={lockedIsLast} (expected True), " +
+                    $"totalNuts={totalNuts} (expected 16).");
                 return BuildLevel1();
             }
+
+            // ── Per-index prefab log ──────────────────────────────────────────
+            bool logEnabled = config == null || config.enableLevel5DetailedLog;
+            if (logEnabled)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("[StructuredLevelProvider] LEVEL 5 VALIDATION");
+                sb.AppendLine($"  Total positions : {data.bolts.Count}");
+                sb.AppendLine($"  Filled          : {normalFilled}");
+                sb.AppendLine($"  Normal empty    : {normalEmpty}");
+                sb.AppendLine($"  Locked          : {locked}");
+                sb.AppendLine($"  Expandable      : {expandable}");
+                sb.AppendLine($"  Locked index    : 6");
+                sb.AppendLine($"  Locked is last  : True");
+                sb.AppendLine($"  Total nuts      : {totalNuts}");
+                sb.AppendLine($"  Validation      : Passed");
+                sb.AppendLine("  --- Per-index prefab assignment ---");
+                string[] typeNames = { "NormalBoltPrefab", "NormalBoltPrefab", "NormalBoltPrefab", "NormalBoltPrefab", "NormalBoltPrefab (empty)", "NormalBoltPrefab (empty)", "LockedBoltPrefab" };
+                for (int i = 0; i < data.bolts.Count; i++)
+                {
+                    var b = data.bolts[i];
+                    string label = b.boltType == BoltType.Locked ? "LockedBoltPrefab" :
+                                   b.boltType == BoltType.Expandable ? "ExpandableBoltPrefab [ERROR]" :
+                                   (b.nutColors == null || b.nutColors.Length == 0) ? "NormalBoltPrefab (empty)" : "NormalBoltPrefab";
+                    sb.AppendLine($"  Index {i} → {label}");
+                }
+                Debug.Log(sb.ToString());
+            }
+
             return ValidateOrFallback(data, 5);
         }
 

@@ -146,11 +146,11 @@ namespace NutBoltSort
             Application.targetFrameRate = 60;
             Screen.orientation = ScreenOrientation.Portrait;
 
-            if (levelManager       == null) levelManager       = GetComponent<LevelManager>()            ?? FindObjectOfType<LevelManager>()            ?? gameObject.AddComponent<LevelManager>();
-            if (uiManager          == null) uiManager          = GetComponent<UIManager>()               ?? FindObjectOfType<UIManager>()               ?? gameObject.AddComponent<UIManager>();
-            if (levelProvider      == null) levelProvider      = GetComponent<StructuredLevelProvider>() ?? FindObjectOfType<StructuredLevelProvider>()  ?? gameObject.AddComponent<StructuredLevelProvider>();
-            if (undoManager        == null) undoManager        = GetComponent<UndoManager>()             ?? FindObjectOfType<UndoManager>()             ?? gameObject.AddComponent<UndoManager>();
-            if (tutorialController == null) tutorialController = GetComponent<TutorialController>()      ?? FindObjectOfType<TutorialController>()      ?? gameObject.AddComponent<TutorialController>();
+            if (levelManager       == null) levelManager       = GetComponent<LevelManager>()            ?? FindAnyObjectByType<LevelManager>()            ?? gameObject.AddComponent<LevelManager>();
+            if (uiManager          == null) uiManager          = GetComponent<UIManager>()               ?? FindAnyObjectByType<UIManager>()               ?? gameObject.AddComponent<UIManager>();
+            if (levelProvider      == null) levelProvider      = GetComponent<StructuredLevelProvider>() ?? FindAnyObjectByType<StructuredLevelProvider>()  ?? gameObject.AddComponent<StructuredLevelProvider>();
+            if (undoManager        == null) undoManager        = GetComponent<UndoManager>()             ?? FindAnyObjectByType<UndoManager>()             ?? gameObject.AddComponent<UndoManager>();
+            if (tutorialController == null) tutorialController = GetComponent<TutorialController>()      ?? FindAnyObjectByType<TutorialController>()      ?? gameObject.AddComponent<TutorialController>();
 
             // Restore persisted level number.
             currentLevelNumber = PlayerPrefs.GetInt(PREFS_LEVEL, 1);
@@ -286,6 +286,7 @@ namespace NutBoltSort
                     if (increased)
                     {
                         tutorialController?.OnExpandableBoltUsed();
+                        uiManager?.RefreshActionButtonStates();
                         return;
                     }
                 }

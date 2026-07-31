@@ -54,8 +54,8 @@ namespace NutBoltSort
 
         private void FindManagers()
         {
-            if (gameManager == null) gameManager = FindObjectOfType<GameManager>();
-            if (levelManager == null) levelManager = FindObjectOfType<LevelManager>();
+            if (gameManager == null) gameManager = FindAnyObjectByType<GameManager>();
+            if (levelManager == null) levelManager = FindAnyObjectByType<LevelManager>();
         }
 
         public void UpdateLevelDisplay()
@@ -98,6 +98,21 @@ namespace NutBoltSort
         {
             if (undoButton != null)
                 undoButton.interactable = gameManager != null && gameManager.CanUndo;
+            if (expandBoltButton != null)
+            {
+                bool available = gameManager != null && gameManager.CurrentLevelNumber >= 3 && levelManager != null;
+                if (available)
+                {
+                    available = false;
+                    foreach (var bolt in levelManager.ActiveBolts)
+                    {
+                        var expandable = bolt != null ? bolt.GetComponent<ExpandableBoltController>() : null;
+                        if (expandable != null && !expandable.IsAtMax) { available = true; break; }
+                    }
+                }
+                expandBoltButton.gameObject.SetActive(available);
+            }
+            if (unlockBoltButton != null) unlockBoltButton.gameObject.SetActive(false);
         }
 
         public void ShowWinPopup()
@@ -166,16 +181,12 @@ namespace NutBoltSort
                 expandBoltButton.onClick.RemoveAllListeners();
                 expandBoltButton.onClick.AddListener(OnExpandBoltButtonPressed);
             }
-            if (unlockBoltButton != null)
-            {
-                unlockBoltButton.onClick.RemoveAllListeners();
-                unlockBoltButton.onClick.AddListener(OnUnlockBoltButtonPressed);
-            }
+            if (unlockBoltButton != null) unlockBoltButton.gameObject.SetActive(false);
         }
 
         private void EnsureUIHierarchy()
         {
-            if (FindObjectOfType<EventSystem>() == null)
+            if (FindAnyObjectByType<EventSystem>() == null)
             {
                 var eventSystem = new GameObject("EventSystem");
                 eventSystem.AddComponent<EventSystem>();
@@ -250,8 +261,7 @@ namespace NutBoltSort
             expandBoltButton = CreateSimpleButton(bottomBar.transform, "ExpandBoltButton", "▲ EXPAND", new Vector2(55, 55), new Vector2(240, 90), new Color(0.15f, 0.55f, 0.80f));
             expandBoltButton.onClick.AddListener(OnExpandBoltButtonPressed);
 
-            unlockBoltButton = CreateSimpleButton(bottomBar.transform, "UnlockBoltButton", "🔓 UNLOCK", new Vector2(320, 55), new Vector2(240, 90), new Color(0.70f, 0.50f, 0.10f));
-            unlockBoltButton.onClick.AddListener(OnUnlockBoltButtonPressed);
+            // Locked bolts were removed; no unlock control is created.
 
             // Level Display
             var displayGO = new GameObject("LevelDisplay", typeof(RectTransform));

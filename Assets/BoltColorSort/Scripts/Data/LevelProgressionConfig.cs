@@ -44,10 +44,20 @@ namespace NutBoltSort
         [Min(1)] public int maxGenerationAttempts = 8;
 
         [Header("Procedural Special-Bolt Schedule")]
-        [Tooltip("Adds one optional locked bolt after the generated normal board. It is always the final grid item.")]
+        [Tooltip("Adds one optional locked bolt after the generated normal board. It is always the final grid item. Ignored when ProceduralLevelGenerator.useTemplateSystem is true.")]
         public bool addOptionalLockedBoltToProceduralLevels = true;
 
         [Min(6)] public int firstOptionalLockedBoltLevel = 6;
         [Min(1)] public int optionalLockedBoltInterval = 4;
+
+        // ── Endless Tier ──────────────────────────────────────────────────────
+        [Header("Endless Tier")]
+        [Tooltip("The 1-based level number at which the final endless difficulty tier begins. Levels at or above this number use capped expert templates indefinitely.")]
+        [Min(51)] public int finalEndlessTierStartLevel = 101;
+
+        // ── Debug ─────────────────────────────────────────────────────────────
+        [Header("Debug")]
+        [Tooltip("When enabled, Level 5 emits a detailed validation log to the Console at load time.")]
+        public bool enableLevel5DetailedLog = true;
     }
 }

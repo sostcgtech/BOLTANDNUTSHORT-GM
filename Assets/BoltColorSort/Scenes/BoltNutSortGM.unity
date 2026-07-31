@@ -9018,9 +9018,195 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae9019366b97db78814b7e44a264ccd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.ProceduralLevelGenerator
-  generatorVersion: 1
-  startingLevelIndex: 1
-  supportedColors: 00000000010000000200000003000000
+  useTemplateSystem: 1
+  maximumBoardPositions: 8
+  difficultyWavePattern: 00000000010000000100000002000000000000000100000002000000010000000300000000000000
+  levelTemplates:
+  - templateId: level_6_safe_standard
+    description: 'Level 6: fixed 4-color procedural introduction'
+    minimumLevel: 6
+    maximumLevel: 6
+    difficulty: 0
+    activeColorCount: 4
+    filledBoltCount: 4
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 16
+    minimumAcceptedSteps: 8
+    minimumMixedBolts: 2
+    minimumColorTransitions: 3
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 0
+    minimumGuaranteedSolutionLength: 8
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 1
+  - templateId: recovery_standard
+    description: 4 colors, lower complexity recovery puzzle
+    minimumLevel: 7
+    maximumLevel: 2147483647
+    difficulty: 0
+    activeColorCount: 4
+    filledBoltCount: 4
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 18
+    minimumAcceptedSteps: 8
+    minimumMixedBolts: 2
+    minimumColorTransitions: 3
+    minimumStartingLegalMoves: 2
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 1
+    minimumGuaranteedSolutionLength: 8
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 3
+  - templateId: standard_4_medium
+    description: 4 colors, standard medium puzzle
+    minimumLevel: 7
+    maximumLevel: 2147483647
+    difficulty: 2
+    activeColorCount: 4
+    filledBoltCount: 4
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 28
+    minimumAcceptedSteps: 14
+    minimumMixedBolts: 3
+    minimumColorTransitions: 5
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 0
+    minimumGuaranteedSolutionLength: 12
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 5
+  - templateId: standard_4_hard
+    description: 4 colors, strongly mixed hard puzzle
+    minimumLevel: 10
+    maximumLevel: 2147483647
+    difficulty: 3
+    activeColorCount: 4
+    filledBoltCount: 4
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 38
+    minimumAcceptedSteps: 18
+    minimumMixedBolts: 3
+    minimumColorTransitions: 6
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 0
+    minimumGuaranteedSolutionLength: 15
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 4
+  - templateId: standard_5_medium
+    description: 5 colors, 5 filled and 2 empty
+    minimumLevel: 21
+    maximumLevel: 2147483647
+    difficulty: 2
+    activeColorCount: 5
+    filledBoltCount: 5
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 38
+    minimumAcceptedSteps: 18
+    minimumMixedBolts: 4
+    minimumColorTransitions: 7
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 0
+    minimumGuaranteedSolutionLength: 15
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 4
+  - templateId: standard_5_hard
+    description: 5 colors, strongly mixed hard puzzle
+    minimumLevel: 31
+    maximumLevel: 2147483647
+    difficulty: 3
+    activeColorCount: 5
+    filledBoltCount: 5
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 48
+    minimumAcceptedSteps: 22
+    minimumMixedBolts: 4
+    minimumColorTransitions: 8
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 0
+    minimumGuaranteedSolutionLength: 18
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 4
+  - templateId: standard_5_challenge
+    description: 5 colors, high-mixing challenge
+    minimumLevel: 41
+    maximumLevel: 2147483647
+    difficulty: 4
+    activeColorCount: 5
+    filledBoltCount: 5
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 56
+    minimumAcceptedSteps: 25
+    minimumMixedBolts: 4
+    minimumColorTransitions: 9
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 0
+    minimumGuaranteedSolutionLength: 20
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 2
+  - templateId: safe_standard_fallback
+    description: Guaranteed safe fallback
+    minimumLevel: 6
+    maximumLevel: 2147483647
+    difficulty: 0
+    activeColorCount: 4
+    filledBoltCount: 4
+    normalEmptyBoltCount: 2
+    lockedBoltCount: 0
+    expandableBoltCount: 0
+    expandableStartingCapacity: 0
+    lockedBoltOptional: 1
+    targetInverseSteps: 14
+    minimumAcceptedSteps: 6
+    minimumMixedBolts: 1
+    minimumColorTransitions: 2
+    minimumStartingLegalMoves: 1
+    maximumStartingLegalMoves: 0
+    maximumCompletedBoltsAtStart: 1
+    minimumGuaranteedSolutionLength: 6
+    minimumDifficultyScore: 0
+    maximumDifficultyScore: 0
+    selectionWeight: 1
+  recentTemplateHistorySize: 5
   difficultyTiers:
   - name: Levels 1-5
     minLevel: 1
@@ -9050,13 +9236,19 @@ MonoBehaviour:
     minimumStartingLegalMoves: 1
     maximumStartingLegalMoves: 0
     maxGenerationAttempts: 24
+  generatorVersion: 1
+  startingLevelIndex: 1
+  supportedColors: 00000000010000000200000003000000
   maximumGenerationAttempts: 32
   maximumInverseMoveAttemptsPerStep: 24
+  maximumSolverNodes: 50000
+  maximumSolverDepth: 96
+  maximumSolverMilliseconds: 150
   recentSignatureHistorySize: 20
   enableDebugLogging: 1
-  storeGuaranteedSolutionPath: 1
   useDeterministicTestSeed: 0
   testSeed: 12345
+  serializedTemplateSchemaVersion: 3
 --- !u!1 &1217525702
 GameObject:
   m_ObjectHideFlags: 0

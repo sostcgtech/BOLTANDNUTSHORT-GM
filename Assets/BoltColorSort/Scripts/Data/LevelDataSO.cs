@@ -33,6 +33,11 @@ namespace NutBoltSort
         public bool isProcedural;
         public int seed;
         public int generatorVersion;
+        public string proceduralTemplateId;
+        public DifficultyRating difficultyBand;
+        public int validatedSolutionLength;
+        public int validatedSolverNodes;
+        public long validatedSolverMilliseconds;
         public string difficultyTier;
         public NutColor[] activeColors;
         [TextArea] public string puzzleSignature;
@@ -46,6 +51,11 @@ namespace NutBoltSort
             copy.isProcedural = isProcedural;
             copy.seed = seed;
             copy.generatorVersion = generatorVersion;
+            copy.proceduralTemplateId = proceduralTemplateId;
+            copy.difficultyBand = difficultyBand;
+            copy.validatedSolutionLength = validatedSolutionLength;
+            copy.validatedSolverNodes = validatedSolverNodes;
+            copy.validatedSolverMilliseconds = validatedSolverMilliseconds;
             copy.difficultyTier = difficultyTier;
             copy.puzzleSignature = puzzleSignature;
             copy.activeColors = activeColors != null ? (NutColor[])activeColors.Clone() : Array.Empty<NutColor>();
