@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 namespace NutBoltSort
 {
     /// <summary>
-    /// Owns the single DOTween animation flow for nut selection, sequential follower transfer,
+    /// Owns DOTween animation flows for nut selection, sequential follower transfers,
     /// random entry animation, and per-bolt completion cap.
     ///
     /// New in this version:
@@ -116,6 +116,13 @@ namespace NutBoltSort
         private Coroutine        selectionRoutine;
         private Coroutine        moveRoutine;
         private Sequence         gameplaySequence;
+        // Transfers own their sequences so unrelated transfers never cancel one another.
+        private readonly HashSet<Sequence> activeMoveSequences = new HashSet<Sequence>();
+        // A transfer commits its stack state when it starts. Its two bolts remain reserved until
+        // the visual path and any completion cap have finished, preventing transform races.
+        private readonly HashSet<BoltView> busyBolts = new HashSet<BoltView>();
+        private readonly List<MoveRecord> pendingMoveRecords = new List<MoveRecord>();
+        private int activeTransferCount;
         private readonly List<Sequence>              hoverSequences = new List<Sequence>();
         private readonly Dictionary<BoltView, Sequence> capSequences  = new Dictionary<BoltView, Sequence>();
 
@@ -135,7 +142,8 @@ namespace NutBoltSort
         /// <summary>0-based index — kept for backward-compatible UIManager calls.</summary>
         public int  CurrentLevelIndex  => currentLevelNumber - 1;
         /// <summary>True when at least one move can be undone.</summary>
-        public bool CanUndo => undoManager != null && undoManager.CanUndo && !inputLocked && !won;
+        public bool CanUndo => undoManager != null && undoManager.CanUndo &&
+                               !inputLocked && activeTransferCount == 0 && !won;
 
         // ─────────────────────────────────────────────────────────────────────
         // Unity Lifecycle
@@ -190,6 +198,9 @@ namespace NutBoltSort
             liftedNut        = null;
             selectionRoutine = null;
             moveRoutine      = null;
+            activeTransferCount = 0;
+            busyBolts.Clear();
+            pendingMoveRecords.Clear();
             won              = false;
 
             bool built;
@@ -239,6 +250,9 @@ namespace NutBoltSort
                 liftedNut        = null;
                 selectionRoutine = null;
                 moveRoutine      = null;
+                activeTransferCount = 0;
+                busyBolts.Clear();
+                pendingMoveRecords.Clear();
                 won              = false;
 
                 levelManager?.BuildLevel(levelProvider.CurrentSnapshot, out _);
@@ -275,7 +289,7 @@ namespace NutBoltSort
         /// </summary>
         public void ExpandFirstAvailableBolt()
         {
-            if (inputLocked || won || levelManager == null) return;
+            if (inputLocked || activeTransferCount > 0 || won || levelManager == null) return;
             foreach (BoltView bolt in levelManager.ActiveBolts)
             {
                 if (bolt == null) continue;
@@ -299,7 +313,7 @@ namespace NutBoltSort
         /// </summary>
         public void UnlockFirstLockedBolt()
         {
-            if (inputLocked || won || levelManager == null) return;
+            if (inputLocked || activeTransferCount > 0 || won || levelManager == null) return;
             foreach (BoltView bolt in levelManager.ActiveBolts)
             {
                 if (bolt == null) continue;
@@ -456,7 +470,7 @@ namespace NutBoltSort
 
         public void TapBolt(BoltView tapped)
         {
-            if (won || inputLocked || tapped == null) return;
+            if (won || inputLocked || tapped == null || IsBoltBusy(tapped)) return;
 
             // Tutorial filter: only the expected bolt accepts a tap during tutorial.
             if (tutorialController != null && !tutorialController.AllowTap(tapped)) return;
@@ -525,10 +539,46 @@ namespace NutBoltSort
         {
             if (selectionRoutine != null) StopCoroutine(selectionRoutine);
             StopHover();
-            inputLocked = true;
+
+            BoltView source = selectedBolt;
+            int moveCount = GetMoveCount(destination, selectedNuts);
+            if (source == null || moveCount <= 0) return;
+
+            List<NutView> moving = selectedNuts.Skip(selectedNuts.Count - moveCount).ToList();
+            int destStartIdx = destination.Nuts.Count;
+
+            // Commit the board state before the animation begins. This makes a later move use
+            // the same rules and capacity that will exist once this transfer lands.
+            source.Nuts.RemoveRange(source.Nuts.Count - moving.Count, moving.Count);
+            for (int q = 0; q < moving.Count; q++)
+                destination.Nuts.Add(moving[moving.Count - 1 - q]);
+
+            // Undo is unavailable until all active transfers settle. Queue the record now so
+            // the completed history still follows the player's move order, even if a shorter
+            // overlapping path finishes first.
+            if (undoManager != null)
+            {
+                int srcBoltIdx = levelManager != null ? levelManager.IndexOfBolt(source) : -1;
+                int dstBoltIdx = levelManager != null ? levelManager.IndexOfBolt(destination) : -1;
+                pendingMoveRecords.Add(new MoveRecord
+                {
+                    sourceBoltIndex              = srcBoltIdx,
+                    destinationBoltIndex         = dstBoltIdx,
+                    movedColor                   = moving[0].Color,
+                    movedNutCount                = moving.Count,
+                    sourceWasCompletedAfter      = source.IsComplete(),
+                    destinationWasCompletedAfter = destination.IsComplete()
+                });
+            }
+
+            busyBolts.Add(source);
+            busyBolts.Add(destination);
+            activeTransferCount++;
+            ClearSelection();
+
             // Tutorial observes the transfer; it never starts or owns movement.
             tutorialController?.OnTransferStarted();
-            moveRoutine = StartCoroutine(MoveSelectedNuts(destination));
+            StartCoroutine(MoveSelectedNuts(source, destination, moving, destStartIdx));
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -623,16 +673,11 @@ namespace NutBoltSort
         //         Uses Lift → Horizontal → Drop path
         // ─────────────────────────────────────────────────────────────────────
 
-        private IEnumerator MoveSelectedNuts(BoltView destination)
+        private IEnumerator MoveSelectedNuts(BoltView source, BoltView destination,
+                                             List<NutView> moving, int destStartIdx)
         {
-            KillGameplayTweens();
-            BoltView      source       = selectedBolt;
-            int           moveCount    = GetMoveCount(destination, selectedNuts);
-            List<NutView> moving       = selectedNuts.Skip(selectedNuts.Count - moveCount).ToList();
-            int           destStartIdx = destination.Nuts.Count;
-            source.SetSelectionEffect(false);
-
-            gameplaySequence = DOTween.Sequence().SetTarget(this);
+            Sequence moveSequence = DOTween.Sequence().SetTarget(this);
+            activeMoveSequences.Add(moveSequence);
             float followerClearanceDelay = Mathf.Max(followerDelay, selectionLiftDuration * .65f);
 
             for (int q = 0; q < moving.Count; q++)
@@ -706,37 +751,17 @@ namespace NutBoltSort
                 nutSeq.Append(tr.DOScale(nut.RestingLocalScale * landingBounceScale, .055f).SetEase(Ease.OutQuad));
                 nutSeq.Append(tr.DOScale(nut.RestingLocalScale, .085f).SetEase(Ease.InOutSine));
 
-                gameplaySequence.Insert(seqStart, nutSeq);
+                moveSequence.Insert(seqStart, nutSeq);
             }
 
-            yield return gameplaySequence.WaitForCompletion();
-
-            // ── Update logical state ─────────────────────────────────────────
-            source.Nuts.RemoveRange(source.Nuts.Count - moving.Count, moving.Count);
-            for (int q = 0; q < moving.Count; q++)
-                destination.Nuts.Add(moving[moving.Count - 1 - q]);
+            yield return moveSequence.WaitForCompletion();
+            activeMoveSequences.Remove(moveSequence);
 
             for (int q = 0; q < moving.Count; q++)
                 RestoreNutToStack(destination, moving[moving.Count - 1 - q], destStartIdx + q);
 
-            // ── Record move for Undo ─────────────────────────────────────────
             bool srcCompleted  = TryLockCompleted(source);
             bool destCompleted = TryLockCompleted(destination);
-
-            if (undoManager != null && moving.Count > 0)
-            {
-                int srcBoltIdx  = levelManager != null ? levelManager.IndexOfBolt(source)      : -1;
-                int dstBoltIdx  = levelManager != null ? levelManager.IndexOfBolt(destination) : -1;
-                undoManager.RecordMove(new MoveRecord
-                {
-                    sourceBoltIndex          = srcBoltIdx,
-                    destinationBoltIndex     = dstBoltIdx,
-                    movedColor               = moving[0].Color,
-                    movedNutCount            = moving.Count,
-                    sourceWasCompletedAfter  = srcCompleted,
-                    destinationWasCompletedAfter = destCompleted
-                });
-            }
 
             // Notify tutorial.
             int srcIdx2 = levelManager != null ? levelManager.IndexOfBolt(source)      : -1;
@@ -751,15 +776,22 @@ namespace NutBoltSort
             if (srcCapRoutine  != null) yield return srcCapRoutine;
             if (destCapRoutine != null) yield return destCapRoutine;
 
-            ClearSelection();
-            gameplaySequence = null;
-            moveRoutine      = null;
+            busyBolts.Remove(source);
+            busyBolts.Remove(destination);
+            activeTransferCount = Mathf.Max(0, activeTransferCount - 1);
 
             // Refresh Undo button.
             uiManager?.RefreshActionButtonStates();
 
-            if (won) uiManager?.ShowWinPopup();
-            else     inputLocked = false;
+            // A win can only be presented after every committed transfer has landed.
+            if (activeTransferCount == 0)
+            {
+                if (undoManager != null)
+                    foreach (MoveRecord record in pendingMoveRecords) undoManager.RecordMove(record);
+                pendingMoveRecords.Clear();
+                CheckWin();
+                if (won) uiManager?.ShowWinPopup();
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -949,8 +981,8 @@ namespace NutBoltSort
             return group;
         }
 
-        private static bool CanSelect(BoltView bolt) =>
-            bolt != null && !bolt.IsLocked && bolt.Nuts.Count > 0;
+        private bool CanSelect(BoltView bolt) =>
+            bolt != null && !IsBoltBusy(bolt) && !bolt.IsLocked && bolt.Nuts.Count > 0;
 
         private int GetMoveCount(BoltView destination, List<NutView> matchingGroup)
         {
@@ -978,11 +1010,13 @@ namespace NutBoltSort
         }
 
         private bool CanMove(BoltView from, BoltView to, List<NutView> moving) =>
-            from != null && GetMoveCount(to, moving) > 0;
+            from != null && !IsBoltBusy(from) && !IsBoltBusy(to) && GetMoveCount(to, moving) > 0;
+
+        private bool IsBoltBusy(BoltView bolt) => bolt != null && busyBolts.Contains(bolt);
 
         private void CheckWin()
         {
-            if (won || levelManager == null) return;
+            if (won || activeTransferCount > 0 || levelManager == null) return;
             won = levelManager.ActiveBolts.All(b =>
                 b.Nuts.Count == 0 || (b.Nuts.Count == BoltView.Capacity && b.IsComplete()));
         }
@@ -1001,6 +1035,10 @@ namespace NutBoltSort
         private void KillAllTweens()
         {
             KillGameplayTweens();
+            foreach (Sequence moveSequence in activeMoveSequences)
+                if (moveSequence != null && moveSequence.IsActive()) moveSequence.Kill(false);
+            activeMoveSequences.Clear();
+            pendingMoveRecords.Clear();
             foreach (var kv in capSequences)
                 if (kv.Value != null && kv.Value.IsActive()) kv.Value.Kill(false);
             capSequences.Clear();
@@ -1052,8 +1090,8 @@ namespace NutBoltSort
             float     scale = Screen.width / 1080f;
             GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1));
             var style = new GUIStyle(GUI.skin.button) { fontSize = 32, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
-            if (GUI.Button(new Rect(50,  50, 190, 68), "↻  RESTART",              style) && !inputLocked) RestartLevel();
-            if (GUI.Button(new Rect(840, 50, 190, 68), "LEVEL " + currentLevelNumber, style) && !inputLocked) LoadNextLevel();
+            if (GUI.Button(new Rect(50,  50, 190, 68), "↻  RESTART",              style) && !inputLocked && activeTransferCount == 0) RestartLevel();
+            if (GUI.Button(new Rect(840, 50, 190, 68), "LEVEL " + currentLevelNumber, style) && !inputLocked && activeTransferCount == 0) LoadNextLevel();
             if (GUI.Button(new Rect(260, 50, 160, 68), "↩ UNDO",                  style) && CanUndo)        UndoLastMove();
             if (won)
             {
