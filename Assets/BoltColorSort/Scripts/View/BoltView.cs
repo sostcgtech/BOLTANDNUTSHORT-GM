@@ -332,14 +332,19 @@ namespace NutBoltSort
             DeactivateCap();
         }
 
-        /// <summary>Checks if bolt contains Capacity nuts of identical color.</summary>
+        /// <summary>Checks if bolt is full of one revealed color. Hidden nuts are unresolved blockers.</summary>
         public bool IsComplete()
         {
             if (Nuts.Count != Capacity) return false;
-            NutColor firstColor = Nuts[0].Color;
+
+            NutView firstNut = Nuts[0];
+            if (firstNut == null || firstNut.IsHidden) return false;
+
+            NutColor firstColor = firstNut.Color;
             for (int i = 1; i < Nuts.Count; i++)
             {
-                if (Nuts[i].Color != firstColor) return false;
+                NutView nut = Nuts[i];
+                if (nut == null || nut.IsHidden || nut.Color != firstColor) return false;
             }
             return true;
         }

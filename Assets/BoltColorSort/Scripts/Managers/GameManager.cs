@@ -980,9 +980,18 @@ namespace NutBoltSort
         {
             var group = new List<NutView>();
             if (bolt == null || bolt.Nuts.Count == 0) return group;
-            NutColor color = bolt.Nuts[bolt.Nuts.Count - 1].Color;
-            for (int i = bolt.Nuts.Count - 1; i >= 0 && bolt.Nuts[i].Color == color && !bolt.Nuts[i].IsHidden; i--)
-                group.Insert(0, bolt.Nuts[i]);
+
+            NutView top = bolt.Nuts[bolt.Nuts.Count - 1];
+            if (top == null || top.IsHidden) return group;
+
+            NutColor color = top.Color;
+            for (int i = bolt.Nuts.Count - 1; i >= 0; i--)
+            {
+                NutView nut = bolt.Nuts[i];
+                // An unrevealed nut is an unknown state, not a color match.
+                if (nut == null || nut.IsHidden || nut.Color != color) break;
+                group.Insert(0, nut);
+            }
             return group;
         }
 
@@ -1000,8 +1009,13 @@ namespace NutBoltSort
             if (availableSpaces <= 0) return 0;
 
             NutColor movingColor = matchingGroup[matchingGroup.Count - 1].Color;
-            if (destination.Nuts.Count > 0 && destination.Nuts[destination.Nuts.Count - 1].Color != movingColor)
-                return 0;
+            if (destination.Nuts.Count > 0)
+            {
+                NutView destinationTop = destination.Nuts[destination.Nuts.Count - 1];
+                // A hidden top nut must reveal before the destination can match a color.
+                if (destinationTop == null || destinationTop.IsHidden || destinationTop.Color != movingColor)
+                    return 0;
+            }
 
             return Mathf.Min(matchingGroup.Count, availableSpaces);
         }
