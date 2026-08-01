@@ -32,6 +32,8 @@ namespace NutBoltSort
         public int CurrentCapacity => _currentCapacity;
         public int MaxCapacity     => _maxCapacity;
         public bool IsAtMax        => _currentCapacity >= _maxCapacity;
+        /// <summary>True only while this bolt's existing expansion animation is running.</summary>
+        public bool IsExpanding    => _coverSeq != null && _coverSeq.IsActive() && _coverSeq.IsPlaying();
 
         /// <summary>Fired when the capacity changes. Argument is the new capacity.</summary>
         public event System.Action<int> OnCapacityChanged;

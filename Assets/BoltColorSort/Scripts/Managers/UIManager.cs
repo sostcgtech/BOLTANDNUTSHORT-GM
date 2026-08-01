@@ -35,6 +35,13 @@ namespace NutBoltSort
         [SerializeField] private Button expandBoltButton;
         [SerializeField] private Button unlockBoltButton;
 
+        [Header("Action Button Counters")]
+        [SerializeField] private TMP_Text undoCounterText;
+        [SerializeField] private TMP_Text expandCounterText;
+        [SerializeField] private CanvasGroup undoButtonCanvasGroup;
+        [SerializeField] private CanvasGroup expandButtonCanvasGroup;
+        [SerializeField, Range(.55f, .7f)] private float disabledActionAlpha = .62f;
+
         public bool IsUIOpen => (winPopup != null && winPopup.IsOpen) ||
                                 (uiBlocker != null && uiBlocker.blocksRaycasts && uiBlocker.alpha > 0f);
 
@@ -42,6 +49,7 @@ namespace NutBoltSort
         {
             FindManagers();
             EnsureUIHierarchy();
+            EnsureActionButtonPresentation();
             BindButtonEvents();
         }
 
@@ -50,6 +58,7 @@ namespace NutBoltSort
             if (winPopup != null && winPopup.gameObject.activeSelf) winPopup.gameObject.SetActive(false);
             SetUIBlockerActive(false);
             UpdateLevelDisplay();
+            RefreshActionButtonStates();
         }
 
         private void FindManagers()
@@ -93,25 +102,22 @@ namespace NutBoltSort
             gameManager.UnlockFirstLockedBolt();
         }
 
-        /// <summary>Updates Undo button interactability. Call after each move or state change.</summary>
+        /// <summary>Keeps both gameplay action buttons visible while synchronising their counters and availability.</summary>
         public void RefreshActionButtonStates()
         {
-            if (undoButton != null)
-                undoButton.interactable = gameManager != null && gameManager.CanUndo;
-            if (expandBoltButton != null)
-            {
-                bool available = gameManager != null && gameManager.CurrentLevelNumber >= 3 && levelManager != null;
-                if (available)
-                {
-                    available = false;
-                    foreach (var bolt in levelManager.ActiveBolts)
-                    {
-                        var expandable = bolt != null ? bolt.GetComponent<ExpandableBoltController>() : null;
-                        if (expandable != null && !expandable.IsAtMax) { available = true; break; }
-                    }
-                }
-                expandBoltButton.gameObject.SetActive(available);
-            }
+            EnsureActionButtonPresentation();
+
+            int undoUses = Mathf.Max(0, gameManager != null ? gameManager.RemainingUndoUses : 0);
+            int expandUses = Mathf.Max(0, gameManager != null ? gameManager.RemainingExpandUses : 0);
+
+            if (undoCounterText != null) undoCounterText.text = undoUses.ToString();
+            if (expandCounterText != null) expandCounterText.text = expandUses.ToString();
+
+            // Do not flicker these buttons while nuts are selected, moving, or animating.
+            // Their visual disabled state represents only no remaining usable action.
+            SetActionButtonState(undoButton, undoButtonCanvasGroup, gameManager != null && gameManager.HasUndoAction);
+            SetActionButtonState(expandBoltButton, expandButtonCanvasGroup, gameManager != null && gameManager.HasExpandAction);
+
             if (unlockBoltButton != null) unlockBoltButton.gameObject.SetActive(false);
         }
 
@@ -121,6 +127,7 @@ namespace NutBoltSort
 
             SetUIBlockerActive(true);
             winPopup.Open();
+            RefreshActionButtonStates();
         }
 
         public void OnNextLevelWinPressed()
@@ -134,6 +141,7 @@ namespace NutBoltSort
                     SetUIBlockerActive(false);
                     gameManager.LoadNextLevel();
                     UpdateLevelDisplay();
+                    RefreshActionButtonStates();
                 });
             }
             else
@@ -150,6 +158,7 @@ namespace NutBoltSort
                 uiBlocker.blocksRaycasts = active;
                 uiBlocker.alpha = active ? 1f : 0f;
             }
+            RefreshActionButtonStates();
         }
 
         private void CloseAllPopups()
@@ -182,6 +191,61 @@ namespace NutBoltSort
                 expandBoltButton.onClick.AddListener(OnExpandBoltButtonPressed);
             }
             if (unlockBoltButton != null) unlockBoltButton.gameObject.SetActive(false);
+        }
+
+        private void EnsureActionButtonPresentation()
+        {
+            EnsureActionButtonPresentation(undoButton, ref undoCounterText, ref undoButtonCanvasGroup, "UndoCounter");
+            EnsureActionButtonPresentation(expandBoltButton, ref expandCounterText, ref expandButtonCanvasGroup, "ExpandCounter");
+        }
+
+        private void EnsureActionButtonPresentation(Button button, ref TMP_Text counterText,
+                                                    ref CanvasGroup canvasGroup, string counterName)
+        {
+            if (button == null) return;
+
+            // Action buttons are deliberately never hidden for availability reasons.
+            if (!button.gameObject.activeSelf) button.gameObject.SetActive(true);
+
+            if (canvasGroup == null)
+                canvasGroup = button.GetComponent<CanvasGroup>() ?? button.gameObject.AddComponent<CanvasGroup>();
+
+            if (counterText == null)
+                counterText = CreateCounterText(button.transform, counterName);
+        }
+
+        private static TMP_Text CreateCounterText(Transform buttonTransform, string counterName)
+        {
+            var counterGO = new GameObject(counterName, typeof(RectTransform));
+            counterGO.transform.SetParent(buttonTransform, false);
+            var rect = counterGO.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(.5f, 0f);
+            rect.anchorMax = new Vector2(.5f, 0f);
+            rect.pivot = new Vector2(.5f, 0f);
+            rect.anchoredPosition = new Vector2(0f, 5f);
+            rect.sizeDelta = new Vector2(70f, 34f);
+
+            var text = counterGO.AddComponent<TextMeshProUGUI>();
+            text.text = "0";
+            text.fontSize = 24f;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Center;
+            text.color = Color.white;
+            text.raycastTarget = false;
+            return text;
+        }
+
+        private void SetActionButtonState(Button button, CanvasGroup canvasGroup, bool interactable)
+        {
+            if (button == null) return;
+            if (!button.gameObject.activeSelf) button.gameObject.SetActive(true);
+            button.interactable = interactable;
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = interactable ? 1f : disabledActionAlpha;
+                canvasGroup.interactable = interactable;
+                canvasGroup.blocksRaycasts = interactable;
+            }
         }
 
         private void EnsureUIHierarchy()

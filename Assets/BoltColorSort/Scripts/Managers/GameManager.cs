@@ -97,6 +97,10 @@ namespace NutBoltSort
         [SerializeField, Min(.01f)]        private float capCloseDuration = .22f;
         [SerializeField, Range(0f, .15f)]  private float capBounceAmount = .06f;
 
+        [Header("Action Uses")]
+        [SerializeField, Min(0)] private int startingUndoUses = 3;
+        [SerializeField, Min(0)] private int startingExpandUses = 2;
+
         // Bolt Feedback ───────────────────────────────────────────────────────
         [Header("Bolt Feedback (scale only)")]
         [SerializeField, Range(1f, 1.15f)] private float boltSelectionScale        = 1.045f;
@@ -129,6 +133,8 @@ namespace NutBoltSort
         private bool inputLocked;
         private bool won;
         private int  currentLevelNumber = 1; // 1-based; persisted via PlayerPrefs
+        private int  remainingUndoUses;
+        private int  remainingExpandUses;
 
         private const string PREFS_LEVEL = "CurrentLevelNumber";
 
@@ -141,9 +147,21 @@ namespace NutBoltSort
         public int  CurrentLevelNumber => currentLevelNumber;
         /// <summary>0-based index — kept for backward-compatible UIManager calls.</summary>
         public int  CurrentLevelIndex  => currentLevelNumber - 1;
-        /// <summary>True when at least one move can be undone.</summary>
-        public bool CanUndo => undoManager != null && undoManager.CanUndo &&
-                               !inputLocked && activeTransferCount == 0 && !won;
+        public int StartingUndoUses => startingUndoUses;
+        public int StartingExpandUses => startingExpandUses;
+        public int RemainingUndoUses => remainingUndoUses;
+        public int RemainingExpandUses => remainingExpandUses;
+        /// <summary>Display availability: only uses and move history control the Undo button's visual state.</summary>
+        public bool HasUndoAction => remainingUndoUses > 0 && undoManager != null && undoManager.CanUndo;
+        /// <summary>Display availability: only uses and an unexpanded bolt control the Expand button's visual state.</summary>
+        public bool HasExpandAction => remainingExpandUses > 0 && HasExpandableBoltBelowMax();
+        /// <summary>True when undo has a use, a history record, and no gameplay/UI blocker.</summary>
+        public bool CanUndo => HasUndoAction &&
+                               !inputLocked && activeTransferCount == 0 && !won &&
+                               (uiManager == null || !uiManager.IsUIOpen);
+        /// <summary>True when an expandable bolt can accept one paid stage increase.</summary>
+        public bool CanExpand => HasExpandAction && !inputLocked && activeTransferCount == 0 && !won &&
+                                 (uiManager == null || !uiManager.IsUIOpen) && HasAvailableExpandableBolt();
 
         // ─────────────────────────────────────────────────────────────────────
         // Unity Lifecycle
@@ -202,6 +220,7 @@ namespace NutBoltSort
             busyBolts.Clear();
             pendingMoveRecords.Clear();
             won              = false;
+            ResetActionUses();
 
             bool built;
             if (levelProvider != null)
@@ -254,6 +273,7 @@ namespace NutBoltSort
                 busyBolts.Clear();
                 pendingMoveRecords.Clear();
                 won              = false;
+                ResetActionUses();
 
                 levelManager?.BuildLevel(levelProvider.CurrentSnapshot, out _);
                 if (uiManager != null)
@@ -289,18 +309,20 @@ namespace NutBoltSort
         /// </summary>
         public void ExpandFirstAvailableBolt()
         {
-            if (inputLocked || activeTransferCount > 0 || won || levelManager == null) return;
+            if (!CanExpand || levelManager == null) return;
             foreach (BoltView bolt in levelManager.ActiveBolts)
             {
                 if (bolt == null) continue;
                 var exp = bolt.GetComponent<ExpandableBoltController>();
-                if (exp != null && !exp.IsAtMax)
+                if (exp != null && !exp.IsAtMax && !exp.IsExpanding && !IsBoltBusy(bolt))
                 {
                     bool increased = exp.IncreaseCapacity();
                     if (increased)
                     {
+                        remainingExpandUses = Mathf.Max(0, remainingExpandUses - 1);
                         tutorialController?.OnExpandableBoltUsed();
                         uiManager?.RefreshActionButtonStates();
+                        StartCoroutine(RefreshActionButtonsAfterExpansion(exp));
                         return;
                     }
                 }
@@ -345,10 +367,12 @@ namespace NutBoltSort
 
             BoltView srcBolt  = levelManager.ActiveBolts.ElementAtOrDefault(record.sourceBoltIndex);
             BoltView dstBolt  = levelManager.ActiveBolts.ElementAtOrDefault(record.destinationBoltIndex);
-            if (srcBolt == null || dstBolt == null) return;
+            if (srcBolt == null || dstBolt == null || record.movedNutCount <= 0 || dstBolt.Nuts.Count == 0) return;
 
             // Undo transfers nuts FROM destination BACK TO source.
+            remainingUndoUses = Mathf.Max(0, remainingUndoUses - 1);
             moveRoutine = StartCoroutine(ExecuteUndoTransfer(dstBolt, srcBolt, record));
+            uiManager?.RefreshActionButtonStates();
         }
 
         private IEnumerator ExecuteUndoTransfer(BoltView undoSrc, BoltView undoDst, MoveRecord record)
@@ -517,6 +541,7 @@ namespace NutBoltSort
             liftedNut = selectedNuts[selectedNuts.Count - 1];
             source.SetSelectionEffect(true);
             inputLocked = true;
+            uiManager?.RefreshActionButtonStates();
             selectionRoutine = StartCoroutine(LiftTopNut());
         }
 
@@ -525,6 +550,7 @@ namespace NutBoltSort
             if (selectionRoutine != null) StopCoroutine(selectionRoutine);
             StopHover();
             inputLocked = true;
+            uiManager?.RefreshActionButtonStates();
             selectionRoutine = StartCoroutine(ReturnTopNut());
         }
 
@@ -533,6 +559,7 @@ namespace NutBoltSort
             if (selectionRoutine != null) StopCoroutine(selectionRoutine);
             StopHover();
             inputLocked = true;
+            uiManager?.RefreshActionButtonStates();
             selectionRoutine = StartCoroutine(ReturnThenSelect(nextBolt));
         }
 
@@ -576,6 +603,7 @@ namespace NutBoltSort
             busyBolts.Add(destination);
             activeTransferCount++;
             ClearSelection();
+            uiManager?.RefreshActionButtonStates();
 
             // Tutorial observes the transfer; it never starts or owns movement.
             tutorialController?.OnTransferStarted();
@@ -613,6 +641,7 @@ namespace NutBoltSort
 
             StartHover();
             inputLocked = false;
+            uiManager?.RefreshActionButtonStates();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -625,6 +654,7 @@ namespace NutBoltSort
             ClearSelection();
             gameplaySequence = null;
             inputLocked = false;
+            uiManager?.RefreshActionButtonStates();
         }
 
         private IEnumerator ReturnThenSelect(BoltView nextBolt)
@@ -642,6 +672,7 @@ namespace NutBoltSort
             else
             {
                 inputLocked = false;
+                uiManager?.RefreshActionButtonStates();
             }
         }
 
@@ -785,15 +816,13 @@ namespace NutBoltSort
             busyBolts.Remove(destination);
             activeTransferCount = Mathf.Max(0, activeTransferCount - 1);
 
-            // Refresh Undo button.
-            uiManager?.RefreshActionButtonStates();
-
             // A win can only be presented after every committed transfer has landed.
             if (activeTransferCount == 0)
             {
                 if (undoManager != null)
                     foreach (MoveRecord record in pendingMoveRecords) undoManager.RecordMove(record);
                 pendingMoveRecords.Clear();
+                uiManager?.RefreshActionButtonStates();
                 CheckWin();
                 if (won) uiManager?.ShowWinPopup();
             }
@@ -812,6 +841,7 @@ namespace NutBoltSort
                 ShowSilentCaps();
                 tutorialController?.OnBoardReady(currentLevelNumber);
                 inputLocked = false;
+                uiManager?.RefreshActionButtonStates();
                 yield break;
             }
 
@@ -856,6 +886,7 @@ namespace NutBoltSort
             ShowSilentCaps();
             tutorialController?.OnBoardReady(currentLevelNumber);
             inputLocked = false;
+            uiManager?.RefreshActionButtonStates();
         }
 
         private void ShowSilentCaps()
@@ -1026,6 +1057,45 @@ namespace NutBoltSort
             if (bolt == null) return 0;
             var exp = bolt.GetComponent<ExpandableBoltController>();
             return exp != null ? exp.CurrentCapacity : BoltView.Capacity;
+        }
+
+        private void ResetActionUses()
+        {
+            remainingUndoUses = Mathf.Max(0, startingUndoUses);
+            remainingExpandUses = Mathf.Max(0, startingExpandUses);
+        }
+
+        private bool HasAvailableExpandableBolt()
+        {
+            if (levelManager == null) return false;
+
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+            {
+                if (bolt == null || IsBoltBusy(bolt)) continue;
+                var expandable = bolt.GetComponent<ExpandableBoltController>();
+                if (expandable != null && !expandable.IsAtMax && !expandable.IsExpanding)
+                    return true;
+            }
+            return false;
+        }
+
+        private bool HasExpandableBoltBelowMax()
+        {
+            if (levelManager == null) return false;
+
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+            {
+                var expandable = bolt != null ? bolt.GetComponent<ExpandableBoltController>() : null;
+                if (expandable != null && !expandable.IsAtMax) return true;
+            }
+            return false;
+        }
+
+        private IEnumerator RefreshActionButtonsAfterExpansion(ExpandableBoltController expandable)
+        {
+            while (expandable != null && expandable.IsExpanding)
+                yield return null;
+            uiManager?.RefreshActionButtonStates();
         }
 
         private bool CanMove(BoltView from, BoltView to, List<NutView> moving) =>
