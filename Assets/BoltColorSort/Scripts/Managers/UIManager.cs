@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
+using DG.Tweening;
 
 namespace NutBoltSort
 {
@@ -42,6 +43,16 @@ namespace NutBoltSort
         [SerializeField] private CanvasGroup expandButtonCanvasGroup;
         [SerializeField, Range(.55f, .7f)] private float disabledActionAlpha = .62f;
 
+        [Header("Reward Refill States")]
+        [Tooltip("Assign the background GameObject that already contains the Undo count text/icon.")]
+        [SerializeField] private GameObject undoNormalState;
+        [Tooltip("Assign your Watch Ad image GameObject. Its own artwork supplies the reward text.")]
+        [SerializeField] private GameObject undoAdState;
+        [Tooltip("Assign the background GameObject that already contains the Expand count text/icon.")]
+        [SerializeField] private GameObject expandNormalState;
+        [Tooltip("Assign your Watch Ad image GameObject. Its own artwork supplies the reward text.")]
+        [SerializeField] private GameObject expandAdState;
+
         public bool IsUIOpen => (winPopup != null && winPopup.IsOpen) ||
                                 (uiBlocker != null && uiBlocker.blocksRaycasts && uiBlocker.alpha > 0f);
 
@@ -50,6 +61,7 @@ namespace NutBoltSort
             FindManagers();
             EnsureUIHierarchy();
             EnsureActionButtonPresentation();
+            EnsureRefillStates();
             BindButtonEvents();
         }
 
@@ -87,13 +99,15 @@ namespace NutBoltSort
         public void OnUndoButtonPressed()
         {
             if (gameManager == null) return;
-            gameManager.UndoLastMove();
+            if (gameManager.RemainingUndoUses > 0) gameManager.UndoLastMove();
+            else gameManager.RequestUndoRewardAd();
         }
 
         public void OnExpandBoltButtonPressed()
         {
             if (gameManager == null) return;
-            gameManager.ExpandFirstAvailableBolt();
+            if (gameManager.RemainingExpandUses > 0) gameManager.ExpandFirstAvailableBolt();
+            else gameManager.RequestExpandRewardAd();
         }
 
         public void OnUnlockBoltButtonPressed()
@@ -105,7 +119,14 @@ namespace NutBoltSort
         /// <summary>Keeps both gameplay action buttons visible while synchronising their counters and availability.</summary>
         public void RefreshActionButtonStates()
         {
+            RefreshUndoAndExpandUI();
+        }
+
+        /// <summary>Central refresh for use counters, normal/ad child states, and temporary ad request locking.</summary>
+        public void RefreshUndoAndExpandUI(bool animateUndoReward = false, bool animateExpandReward = false)
+        {
             EnsureActionButtonPresentation();
+            EnsureRefillStates();
 
             int undoUses = Mathf.Max(0, gameManager != null ? gameManager.RemainingUndoUses : 0);
             int expandUses = Mathf.Max(0, gameManager != null ? gameManager.RemainingExpandUses : 0);
@@ -113,10 +134,12 @@ namespace NutBoltSort
             if (undoCounterText != null) undoCounterText.text = undoUses.ToString();
             if (expandCounterText != null) expandCounterText.text = expandUses.ToString();
 
-            // Do not flicker these buttons while nuts are selected, moving, or animating.
-            // Their visual disabled state represents only no remaining usable action.
-            SetActionButtonState(undoButton, undoButtonCanvasGroup, gameManager != null && gameManager.HasUndoAction);
-            SetActionButtonState(expandBoltButton, expandButtonCanvasGroup, gameManager != null && gameManager.HasExpandAction);
+            SetRefillState(undoNormalState, undoAdState, undoUses > 0, animateUndoReward);
+            SetRefillState(expandNormalState, expandAdState, expandUses > 0, animateExpandReward);
+
+            // A zero-use button is still clickable because it is now a rewarded-ad button.
+            SetActionButtonState(undoButton, undoButtonCanvasGroup, gameManager == null || !gameManager.IsUndoAdRequestActive);
+            SetActionButtonState(expandBoltButton, expandButtonCanvasGroup, gameManager == null || !gameManager.IsExpandAdRequestActive);
 
             if (unlockBoltButton != null) unlockBoltButton.gameObject.SetActive(false);
         }
@@ -212,6 +235,70 @@ namespace NutBoltSort
 
             if (counterText == null)
                 counterText = CreateCounterText(button.transform, counterName);
+        }
+
+        private void EnsureRefillStates()
+        {
+            EnsureRefillState(undoButton, ref undoNormalState, ref undoAdState, undoCounterText,
+                "UndoNormalState", "UndoAdState");
+            EnsureRefillState(expandBoltButton, ref expandNormalState, ref expandAdState, expandCounterText,
+                "ExpandNormalState", "ExpandAdState");
+        }
+
+        private static void EnsureRefillState(Button button, ref GameObject normalState, ref GameObject adState,
+                                              TMP_Text counterText,
+                                              string normalName, string adName)
+        {
+            if (button == null) return;
+            // The normal state should be the user's existing count background so its art and
+            // text hide/show together. Never move the count text out of that object.
+            if (normalState == null && counterText != null)
+                normalState = counterText.transform.parent != button.transform
+                    ? counterText.transform.parent.gameObject
+                    : counterText.gameObject;
+            if (normalState == null) normalState = CreateState(button.transform, normalName);
+            if (adState == null) adState = CreateState(button.transform, adName);
+        }
+
+        private static GameObject CreateState(Transform buttonTransform, string stateName)
+        {
+            var state = new GameObject(stateName, typeof(RectTransform));
+            state.transform.SetParent(buttonTransform, false);
+            var rect = state.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            return state;
+        }
+
+        private static void SetRefillState(GameObject normalState, GameObject adState, bool hasUses, bool animateReward)
+        {
+            if (normalState == null || adState == null) return;
+
+            if (!animateReward || !hasUses)
+            {
+                normalState.SetActive(hasUses);
+                adState.SetActive(!hasUses);
+                return;
+            }
+
+            // Reward success: only child states animate; the button itself never moves or hides.
+            normalState.SetActive(true);
+            adState.SetActive(true);
+            CanvasGroup normalGroup = normalState.GetComponent<CanvasGroup>() ?? normalState.AddComponent<CanvasGroup>();
+            CanvasGroup adGroup = adState.GetComponent<CanvasGroup>() ?? adState.AddComponent<CanvasGroup>();
+            normalState.transform.localScale = Vector3.one * .85f;
+            normalGroup.alpha = 0f;
+            adGroup.alpha = 1f;
+            DOTween.Kill(normalState.transform);
+            DOTween.Kill(adState.transform);
+            Sequence sequence = DOTween.Sequence();
+            sequence.Join(adGroup.DOFade(0f, .12f));
+            sequence.Join(adState.transform.DOScale(.85f, .12f));
+            sequence.AppendCallback(() => adState.SetActive(false));
+            sequence.Append(normalGroup.DOFade(1f, .14f));
+            sequence.Join(normalState.transform.DOScale(1f, .14f).SetEase(Ease.OutBack));
         }
 
         private static TMP_Text CreateCounterText(Transform buttonTransform, string counterName)

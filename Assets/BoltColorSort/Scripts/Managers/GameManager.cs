@@ -98,8 +98,10 @@ namespace NutBoltSort
         [SerializeField, Range(0f, .15f)]  private float capBounceAmount = .06f;
 
         [Header("Action Uses")]
-        [SerializeField, Min(0)] private int startingUndoUses = 3;
-        [SerializeField, Min(0)] private int startingExpandUses = 2;
+        [SerializeField, Min(0)] private int startingUndoUses = 5;
+        [SerializeField, Min(0)] private int startingExpandUses = 1;
+        [SerializeField, Min(1)] private int undoRefillAmount = 5;
+        [SerializeField, Min(1)] private int expandRefillAmount = 1;
 
         // Bolt Feedback ───────────────────────────────────────────────────────
         [Header("Bolt Feedback (scale only)")]
@@ -135,6 +137,8 @@ namespace NutBoltSort
         private int  currentLevelNumber = 1; // 1-based; persisted via PlayerPrefs
         private int  remainingUndoUses;
         private int  remainingExpandUses;
+        private bool isUndoAdRequestActive;
+        private bool isExpandAdRequestActive;
 
         private const string PREFS_LEVEL = "CurrentLevelNumber";
 
@@ -149,8 +153,12 @@ namespace NutBoltSort
         public int  CurrentLevelIndex  => currentLevelNumber - 1;
         public int StartingUndoUses => startingUndoUses;
         public int StartingExpandUses => startingExpandUses;
+        public int UndoRefillAmount => undoRefillAmount;
+        public int ExpandRefillAmount => expandRefillAmount;
         public int RemainingUndoUses => remainingUndoUses;
         public int RemainingExpandUses => remainingExpandUses;
+        public bool IsUndoAdRequestActive => isUndoAdRequestActive;
+        public bool IsExpandAdRequestActive => isExpandAdRequestActive;
         /// <summary>Display availability: only uses and move history control the Undo button's visual state.</summary>
         public bool HasUndoAction => remainingUndoUses > 0 && undoManager != null && undoManager.CanUndo;
         /// <summary>Display availability: only uses and an unexpanded bolt control the Expand button's visual state.</summary>
@@ -181,6 +189,7 @@ namespace NutBoltSort
             // Restore persisted level number.
             currentLevelNumber = PlayerPrefs.GetInt(PREFS_LEVEL, 1);
             if (currentLevelNumber < 1) currentLevelNumber = 1;
+            ResetActionUses();
         }
 
         private void Start() => LoadCurrentLevel();
@@ -327,6 +336,54 @@ namespace NutBoltSort
                     }
                 }
             }
+        }
+
+        /// <summary>Temporary rewarded-ad entry point. Replace only the simulated callback when an ad SDK is added.</summary>
+        public void RequestUndoRewardAd()
+        {
+            if (remainingUndoUses > 0 || isUndoAdRequestActive) return;
+            isUndoAdRequestActive = true;
+            uiManager?.RefreshUndoAndExpandUI();
+            StartCoroutine(SimulateUndoRewardAd());
+        }
+
+        /// <summary>Temporary rewarded-ad entry point. Replace only the simulated callback when an ad SDK is added.</summary>
+        public void RequestExpandRewardAd()
+        {
+            if (remainingExpandUses > 0 || isExpandAdRequestActive) return;
+            isExpandAdRequestActive = true;
+            uiManager?.RefreshUndoAndExpandUI();
+            StartCoroutine(SimulateExpandRewardAd());
+        }
+
+        public void OnUndoRewardAdSucceeded()
+        {
+            if (!isUndoAdRequestActive) return;
+            isUndoAdRequestActive = false;
+            remainingUndoUses = Mathf.Max(0, remainingUndoUses + undoRefillAmount);
+            uiManager?.RefreshUndoAndExpandUI(animateUndoReward: true);
+        }
+
+        public void OnUndoRewardAdFailed()
+        {
+            if (!isUndoAdRequestActive) return;
+            isUndoAdRequestActive = false;
+            uiManager?.RefreshUndoAndExpandUI();
+        }
+
+        public void OnExpandRewardAdSucceeded()
+        {
+            if (!isExpandAdRequestActive) return;
+            isExpandAdRequestActive = false;
+            remainingExpandUses = Mathf.Max(0, remainingExpandUses + expandRefillAmount);
+            uiManager?.RefreshUndoAndExpandUI(animateExpandReward: true);
+        }
+
+        public void OnExpandRewardAdFailed()
+        {
+            if (!isExpandAdRequestActive) return;
+            isExpandAdRequestActive = false;
+            uiManager?.RefreshUndoAndExpandUI();
         }
 
         /// <summary>
@@ -1063,6 +1120,20 @@ namespace NutBoltSort
         {
             remainingUndoUses = Mathf.Max(0, startingUndoUses);
             remainingExpandUses = Mathf.Max(0, startingExpandUses);
+            isUndoAdRequestActive = false;
+            isExpandAdRequestActive = false;
+        }
+
+        private IEnumerator SimulateUndoRewardAd()
+        {
+            yield return new WaitForSeconds(.15f);
+            OnUndoRewardAdSucceeded();
+        }
+
+        private IEnumerator SimulateExpandRewardAd()
+        {
+            yield return new WaitForSeconds(.15f);
+            OnExpandRewardAdSucceeded();
         }
 
         private bool HasAvailableExpandableBolt()
