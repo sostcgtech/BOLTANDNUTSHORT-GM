@@ -504,7 +504,9 @@
           },
           {
             "name": "TrailRenderer",
-            "scenes": [],
+            "scenes": [
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
