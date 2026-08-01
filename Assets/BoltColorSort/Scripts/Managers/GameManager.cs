@@ -454,6 +454,7 @@ namespace NutBoltSort
 
             // Re-evaluate completion.
             won = false; // undo cannot complete a level
+            yield return RevealNewTopIfHidden(undoSrc);
             TryLockCompleted(undoSrc);
             TryLockCompleted(undoDst);
             CheckWin();
@@ -760,6 +761,10 @@ namespace NutBoltSort
             for (int q = 0; q < moving.Count; q++)
                 RestoreNutToStack(destination, moving[moving.Count - 1 - q], destStartIdx + q);
 
+            // Only the newly exposed source top may reveal. The source stays reserved
+            // until this DOTween sequence settles; unrelated transfers remain available.
+            yield return RevealNewTopIfHidden(source);
+
             bool srcCompleted  = TryLockCompleted(source);
             bool destCompleted = TryLockCompleted(destination);
 
@@ -976,7 +981,7 @@ namespace NutBoltSort
             var group = new List<NutView>();
             if (bolt == null || bolt.Nuts.Count == 0) return group;
             NutColor color = bolt.Nuts[bolt.Nuts.Count - 1].Color;
-            for (int i = bolt.Nuts.Count - 1; i >= 0 && bolt.Nuts[i].Color == color; i--)
+            for (int i = bolt.Nuts.Count - 1; i >= 0 && bolt.Nuts[i].Color == color && !bolt.Nuts[i].IsHidden; i--)
                 group.Insert(0, bolt.Nuts[i]);
             return group;
         }
@@ -1014,6 +1019,15 @@ namespace NutBoltSort
 
         private bool IsBoltBusy(BoltView bolt) => bolt != null && busyBolts.Contains(bolt);
 
+        private IEnumerator RevealNewTopIfHidden(BoltView bolt)
+        {
+            if (bolt == null || bolt.Nuts.Count == 0) yield break;
+            NutView top = bolt.Nuts[bolt.Nuts.Count - 1];
+            if (top == null || !top.IsHidden || top.IsRevealing) yield break;
+            Sequence reveal = top.Reveal();
+            if (reveal != null) yield return reveal.WaitForCompletion();
+        }
+
         private void CheckWin()
         {
             if (won || activeTransferCount > 0 || levelManager == null) return;
@@ -1042,6 +1056,9 @@ namespace NutBoltSort
             foreach (var kv in capSequences)
                 if (kv.Value != null && kv.Value.IsActive()) kv.Value.Kill(false);
             capSequences.Clear();
+            if (levelManager != null)
+                foreach (BoltView bolt in levelManager.ActiveBolts)
+                    foreach (NutView nut in bolt.Nuts) nut?.CancelReveal();
         }
 
         private static void KillNutTween(NutView nut)
@@ -1056,6 +1073,37 @@ namespace NutBoltSort
             selectedBolt = null;
             selectedNuts.Clear();
             liftedNut = null;
+        }
+
+        [ContextMenu("Reveal All Hidden Nuts")]
+        private void RevealAllHiddenNuts()
+        {
+            if (levelManager == null) return;
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+                foreach (NutView nut in bolt.Nuts) nut?.RevealSilently();
+        }
+
+        [ContextMenu("Reset Hidden Nuts")]
+        private void ResetHiddenNuts()
+        {
+            if (levelManager == null) return;
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+            {
+                foreach (NutView nut in bolt.Nuts) nut?.ResetHiddenToStart();
+                if (bolt.Nuts.Count > 0) bolt.Nuts[bolt.Nuts.Count - 1].RevealSilently();
+            }
+        }
+
+        [ContextMenu("Print Hidden Nut Data")]
+        private void PrintHiddenNutData()
+        {
+            if (levelManager == null) return;
+            foreach (BoltView bolt in levelManager.ActiveBolts)
+                for (int i = 0; i < bolt.Nuts.Count; i++)
+                {
+                    NutView nut = bolt.Nuts[i];
+                    Debug.Log($"[HiddenNut] Bolt {bolt.BoltIndex}, slot {i}: color={nut.Color}, startsHidden={nut.StartsHidden}, revealed={nut.IsRevealed}");
+                }
         }
 
         // ─────────────────────────────────────────────────────────────────────

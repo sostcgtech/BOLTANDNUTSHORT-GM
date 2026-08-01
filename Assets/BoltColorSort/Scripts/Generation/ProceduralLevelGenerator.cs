@@ -305,6 +305,12 @@ namespace NutBoltSort
         [SerializeField, Range(1, 50)] private int recentSignatureHistorySize = 20;
         [SerializeField, Range(1, 12)] private int recentColorSubsetHistorySize = 5;
         [SerializeField, Range(0f, 1f)] private float maximumSimilarityScore = .75f;
+        [Header("Hidden Nut Progression")]
+        [SerializeField, Min(11)] private int hiddenNutIntroductionLevel = 11;
+        [SerializeField, Range(0, 2)] private int hiddenNutsLevels11To20 = 2;
+        [SerializeField, Range(0, 4)] private int hiddenNutsLevels21To40 = 4;
+        [SerializeField, Range(0, 6)] private int hiddenNutsLevels41To70 = 6;
+        [SerializeField, Range(0, 8)] private int hiddenNutsLevels71Plus = 7;
         [SerializeField] private bool enableDebugLogging = true;
         [SerializeField] private bool useDeterministicTestSeed;
         [SerializeField] private int testSeed = 12345;
@@ -810,6 +816,7 @@ namespace NutBoltSort
                 data.proceduralTemplateId = template.templateId;
                 data.difficultyBand = template.difficulty;
                 data.layoutPresetId = PickLayoutPresetId(data.bolts.Count, random);
+                ApplyHiddenNutFlags(data, level, template.difficulty, random);
                 data.validatedSolutionLength = solver.path.Count;
                 data.validatedSolverNodes = solver.nodes;
                 data.validatedSolverMilliseconds = solver.milliseconds;
@@ -1402,6 +1409,48 @@ namespace NutBoltSort
             return same / (float)total;
         }
 
+        private void ApplyHiddenNutFlags(LevelDataSO data, int level, DifficultyRating difficulty, System.Random random)
+        {
+            foreach (BoltNutStackData bolt in data.bolts)
+                bolt.startsHidden = bolt.nutColors != null ? new bool[bolt.nutColors.Length] : Array.Empty<bool>();
+
+            int target = GetHiddenNutTarget(level, difficulty);
+            if (target == 0) return;
+            var eligible = new List<Tuple<BoltNutStackData, int>>();
+            foreach (BoltNutStackData bolt in data.bolts)
+            {
+                if (bolt.boltType != BoltType.Normal || bolt.nutColors == null) continue;
+                // Never hide the starting top nut.
+                for (int i = 0; i < bolt.nutColors.Length - 1; i++) eligible.Add(Tuple.Create(bolt, i));
+            }
+            for (int i = eligible.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                var temp = eligible[i]; eligible[i] = eligible[j]; eligible[j] = temp;
+            }
+            var hiddenByColor = new Dictionary<NutColor, int>();
+            int applied = 0;
+            foreach (var item in eligible)
+            {
+                if (applied >= target) break;
+                NutColor color = item.Item1.nutColors[item.Item2];
+                if (hiddenByColor.TryGetValue(color, out int count) && count >= BoltView.Capacity - 1) continue;
+                item.Item1.startsHidden[item.Item2] = true;
+                hiddenByColor[color] = count + 1;
+                applied++;
+            }
+        }
+
+        private int GetHiddenNutTarget(int level, DifficultyRating difficulty)
+        {
+            if (level < hiddenNutIntroductionLevel) return 0;
+            int maximum = level <= 20 ? hiddenNutsLevels11To20 : level <= 40 ? hiddenNutsLevels21To40 :
+                          level <= 70 ? hiddenNutsLevels41To70 : hiddenNutsLevels71Plus;
+            if (difficulty == DifficultyRating.Recovery) maximum = Mathf.Min(maximum, 2);
+            if (difficulty == DifficultyRating.Easy) maximum = Mathf.Min(maximum, 3);
+            return maximum == 0 ? 0 : maximum;
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         // Snapshot management
         // ─────────────────────────────────────────────────────────────────────
@@ -1465,7 +1514,9 @@ namespace NutBoltSort
             foreach (var bolt in data.bolts)
             {
                 sb.Append((int)bolt.boltType).Append(':').Append(bolt.expandableStartCapacity).Append(':');
-                if (bolt.nutColors != null) foreach (var color in bolt.nutColors) sb.Append((int)color).Append(',');
+                if (bolt.nutColors != null)
+                    for (int i = 0; i < bolt.nutColors.Length; i++)
+                        sb.Append((int)bolt.nutColors[i]).Append(bolt.startsHidden != null && i < bolt.startsHidden.Length && bolt.startsHidden[i] ? 'h' : 'v').Append(',');
                 sb.Append(';');
             }
             return sb.ToString();

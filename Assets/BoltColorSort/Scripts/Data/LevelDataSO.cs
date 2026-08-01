@@ -10,6 +10,9 @@ namespace NutBoltSort
         [Tooltip("Nut colors ordered from Bottom (index 0) to Top (index 3). Empty array indicates an empty bolt.")]
         public NutColor[] nutColors;
 
+        [Tooltip("Per-nut hidden flags, ordered with nutColors from Bottom to Top. Real colours always remain in nutColors.")]
+        public bool[] startsHidden;
+
         [Tooltip("Bolt classification. Normal bolts behave as standard 4-slot targets.")]
         public BoltType boltType = BoltType.Normal;
 
@@ -68,6 +71,7 @@ namespace NutBoltSort
                     copy.bolts.Add(new BoltNutStackData
                     {
                         nutColors               = bolt != null && bolt.nutColors != null ? (NutColor[])bolt.nutColors.Clone() : Array.Empty<NutColor>(),
+                        startsHidden             = bolt != null && bolt.startsHidden != null ? (bool[])bolt.startsHidden.Clone() : Array.Empty<bool>(),
                         boltType                = bolt != null ? bolt.boltType : BoltType.Normal,
                         expandableStartCapacity = bolt != null ? bolt.expandableStartCapacity : 0
                     });

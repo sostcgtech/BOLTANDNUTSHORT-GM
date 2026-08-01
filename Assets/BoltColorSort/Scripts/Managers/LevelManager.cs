@@ -192,13 +192,17 @@ namespace NutBoltSort
                     for (int slot = 0; slot < boltData.nutColors.Length; slot++)
                     {
                         NutColor nutColor = boltData.nutColors[slot];
-                        NutView nut = SpawnNut(bolt, nutColor, slot);
+                        bool startsHidden = boltData.startsHidden != null && slot < boltData.startsHidden.Length && boltData.startsHidden[slot];
+                        NutView nut = SpawnNut(bolt, nutColor, slot, startsHidden);
                         if (nut != null)
                         {
                             bolt.Nuts.Add(nut);
                         }
                     }
                 }
+
+                // Starting top nuts are always visible, even if malformed data flagged one hidden.
+                if (bolt.Nuts.Count > 0) bolt.Nuts[bolt.Nuts.Count - 1].RevealSilently();
             }
 
             // Apply staggered perspective layout
@@ -334,7 +338,7 @@ namespace NutBoltSort
             return boltView;
         }
 
-        private NutView SpawnNut(BoltView bolt, NutColor color, int slotIndex)
+        private NutView SpawnNut(BoltView bolt, NutColor color, int slotIndex, bool startsHidden)
         {
             Material mat = GetOrCreateMaterial(color);
             Vector3 localPos = bolt.GetStackPosition(slotIndex);
@@ -347,7 +351,7 @@ namespace NutBoltSort
                 nutInstance.transform.localPosition = localPos;
                 nutInstance.transform.localRotation = Quaternion.identity;
                 nutInstance.transform.localScale = Vector3.one;
-                nutInstance.Initialize(color, mat);
+                nutInstance.Initialize(color, mat, startsHidden);
                 return nutInstance;
             }
 
@@ -367,7 +371,7 @@ namespace NutBoltSort
             if (bevel.TryGetComponent<Collider>(out var c2)) c2.enabled = false;
 
             var nutView = n.AddComponent<NutView>();
-            nutView.Initialize(color, mat);
+            nutView.Initialize(color, mat, startsHidden);
             return nutView;
         }
 
@@ -438,6 +442,12 @@ namespace NutBoltSort
                 if (boltData.nutColors != null && boltData.nutColors.Length > BoltView.Capacity)
                 {
                     Debug.LogError($"[LevelManager] Validation Failed: Bolt stack exceeds capacity ({boltData.nutColors.Length} > {BoltView.Capacity}) in Level {data.levelNumber}.");
+                    return false;
+                }
+                if (boltData.startsHidden != null && boltData.startsHidden.Length > 0 &&
+                    (boltData.nutColors == null || boltData.startsHidden.Length != boltData.nutColors.Length))
+                {
+                    Debug.LogError($"[LevelManager] Validation Failed: hidden-state count does not match nut count in Level {data.levelNumber}.");
                     return false;
                 }
             }
