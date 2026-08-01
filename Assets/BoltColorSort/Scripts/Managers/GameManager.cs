@@ -168,7 +168,7 @@ namespace NutBoltSort
                                !inputLocked && activeTransferCount == 0 && !won &&
                                (uiManager == null || !uiManager.IsUIOpen);
         /// <summary>True when an expandable bolt can accept one paid stage increase.</summary>
-        public bool CanExpand => HasExpandAction && !inputLocked && activeTransferCount == 0 && !won &&
+        public bool CanExpand => HasExpandAction && selectedBolt == null && !inputLocked && activeTransferCount == 0 && !won &&
                                  (uiManager == null || !uiManager.IsUIOpen) && HasAvailableExpandableBolt();
 
         // ─────────────────────────────────────────────────────────────────────

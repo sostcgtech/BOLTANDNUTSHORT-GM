@@ -20,6 +20,16 @@ namespace NutBoltSort
         [SerializeField] private GameObject completionEffect;
         [SerializeField] private BoxCollider boxCollider;
 
+        [Header("Expandable Bolt Stage Models")]
+        [Tooltip("Drag the 1-nut-capacity bolt model here.")]
+        [SerializeField] private GameObject boltStage1;
+        [Tooltip("Drag the 2-nut-capacity bolt model here.")]
+        [SerializeField] private GameObject boltStage2;
+        [Tooltip("Drag the 3-nut-capacity bolt model here.")]
+        [SerializeField] private GameObject boltStage3;
+        [Tooltip("Drag the full 4-nut-capacity bolt model here.")]
+        [SerializeField] private GameObject boltStage4;
+
         // ── Slot Spacing ───────────────────────────────────────────────────────
         [Header("Slot Spacing Settings")]
         [Tooltip("Vertical spacing distance between consecutive slots.")]
@@ -71,6 +81,10 @@ namespace NutBoltSort
         public BoxCollider Collider => boxCollider != null ? boxCollider : GetComponent<BoxCollider>();
         public Transform CompletionCapTransform => completionCap != null ? completionCap.transform : null;
         public Vector3 CompletionCapRestingLocalScale => completionCapRestingLocalScale;
+        public GameObject BoltStage1 => boltStage1;
+        public GameObject BoltStage2 => boltStage2;
+        public GameObject BoltStage3 => boltStage3;
+        public GameObject BoltStage4 => boltStage4;
 
         // ── Slot Spacing Public API ────────────────────────────────────────────
         public float SlotSpacing
