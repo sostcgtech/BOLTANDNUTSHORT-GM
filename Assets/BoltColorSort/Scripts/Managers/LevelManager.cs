@@ -350,7 +350,10 @@ namespace NutBoltSort
                 nutInstance.gameObject.name = $"{color}_Nut";
                 nutInstance.transform.localPosition = localPos;
                 nutInstance.transform.localRotation = Quaternion.identity;
-                nutInstance.transform.localScale = Vector3.one;
+                // Keep the prefab's authored root scale. NutPrefab uses this scale to
+                // size its imported mesh; forcing Vector3.one made nuts appear tiny
+                // until the first landing animation restored their cached prefab scale.
+                nutInstance.CaptureRestingTransform();
                 nutInstance.Initialize(color, mat, startsHidden);
                 return nutInstance;
             }

@@ -36,11 +36,20 @@ namespace NutBoltSort
 
         private void Awake()
         {
-            RestingLocalRotation = transform.localRotation;
-            RestingLocalScale = transform.localScale;
+            CaptureRestingTransform();
 
             if (optionalHighlight != null)
                 optionalHighlight.SetActive(false);
+        }
+
+        /// <summary>
+        /// Stores the transform that movement, reveal, and landing animations must return to.
+        /// Call this after a spawner has applied its final local transform.
+        /// </summary>
+        public void CaptureRestingTransform()
+        {
+            RestingLocalRotation = transform.localRotation;
+            RestingLocalScale = transform.localScale;
         }
 
         /// <summary>
