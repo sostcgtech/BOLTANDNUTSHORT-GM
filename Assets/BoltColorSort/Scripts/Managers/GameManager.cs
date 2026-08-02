@@ -213,7 +213,7 @@ namespace NutBoltSort
         // Level Loading
         // ─────────────────────────────────────────────────────────────────────
 
-        public void LoadCurrentLevel()
+        public void LoadCurrentLevel(bool isRestart = false)
         {
             StopAllCoroutines();
             KillAllTweens();
@@ -260,6 +260,7 @@ namespace NutBoltSort
             // Notify tutorial controller.
             tutorialController?.OnLevelLoaded(currentLevelNumber, this, levelManager);
 
+            uiManager?.ShowLevelRibbon(isRestart);
             StartCoroutine(PlayEntryAnimation());
         }
 
@@ -292,11 +293,12 @@ namespace NutBoltSort
                 }
 
                 tutorialController?.OnLevelLoaded(currentLevelNumber, this, levelManager);
+                uiManager?.ShowLevelRibbon(isRestart: true);
                 StartCoroutine(PlayEntryAnimation());
             }
             else
             {
-                LoadCurrentLevel();
+                LoadCurrentLevel(isRestart: true);
             }
         }
 

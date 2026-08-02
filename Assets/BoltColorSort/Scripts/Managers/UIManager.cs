@@ -27,6 +27,9 @@ namespace NutBoltSort
         [SerializeField] private Button restartButton;
         [SerializeField] private TMP_Text levelDisplayTextTMP;
 
+        [Header("Level Ribbon")]
+        [SerializeField] private LevelRibbonController levelRibbon;
+
         [Header("Win Popup")]
         [SerializeField] private UIPopup winPopup;
         [SerializeField] private Button nextLevelWinButton;
@@ -85,6 +88,14 @@ namespace NutBoltSort
             string text  = $"LEVEL {levelNum}";
 
             if (levelDisplayTextTMP != null) levelDisplayTextTMP.text = text;
+        }
+
+        /// <summary>Shows the level notification without changing gameplay or input state.</summary>
+        public void ShowLevelRibbon(bool isRestart = false)
+        {
+            if (levelRibbon == null || (isRestart && !levelRibbon.ShowRibbonOnRestart)) return;
+            int levelNum = gameManager != null ? gameManager.CurrentLevelNumber : 1;
+            levelRibbon.Show(levelNum);
         }
 
         public void OnRestartButtonPressed()
