@@ -466,7 +466,10 @@ namespace NutBoltSort
             List<NutView> toMove = undoSrc.Nuts.GetRange(undoSrc.Nuts.Count - moveCount, moveCount);
             int destStartIdx     = undoDst.Nuts.Count;
             float followerClearanceDelay = Mathf.Max(followerDelay, liftDuration * .65f);
-            float hoverWorldY    = undoSrc.GetHoverWorldPosition().y;
+            // Travel directly from the source bolt's hover point to the destination
+            // bolt's hover point. This preserves each row's intentional height offset.
+            Vector3 sourceHover = undoSrc.GetHoverWorldPosition();
+            Vector3 destinationHover = undoDst.GetHoverWorldPosition();
 
             gameplaySequence = DOTween.Sequence().SetTarget(this);
 
@@ -484,7 +487,7 @@ namespace NutBoltSort
                 Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
 
                 // Phase 1: lift (all nuts, as they all start on the stack)
-                Vector3 liftTarget = new Vector3(tr.position.x, hoverWorldY, tr.position.z);
+                Vector3 liftTarget = sourceHover;
                 Sequence liftSeq = DOTween.Sequence();
                 liftSeq.Join(tr.DOMove(liftTarget, liftDuration).SetEase(Ease.OutCubic));
                 liftSeq.Join(tr.DORotate(Vector3.up * (selectionRotationSpeed * liftDuration),
@@ -492,7 +495,7 @@ namespace NutBoltSort
                 nutSeq.Append(liftSeq);
 
                 // Phase 2: horizontal travel
-                Vector3 horizontalDest = new Vector3(destWorld.x, hoverWorldY, destWorld.z);
+                Vector3 horizontalDest = destinationHover;
                 float horizDist = Vector3.Distance(
                     new Vector3(tr.position.x, 0f, tr.position.z),
                     new Vector3(horizontalDest.x, 0f, horizontalDest.z));
@@ -770,6 +773,11 @@ namespace NutBoltSort
             Sequence moveSequence = DOTween.Sequence().SetTarget(this);
             activeMoveSequences.Add(moveSequence);
             float followerClearanceDelay = Mathf.Max(followerDelay, selectionLiftDuration * .65f);
+            // Use the authored hover points at both ends. A row-height offset is part
+            // of those positions, so the travel path naturally reaches the back row's
+            // hover point instead of forcing the nut through the bolt centre.
+            Vector3 sourceHover = source.GetHoverWorldPosition();
+            Vector3 destinationHover = destination.GetHoverWorldPosition();
 
             for (int q = 0; q < moving.Count; q++)
             {
@@ -784,20 +792,15 @@ namespace NutBoltSort
 
                 Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
 
-                // ── Shared hover height ──────────────────────────────────────
-                float hoverWorldY = source.GetHoverWorldPosition().y;
-
                 // ── Phase 1: Vertical Lift (followers only) ──────────────────
                 if (q == 0)
                 {
-                    // Leader: already at hover height — snap Y cleanly.
-                    Vector3 snapPos = tr.position;
-                    snapPos.y       = hoverWorldY;
-                    tr.position     = snapPos;
+                    // The leader is already at the source hover point after selection.
+                    // Do not change its position before the hover-to-hover travel.
                 }
                 else
                 {
-                    Vector3 liftTarget = new Vector3(tr.position.x, hoverWorldY, tr.position.z);
+                    Vector3 liftTarget = sourceHover;
                     Sequence liftSeq = DOTween.Sequence();
                     liftSeq.Join(tr.DOMove(liftTarget, liftDuration).SetEase(Ease.OutCubic));
                     liftSeq.Join(tr.DORotate(
@@ -807,7 +810,7 @@ namespace NutBoltSort
                 }
 
                 // ── Phase 2: Horizontal Travel ───────────────────────────────
-                Vector3 horizontalDest = new Vector3(destWorld.x, hoverWorldY, destWorld.z);
+                Vector3 horizontalDest = destinationHover;
                 float   horizDist      = Vector3.Distance(
                     new Vector3(tr.position.x, 0f, tr.position.z),
                     new Vector3(horizontalDest.x, 0f, horizontalDest.z));
