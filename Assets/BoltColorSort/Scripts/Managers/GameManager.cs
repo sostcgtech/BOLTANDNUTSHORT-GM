@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace NutBoltSort
 {
@@ -50,8 +52,9 @@ namespace NutBoltSort
 
         // Followers ───────────────────────────────────────────────────────────
         [Header("Followers")]
-        [Tooltip("Minimum clearance time before the next nut starts.")]
-        [SerializeField, Range(.05f, .30f)] private float followerDelay  = .14f;
+        [Tooltip("Time between followers beginning their transfer. Their landings overlap while the previous nut settles.")]
+        [FormerlySerializedAs("followerDelay")]
+        [SerializeField, Range(.06f, .10f)] private float followerDropDelay = .08f;
 
         // Travel ──────────────────────────────────────────────────────────────
         [Header("Travel")]
@@ -69,8 +72,21 @@ namespace NutBoltSort
 
         // Landing ─────────────────────────────────────────────────────────────
         [Header("Landing")]
-        [SerializeField, Min(.01f)] private float landingDuration        = .16f;
-        [SerializeField, Range(1f, 1.2f)] private float landingBounceScale = 1.045f;
+        [Tooltip("Base duration of the threaded vertical drop. It scales slightly with drop distance.")]
+        [FormerlySerializedAs("landingDuration")]
+        [SerializeField, Range(.20f, .28f)] private float dropDuration = .24f;
+        [SerializeField] private Ease dropEase = Ease.InOutSine;
+        [Tooltip("Degrees of rethread rotation per world-unit descended.")]
+        [SerializeField, Min(0f)] private float threadRotationMultiplier = 520f;
+        [Tooltip("Y scale at the end of the screw-down. X/Z expand proportionally to retain a firm mechanical contact.")]
+        [SerializeField, Range(.94f, 1f)] private float landingCompression = .96f;
+        [SerializeField, Range(1f, 1.1f)] private float landingBounceScale = 1.025f;
+        [SerializeField, Range(.05f, .07f)] private float landingImpactDuration = .06f;
+        [SerializeField, Range(.08f, .12f)] private float landingRecoveryDuration = .10f;
+        [SerializeField, Range(1f, 1.1f)] private float finalNutImpactMultiplier = 1.01f;
+        [SerializeField] private bool useLandingRotationVariation = true;
+        [SerializeField, Range(8f, 15f)] private float landingRotationVariation = 10f;
+        [SerializeField, Range(.08f, .15f)] private float completionEffectDelay = .10f;
 
         // Entry Animation ─────────────────────────────────────────────────────
         [Header("Entry Animation")]
@@ -107,8 +123,10 @@ namespace NutBoltSort
         [Header("Bolt Feedback (scale only)")]
         [SerializeField, Range(1f, 1.15f)] private float boltSelectionScale        = 1.045f;
         [SerializeField, Min(.01f)]        private float boltSelectionPulseDuration = .12f;
-        [SerializeField, Range(.9f, 1f)]   private float boltAttachYScale          = .965f;
-        [SerializeField, Min(.01f)]        private float boltAttachPulseDuration   = .11f;
+        [FormerlySerializedAs("boltAttachYScale")]
+        [SerializeField, Range(.97f, 1f)]  private float boltContactCompression     = .985f;
+        [FormerlySerializedAs("boltAttachPulseDuration")]
+        [SerializeField, Range(.06f, .10f)] private float boltContactDuration       = .08f;
         [SerializeField, Range(.9f, 1.1f)] private float invalidScalePulse         = .965f;
         [SerializeField, Min(.01f)]        private float invalidPulseDuration       = .16f;
 
@@ -141,6 +159,9 @@ namespace NutBoltSort
         private bool isExpandAdRequestActive;
 
         private const string PREFS_LEVEL = "CurrentLevelNumber";
+
+        /// <summary>Optional hook fired at the precise moment each transferred nut contacts its destination slot.</summary>
+        public event Action<NutView, BoltView> OnNutLanded;
 
         // ─────────────────────────────────────────────────────────────────────
         // Public Properties
@@ -465,7 +486,7 @@ namespace NutBoltSort
             // Grab the top N nuts from undoSrc.
             List<NutView> toMove = undoSrc.Nuts.GetRange(undoSrc.Nuts.Count - moveCount, moveCount);
             int destStartIdx     = undoDst.Nuts.Count;
-            float followerClearanceDelay = Mathf.Max(followerDelay, liftDuration * .65f);
+            float followerClearanceDelay = Mathf.Clamp(followerDropDelay, .06f, .10f);
             // Travel directly from the source bolt's hover point to the destination
             // bolt's hover point. This preserves each row's intentional height offset.
             Vector3 sourceHover = undoSrc.GetHoverWorldPosition();
@@ -481,7 +502,6 @@ namespace NutBoltSort
                 KillNutTween(nut);
 
                 int     destIdx   = destStartIdx + q;
-                Vector3 destWorld = undoDst.NutContainer.TransformPoint(undoDst.GetStackPosition(destIdx));
                 float   seqStart  = q * followerClearanceDelay;
 
                 Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
@@ -506,23 +526,7 @@ namespace NutBoltSort
                     horizDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                 nutSeq.Append(travelSeq);
 
-                // Phase 3: reparent + drop
-                NutView  capturedNut  = nut;
-                int      capturedDIdx = destIdx;
-                BoltView capturedDst  = undoDst;
-                nutSeq.AppendCallback(() => tr.SetParent(capturedDst.NutContainer, worldPositionStays: true));
-                Sequence landSeq = DOTween.Sequence();
-                landSeq.Append(tr.DOMove(destWorld, landingDuration).SetEase(Ease.InCubic));
-                landSeq.Join(tr.DORotate(Vector3.down * (selectionRotationSpeed * landingDuration),
-                    landingDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                nutSeq.Append(landSeq);
-                nutSeq.AppendCallback(() =>
-                {
-                    SnapNutToStack(capturedDst, capturedNut, capturedDIdx);
-                    PulseBoltAttach(capturedDst);
-                });
-                nutSeq.Append(tr.DOScale(nut.RestingLocalScale * landingBounceScale, .055f).SetEase(Ease.OutQuad));
-                nutSeq.Append(tr.DOScale(nut.RestingLocalScale, .085f).SetEase(Ease.InOutSine));
+                AppendThreadedLanding(nutSeq, nut, undoDst, destIdx, q == toMove.Count - 1);
 
                 gameplaySequence.Insert(seqStart, nutSeq);
             }
@@ -772,7 +776,7 @@ namespace NutBoltSort
         {
             Sequence moveSequence = DOTween.Sequence().SetTarget(this);
             activeMoveSequences.Add(moveSequence);
-            float followerClearanceDelay = Mathf.Max(followerDelay, selectionLiftDuration * .65f);
+            float followerClearanceDelay = Mathf.Clamp(followerDropDelay, .06f, .10f);
             // Use the authored hover points at both ends. A row-height offset is part
             // of those positions, so the travel path naturally reaches the back row's
             // hover point instead of forcing the nut through the bolt centre.
@@ -787,7 +791,6 @@ namespace NutBoltSort
                 KillNutTween(nut);
 
                 int     destIdx   = destStartIdx + q;
-                Vector3 destWorld = destination.NutContainer.TransformPoint(destination.GetStackPosition(destIdx));
                 float   seqStart  = q * followerClearanceDelay;
 
                 Sequence nutSeq = DOTween.Sequence().SetTarget(tr);
@@ -823,27 +826,8 @@ namespace NutBoltSort
                     RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                 nutSeq.Append(travelSeq);
 
-                // ── Phase 3: reparent → Vertical Drop ───────────────────────
-                NutView  capturedNut     = nut;
-                int      capturedDestIdx = destIdx;
-                BoltView capturedDest    = destination;
-
-                nutSeq.AppendCallback(() => tr.SetParent(capturedDest.NutContainer, worldPositionStays: true));
-
-                Sequence landSeq = DOTween.Sequence();
-                landSeq.Append(tr.DOMove(destWorld, landingDuration).SetEase(Ease.InCubic));
-                landSeq.Join(tr.DORotate(
-                    Vector3.down * (selectionRotationSpeed * landingDuration),
-                    landingDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
-                nutSeq.Append(landSeq);
-
-                nutSeq.AppendCallback(() =>
-                {
-                    SnapNutToStack(capturedDest, capturedNut, capturedDestIdx);
-                    PulseBoltAttach(capturedDest);
-                });
-                nutSeq.Append(tr.DOScale(nut.RestingLocalScale * landingBounceScale, .055f).SetEase(Ease.OutQuad));
-                nutSeq.Append(tr.DOScale(nut.RestingLocalScale, .085f).SetEase(Ease.InOutSine));
+                // ── Phase 3: reparent → threaded vertical drop ──────────────
+                AppendThreadedLanding(nutSeq, nut, destination, destIdx, q == moving.Count - 1);
 
                 moveSequence.Insert(seqStart, nutSeq);
             }
@@ -860,6 +844,9 @@ namespace NutBoltSort
 
             bool srcCompleted  = TryLockCompleted(source);
             bool destCompleted = TryLockCompleted(destination);
+
+            // Let the final threaded contact read clearly before the existing cap effect.
+            if (destCompleted) yield return new WaitForSeconds(completionEffectDelay);
 
             // Notify tutorial.
             int srcIdx2 = levelManager != null ? levelManager.IndexOfBolt(source)      : -1;
@@ -919,7 +906,7 @@ namespace NutBoltSort
 
                     Vector3 finalWorld  = bolt.NutContainer.TransformPoint(bolt.GetStackPosition(i));
                     Vector3 startWorld  = finalWorld + Vector3.up * entryHeightOffset;
-                    float   randomYRot  = Random.Range(entryRotMin, entryRotMax);
+                    float   randomYRot  = UnityEngine.Random.Range(entryRotMin, entryRotMax);
                     float   entryClearanceDelay = Mathf.Max(entryMaxDelay, entryDuration * .65f);
                     float   delay = i * entryClearanceDelay;
 
@@ -1036,6 +1023,61 @@ namespace NutBoltSort
             hoverSequences.Clear();
         }
 
+        /// <summary>
+        /// Appends the existing transfer path's landing phase. The nut stays parented to the
+        /// destination while it visibly screws down, then is snapped only to remove final-frame drift.
+        /// </summary>
+        private void AppendThreadedLanding(Sequence nutSequence, NutView nut, BoltView destination,
+                                           int destinationIndex, bool isFinalNut)
+        {
+            if (nutSequence == null || nut == null || destination == null) return;
+
+            Transform tr = nut.transform;
+            Vector3 destinationWorld = destination.NutContainer.TransformPoint(destination.GetStackPosition(destinationIndex));
+
+            nutSequence.AppendCallback(() =>
+            {
+                tr.SetParent(destination.NutContainer, worldPositionStays: true);
+                if (useLandingRotationVariation && landingRotationVariation > 0f)
+                    tr.Rotate(Vector3.up, UnityEngine.Random.Range(-landingRotationVariation, landingRotationVariation), Space.World);
+            });
+
+            // A tiny beat makes the transition from horizontal travel into threading legible.
+            nutSequence.AppendInterval(.03f);
+
+            // The horizontal phase always ends at this authored hover point, so calculate
+            // thread amount from that known approach height rather than the current source position.
+            float dropDistance = Mathf.Abs(destination.GetHoverWorldPosition().y - destinationWorld.y);
+            float threadedDuration = Mathf.Clamp(dropDuration + Mathf.Max(0f, dropDistance - .5f) * .02f, .20f, .28f);
+            float compressionStart = threadedDuration * .82f;
+            float compressionDuration = threadedDuration - compressionStart;
+            float xzCompression = 1f + (1f - landingCompression) * .5f;
+            Vector3 compressedScale = Vector3.Scale(nut.RestingLocalScale,
+                new Vector3(xzCompression, landingCompression, xzCompression));
+            float threadDegrees = dropDistance * threadRotationMultiplier;
+
+            Sequence threadDown = DOTween.Sequence();
+            threadDown.Append(tr.DOMove(destinationWorld, threadedDuration).SetEase(dropEase));
+            threadDown.Join(tr.DORotate(Vector3.down * threadDegrees, threadedDuration,
+                RotateMode.WorldAxisAdd).SetEase(dropEase));
+            threadDown.Insert(compressionStart,
+                tr.DOScale(compressedScale, compressionDuration).SetEase(Ease.InQuad));
+            nutSequence.Append(threadDown);
+
+            nutSequence.AppendCallback(() =>
+            {
+                // Position and rotation snap only after the complete visible descent.
+                SnapNutPositionAndRotation(destination, nut, destinationIndex);
+                PulseBoltAttach(destination);
+                OnNutLanded?.Invoke(nut, destination);
+            });
+
+            float impactScale = landingBounceScale * (isFinalNut ? finalNutImpactMultiplier : 1f);
+            nutSequence.Append(tr.DOScale(nut.RestingLocalScale * impactScale, landingImpactDuration).SetEase(Ease.OutQuad));
+            nutSequence.Append(tr.DOScale(nut.RestingLocalScale, landingRecoveryDuration).SetEase(Ease.OutBack));
+            nutSequence.AppendCallback(() => SnapNutToStack(destination, nut, destinationIndex));
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         // Bolt Feedback
         // ─────────────────────────────────────────────────────────────────────
@@ -1052,7 +1094,9 @@ namespace NutBoltSort
             PulseBoltScale(bolt, Vector3.one * boltSelectionScale, boltSelectionPulseDuration);
 
         private void PulseBoltAttach(BoltView bolt) =>
-            PulseBoltScale(bolt, new Vector3(1.012f, boltAttachYScale, 1.012f), boltAttachPulseDuration);
+            PulseBoltScale(bolt,
+                new Vector3(1f, Mathf.Clamp(boltContactCompression, .97f, 1f), 1f),
+                Mathf.Clamp(boltContactDuration, .06f, .10f));
 
         private void PulseBoltScale(BoltView bolt, Vector3 multiplier, float duration)
         {
@@ -1280,11 +1324,18 @@ namespace NutBoltSort
         private static void SnapNutToStack(BoltView bolt, NutView nut, int index)
         {
             if (bolt == null || nut == null) return;
+            SnapNutPositionAndRotation(bolt, nut, index);
+            Transform tr = nut.transform;
+            tr.localScale    = nut.RestingLocalScale;
+        }
+
+        private static void SnapNutPositionAndRotation(BoltView bolt, NutView nut, int index)
+        {
+            if (bolt == null || nut == null) return;
             Transform tr = nut.transform;
             if (tr.parent != bolt.NutContainer) tr.SetParent(bolt.NutContainer, false);
             tr.localPosition = bolt.GetStackPosition(index);
             tr.localRotation = nut.RestingLocalRotation;
-            tr.localScale    = nut.RestingLocalScale;
         }
 
         // ─────────────────────────────────────────────────────────────────────
