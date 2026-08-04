@@ -34,6 +34,10 @@ namespace NutBoltSort
         [SerializeField] private UIPopup winPopup;
         [SerializeField] private Button nextLevelWinButton;
 
+        [Header("Settings")]
+        [SerializeField] private SettingsPanelController settingsPanelController;
+        [SerializeField] private Button settingsButton;
+
         [Header("Gameplay Action Buttons")]
         [SerializeField] private Button undoButton;
         [SerializeField] private Button expandBoltButton;
@@ -57,7 +61,8 @@ namespace NutBoltSort
         [SerializeField] private GameObject expandAdState;
 
         public bool IsUIOpen => (winPopup != null && winPopup.IsOpen) ||
-                                (uiBlocker != null && uiBlocker.blocksRaycasts && uiBlocker.alpha > 0f);
+                                (uiBlocker != null && uiBlocker.blocksRaycasts && uiBlocker.alpha > 0f) ||
+                                (settingsPanelController != null && settingsPanelController.IsOpen);
 
         private void Awake()
         {
@@ -74,6 +79,10 @@ namespace NutBoltSort
             SetUIBlockerActive(false);
             UpdateLevelDisplay();
             RefreshActionButtonStates();
+
+            // Hide the settings overlay at game start regardless of its state in the editor.
+            // This also forces button binding to run if the overlay started disabled.
+            settingsPanelController?.HideImmediate();
         }
 
         private void FindManagers()
@@ -167,9 +176,24 @@ namespace NutBoltSort
         {
             if (winPopup == null) return;
 
+            // Defer Win popup until the Settings panel closes to avoid overlap.
+            if (settingsPanelController != null && settingsPanelController.IsOpen)
+            {
+                settingsPanelController.SetPendingWin(true);
+                return;
+            }
+
             SetUIBlockerActive(true);
             winPopup.Open();
             RefreshActionButtonStates();
+        }
+
+        /// <summary>Opens the Settings panel from the gameplay screen.</summary>
+        public void OnSettingsButtonPressed()
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Vibrate(HapticType.Light);
+            settingsPanelController?.OpenSettings();
         }
 
         public void OnNextLevelWinPressed()
@@ -235,6 +259,12 @@ namespace NutBoltSort
                 expandBoltButton.onClick.AddListener(OnExpandBoltButtonPressed);
             }
             if (unlockBoltButton != null) unlockBoltButton.gameObject.SetActive(false);
+
+            if (settingsButton != null)
+            {
+                settingsButton.onClick.RemoveAllListeners();
+                settingsButton.onClick.AddListener(OnSettingsButtonPressed);
+            }
         }
 
         private void EnsureActionButtonPresentation()
