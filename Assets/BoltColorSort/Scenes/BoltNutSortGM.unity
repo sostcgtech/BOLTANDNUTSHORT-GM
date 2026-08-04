@@ -7631,31 +7631,63 @@ MonoBehaviour:
   selectionSwitchDuration: 0.16
   hoverAmount: 0.035
   hoverHalfCycleDuration: 0.32
-  followerDelay: 0.05
+  followerDropDelay: 0.05
   liftDuration: 0.2
   travelDurationMin: 0.28
   travelDurationPerUnit: 0.12
   travelRotationSpeed: 200
-  landingDuration: 0.055
+  dropDuration: 0.055
+  dropEase: 4
+  threadRotationMultiplier: 520
+  landingCompression: 0.96
   landingBounceScale: 1.045
-  entryHeightOffset: 0.5
-  entryRotMin: 90
-  entryRotMax: 360
-  entryMaxDelay: 0.017
-  entryDuration: 0.15
-  capPopHeight: 0.18
+  landingImpactDuration: 0.06
+  landingRecoveryDuration: 0.1
+  finalNutImpactMultiplier: 1.01
+  useLandingRotationVariation: 1
+  landingRotationVariation: 10
+  completionStartDelay: 0.1
+  boltEntryOffset: {x: 0, y: -0.35, z: 0}
+  boltEntryStartScale: 0.9
+  boltEntryDuration: 0.26
+  boltEntryStagger: 0.04
+  rowEntryDelay: 0.1
+  animateBoltsInParallel: 1
+  maximumConcurrentBoltEntrySequences: 4
+  nutEntryHeight: 0.7
+  nutEntryStartScale: 0.92
+  nutEntryDuration: 0.15
+  nutEntryStagger: 0.017
+  nutEntryRotation: 180
+  nutSettleScale: 1.025
+  nutSettleDuration: 0.08
+  useClearanceBasedNutStagger: 1
+  allowParallelNutEntryAcrossBolts: 1
+  nutWavePulseScale: 1.08
+  nutWaveCompressionScale: 0.98
+  nutWaveLiftAmount: 0.04
+  nutWavePulseDuration: 0.15
+  nutWaveStagger: 0.045
+  nutWaveGlowStrength: 0.75
+  capStartHeight: 0.18
   capStartScale: 0.75
-  capPopDuration: 0.14
-  capCloseDuration: 0.22
-  capBounceAmount: 0.15
+  capDropDuration: 0.22
+  capRotationAmount: 120
+  capImpactScale: {x: 1.03, y: 0.94, z: 1.03}
+  capImpactDuration: 0.14
+  capSettleDuration: 0.08
+  capStartProgress: 0.75
+  finalStackPulseScale: 1.025
+  finalStackPulseDuration: 0.1
+  winDelayAfterCompletion: 0.15
   startingUndoUses: 3
   startingExpandUses: 2
   undoRefillAmount: 5
   expandRefillAmount: 1
   boltSelectionScale: 1.045
   boltSelectionPulseDuration: 0.12
-  boltAttachYScale: 0.965
-  boltAttachPulseDuration: 0.11
+  boltContactCompression: 0.965
+  boltContactDuration: 0.11
   invalidScalePulse: 0.965
   invalidPulseDuration: 0.16
 --- !u!1 &832575517
@@ -8713,10 +8745,6 @@ MonoBehaviour:
     GridCenterOffset: {x: 0, y: 0, z: -0.25}
     FillBackRowFirst: 1
     OptionalRowHeightOffset: 1
-  boardEntryDuration: 0.26
-  boardEntryStagger: 0.045
-  boardEntryDropOffset: 0.28
-  boardEntryStartScale: 0.9
   levelDataList: []
 --- !u!1 &1057627340
 GameObject:

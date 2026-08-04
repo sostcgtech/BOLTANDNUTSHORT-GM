@@ -1,6 +1,7 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace NutBoltSort
 {
@@ -17,8 +18,11 @@ namespace NutBoltSort
         [SerializeField] private Material hiddenMaterial;
         [SerializeField] private TextMeshPro questionMarkText;
         [SerializeField] private UnityEngine.Color questionMarkColor = UnityEngine.Color.white;
-        [SerializeField, Min(.01f)] private float questionMarkSize = .75f;
-        [SerializeField] private Vector3 questionMarkLocalOffset = new Vector3(0f, .12f, -.34f);
+        [Tooltip("The TextMeshPro font size used by the hidden-nut question mark.")]
+        [FormerlySerializedAs("questionMarkSize")]
+        [SerializeField, Min(.01f)] private float questionMarkFontSize = 3f;
+        [Tooltip("Fallback placement used only when no Question Mark Text is assigned on the prefab.")]
+        [SerializeField] private Vector3 questionMarkLocalOffset = new Vector3(0f, .02f, -.04f);
         [SerializeField, Min(.01f)] private float revealDuration = .30f;
         [SerializeField] private float revealRotationDegrees = 180f;
         [SerializeField, Range(.7f, 1f)] private float revealAnticipationScale = .88f;
@@ -33,6 +37,7 @@ namespace NutBoltSort
         private Material realColorMaterial;
         private Material runtimeHiddenMaterial;
         private Sequence revealSequence;
+        private MaterialPropertyBlock completionGlowProperties;
 
         private void Awake()
         {
@@ -40,6 +45,13 @@ namespace NutBoltSort
 
             if (optionalHighlight != null)
                 optionalHighlight.SetActive(false);
+        }
+
+        private void OnValidate()
+        {
+            if (questionMarkText == null) return;
+            questionMarkText.fontSize = questionMarkFontSize;
+            questionMarkText.color = questionMarkColor;
         }
 
         /// <summary>
@@ -125,17 +137,43 @@ namespace NutBoltSort
             SetQuestionMarkVisible(IsHidden);
         }
 
+        /// <summary>Applies a temporary completion-wave emissive pulse without creating material instances.</summary>
+        public void SetCompletionGlow(UnityEngine.Color color, float strength)
+        {
+            ApplyCompletionGlow(mainRenderer, color, strength);
+            if (bevelRenderer != mainRenderer) ApplyCompletionGlow(bevelRenderer, color, strength);
+        }
+
+        private void ApplyCompletionGlow(Renderer renderer, UnityEngine.Color color, float strength)
+        {
+            if (renderer == null || renderer.sharedMaterial == null || !renderer.sharedMaterial.HasProperty("_EmissionColor")) return;
+            if (completionGlowProperties == null) completionGlowProperties = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(completionGlowProperties);
+            completionGlowProperties.SetColor("_EmissionColor", color * Mathf.Max(0f, strength));
+            renderer.SetPropertyBlock(completionGlowProperties);
+        }
+
         private void EnsureQuestionMark()
         {
-            if (questionMarkText != null) return;
-            var go = new GameObject("QuestionMarkText");
-            go.transform.SetParent(transform, false);
-            go.transform.localPosition = questionMarkLocalOffset;
-            go.transform.localRotation = Quaternion.identity;
-            questionMarkText = go.AddComponent<TextMeshPro>();
+            bool wasCreated = false;
+            if (questionMarkText == null)
+            {
+                var go = new GameObject("QuestionMarkText");
+                go.transform.SetParent(transform, false);
+                questionMarkText = go.AddComponent<TextMeshPro>();
+                wasCreated = true;
+            }
+
+            // A prefab-assigned text object owns its authored placement and rotation.
+            // The offset is used only by the automatic fallback object.
+            if (wasCreated)
+            {
+                questionMarkText.transform.localPosition = questionMarkLocalOffset;
+                questionMarkText.transform.localRotation = Quaternion.identity;
+            }
             questionMarkText.text = "?";
             questionMarkText.alignment = TextAlignmentOptions.Center;
-            questionMarkText.fontSize = questionMarkSize;
+            questionMarkText.fontSize = questionMarkFontSize;
             questionMarkText.color = questionMarkColor;
         }
 

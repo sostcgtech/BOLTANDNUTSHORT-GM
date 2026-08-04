@@ -116,7 +116,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1268385486728740747}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.0253}
+  m_LocalPosition: {x: 0, y: 0, z: 0.03}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -223,8 +223,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 0.5
-  m_fontSizeBase: 0.5
+  m_fontSize: 3
+  m_fontSizeBase: 3
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -262,7 +262,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 0.0099529885, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   _SortingLayer: 0
@@ -297,7 +297,7 @@ Transform:
   m_GameObject: {fileID: 4861358962706283616}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.34}
   m_LocalScale: {x: 10.5, y: 12.9, z: 10.5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -323,8 +323,8 @@ MonoBehaviour:
   hiddenMaterial: {fileID: 2100000, guid: 1cf38610ae897d137b8cc0c16203c075, type: 2}
   questionMarkText: {fileID: 3495207464626759712}
   questionMarkColor: {r: 1, g: 1, b: 1, a: 1}
-  questionMarkSize: 5
-  questionMarkLocalOffset: {x: 0, y: 0.12, z: -0.34}
+  questionMarkFontSize: 3
+  questionMarkLocalOffset: {x: 0, y: 0, z: 0.03}
   revealDuration: 0.3
   revealRotationDegrees: 360
   revealAnticipationScale: 0.88

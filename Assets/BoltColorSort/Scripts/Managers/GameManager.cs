@@ -86,7 +86,8 @@ namespace NutBoltSort
         [SerializeField, Range(1f, 1.1f)] private float finalNutImpactMultiplier = 1.01f;
         [SerializeField] private bool useLandingRotationVariation = true;
         [SerializeField, Range(8f, 15f)] private float landingRotationVariation = 10f;
-        [SerializeField, Range(.08f, .15f)] private float completionEffectDelay = .10f;
+        [FormerlySerializedAs("completionEffectDelay")]
+        [SerializeField, Range(.03f, .06f)] private float completionStartDelay = .04f;
 
         // Entry Animation ─────────────────────────────────────────────────────
         [Header("Entry Animation")]
@@ -112,11 +113,29 @@ namespace NutBoltSort
 
         // Completion Cap ──────────────────────────────────────────────────────
         [Header("Completion Cap")]
-        [SerializeField, Min(0f)]          private float capPopHeight    = .18f;
-        [SerializeField, Range(.5f, 1f)]   private float capStartScale   = .75f;
-        [SerializeField, Min(.01f)]        private float capPopDuration  = .14f;
-        [SerializeField, Min(.01f)]        private float capCloseDuration = .22f;
-        [SerializeField, Range(0f, .15f)]  private float capBounceAmount = .06f;
+        [Header("Completion Wave")]
+        [SerializeField, Range(1.06f, 1.10f)] private float nutWavePulseScale = 1.08f;
+        [SerializeField, Range(.97f, .99f)] private float nutWaveCompressionScale = .98f;
+        [SerializeField, Range(.03f, .06f)] private float nutWaveLiftAmount = .04f;
+        [SerializeField, Range(.12f, .18f)] private float nutWavePulseDuration = .15f;
+        [SerializeField, Range(.035f, .06f)] private float nutWaveStagger = .045f;
+        [SerializeField, Range(0f, 2f)] private float nutWaveGlowStrength = .75f;
+        [Header("Completion Cap")]
+        [FormerlySerializedAs("capPopHeight")]
+        [SerializeField, Range(.20f, .35f)] private float capStartHeight = .25f;
+        [FormerlySerializedAs("capStartScale")]
+        [SerializeField, Range(.65f, .80f)] private float capStartScale = .72f;
+        [FormerlySerializedAs("capCloseDuration")]
+        [SerializeField, Range(.16f, .24f)] private float capDropDuration = .20f;
+        [SerializeField, Range(90f, 180f)] private float capRotationAmount = 120f;
+        [SerializeField] private Vector3 capImpactScale = new Vector3(1.03f, .94f, 1.03f);
+        [FormerlySerializedAs("capPopDuration")]
+        [SerializeField, Range(.05f, .08f)] private float capImpactDuration = .06f;
+        [SerializeField, Range(.06f, .10f)] private float capSettleDuration = .08f;
+        [SerializeField, Range(.70f, .80f)] private float capStartProgress = .75f;
+        [SerializeField, Range(1.02f, 1.04f)] private float finalStackPulseScale = 1.025f;
+        [SerializeField, Range(.08f, .14f)] private float finalStackPulseDuration = .10f;
+        [SerializeField, Range(.10f, .20f)] private float winDelayAfterCompletion = .15f;
 
         [Header("Action Uses")]
         [SerializeField, Min(0)] private int startingUndoUses = 5;
@@ -172,6 +191,9 @@ namespace NutBoltSort
 
         /// <summary>Optional hook fired at the precise moment each transferred nut contacts its destination slot.</summary>
         public event Action<NutView, BoltView> OnNutLanded;
+        public event Action<BoltView> OnCompletionWaveStarted;
+        public event Action<BoltView> OnCompletionWaveReachedTop;
+        public event Action<BoltView> OnCompletionCapClosed;
 
         // ─────────────────────────────────────────────────────────────────────
         // Public Properties
@@ -860,7 +882,7 @@ namespace NutBoltSort
             bool destCompleted = TryLockCompleted(destination);
 
             // Let the final threaded contact read clearly before the existing cap effect.
-            if (destCompleted) yield return new WaitForSeconds(completionEffectDelay);
+            if (destCompleted) yield return new WaitForSeconds(completionStartDelay);
 
             // Notify tutorial.
             int srcIdx2 = levelManager != null ? levelManager.IndexOfBolt(source)      : -1;
@@ -1056,30 +1078,102 @@ namespace NutBoltSort
         {
             if (bolt == null || bolt.CompletionCapTransform == null) yield break;
 
-            Color     capColor = GetTopNutColor(bolt);
-            Transform capTr    = bolt.CompletionCapTransform;
-            Vector3   capScale = bolt.CompletionCapRestingLocalScale;
-            Vector3   restPos  = bolt.GetCapWorldPosition();
-            Vector3   startPos = restPos + Vector3.up * capPopHeight;
-            Vector3   popPos   = restPos + Vector3.up * (capPopHeight * .45f);
+            Color capColor = GetTopNutColor(bolt);
+            Transform capTr = bolt.CompletionCapTransform;
+            Vector3 capScale = bolt.CompletionCapRestingLocalScale;
+            Vector3 restPos = bolt.GetCapWorldPosition();
+            Quaternion restRotation = capTr.localRotation;
+            int nutCount = bolt.Nuts.Count;
 
             if (capSequences.TryGetValue(bolt, out Sequence prev) && prev != null && prev.IsActive())
                 prev.Kill(false);
 
-            bolt.ActivateCap(capColor);
-            capTr.position   = startPos;
-            capTr.localScale = capScale * capStartScale;
+            bolt.DeactivateCap();
+            Sequence completionSeq = DOTween.Sequence().SetTarget(capTr);
+            completionSeq.AppendCallback(() => OnCompletionWaveStarted?.Invoke(bolt));
 
-            Sequence capSeq = DOTween.Sequence().SetTarget(capTr);
-            capSeq.Append(capTr.DOScale(capScale * 1.08f, capPopDuration).SetEase(Ease.OutBack));
-            capSeq.Join(capTr.DOMove(popPos, capPopDuration).SetEase(Ease.OutQuad));
-            capSeq.Append(capTr.DOMove(restPos, capCloseDuration).SetEase(Ease.InCubic));
-            capSeq.Append(capTr.DOScale(capScale * (1f + capBounceAmount), .06f).SetEase(Ease.OutQuad));
-            capSeq.Append(capTr.DOScale(capScale * (1f - capBounceAmount * .5f), .07f).SetEase(Ease.InOutSine));
-            capSeq.Append(capTr.DOScale(capScale, .07f).SetEase(Ease.InOutSine));
+            for (int index = 0; index < nutCount; index++)
+            {
+                NutView nut = bolt.Nuts[index];
+                if (nut == null) continue;
+                completionSeq.Insert(index * nutWaveStagger, CreateNutWavePulse(bolt, nut, index, capColor));
+            }
 
-            capSequences[bolt] = capSeq;
-            yield return capSeq.WaitForCompletion();
+            float waveDuration = (nutCount - 1) * nutWaveStagger + nutWavePulseDuration;
+            float capStartTime = Mathf.Clamp(waveDuration * capStartProgress, 0f, waveDuration);
+            completionSeq.InsertCallback((nutCount - 1) * nutWaveStagger, () => OnCompletionWaveReachedTop?.Invoke(bolt));
+            completionSeq.InsertCallback(capStartTime, () =>
+            {
+                bolt.ActivateCap(capColor);
+                capTr.position = restPos + Vector3.up * capStartHeight;
+                capTr.localScale = capScale * capStartScale;
+                capTr.localRotation = restRotation * Quaternion.Euler(0f, capRotationAmount, 0f);
+            });
+
+            Sequence capClose = DOTween.Sequence();
+            capClose.Append(capTr.DOMove(restPos, capDropDuration).SetEase(Ease.OutCubic));
+            capClose.Join(capTr.DOLocalRotateQuaternion(restRotation, capDropDuration).SetEase(Ease.OutCubic));
+            capClose.Join(capTr.DOScale(capScale * 1.02f, capDropDuration).SetEase(Ease.OutCubic));
+            capClose.Append(capTr.DOScale(Vector3.Scale(capScale, capImpactScale), capImpactDuration).SetEase(Ease.OutQuad));
+            capClose.Append(capTr.DOScale(capScale, capSettleDuration).SetEase(Ease.OutBack));
+            completionSeq.Insert(capStartTime, capClose);
+
+            float finalPulseStart = capStartTime + capDropDuration + capImpactDuration + capSettleDuration;
+            for (int index = 0; index < nutCount; index++)
+            {
+                NutView nut = bolt.Nuts[index];
+                if (nut == null) continue;
+                completionSeq.Insert(finalPulseStart, CreateFinalStackPulse(nut));
+            }
+            completionSeq.InsertCallback(finalPulseStart, () => OnCompletionCapClosed?.Invoke(bolt));
+            completionSeq.Insert(finalPulseStart + finalStackPulseDuration,
+                DOTween.Sequence().AppendInterval(winDelayAfterCompletion));
+            completionSeq.OnComplete(() =>
+            {
+                foreach (NutView nut in bolt.Nuts)
+                {
+                    if (nut == null) continue;
+                    int index = bolt.Nuts.IndexOf(nut);
+                    SnapNutToStack(bolt, nut, index);
+                    nut.SetCompletionGlow(Color.black, 0f);
+                }
+                capTr.position = restPos;
+                capTr.localRotation = restRotation;
+                capTr.localScale = capScale;
+                capSequences.Remove(bolt);
+            });
+
+            capSequences[bolt] = completionSeq;
+            yield return completionSeq.WaitForCompletion();
+        }
+
+        private Sequence CreateNutWavePulse(BoltView bolt, NutView nut, int index, Color completedColor)
+        {
+            Transform tr = nut.transform;
+            Vector3 slot = bolt.GetStackPosition(index);
+            Vector3 scale = nut.RestingLocalScale;
+            float firstPart = nutWavePulseDuration * .40f;
+            float compressionPart = nutWavePulseDuration * .25f;
+            float recoverPart = nutWavePulseDuration - firstPart - compressionPart;
+            Sequence pulse = DOTween.Sequence();
+            pulse.Append(tr.DOLocalMove(slot + Vector3.up * nutWaveLiftAmount, firstPart).SetEase(Ease.OutQuad));
+            pulse.Join(tr.DOScale(scale * nutWavePulseScale, firstPart).SetEase(Ease.OutQuad));
+            pulse.Join(DOTween.To(() => 0f, value => nut.SetCompletionGlow(completedColor, value), nutWaveGlowStrength, firstPart));
+            pulse.Append(tr.DOLocalMove(slot, compressionPart).SetEase(Ease.InQuad));
+            pulse.Join(tr.DOScale(scale * nutWaveCompressionScale, compressionPart).SetEase(Ease.InQuad));
+            pulse.Join(DOTween.To(() => nutWaveGlowStrength, value => nut.SetCompletionGlow(completedColor, value), 0f, compressionPart));
+            pulse.Append(tr.DOScale(scale, recoverPart).SetEase(Ease.OutQuad));
+            return pulse;
+        }
+
+        private Sequence CreateFinalStackPulse(NutView nut)
+        {
+            Transform tr = nut.transform;
+            Vector3 scale = nut.RestingLocalScale;
+            Sequence pulse = DOTween.Sequence();
+            pulse.Append(tr.DOScale(scale * finalStackPulseScale, finalStackPulseDuration * .45f).SetEase(Ease.OutQuad));
+            pulse.Append(tr.DOScale(scale, finalStackPulseDuration * .55f).SetEase(Ease.OutBack));
+            return pulse;
         }
 
         private Color GetTopNutColor(BoltView bolt)
@@ -1350,7 +1444,18 @@ namespace NutBoltSort
             capSequences.Clear();
             if (levelManager != null)
                 foreach (BoltView bolt in levelManager.ActiveBolts)
-                    foreach (NutView nut in bolt.Nuts) nut?.CancelReveal();
+                {
+                    if (bolt == null) continue;
+                    for (int index = 0; index < bolt.Nuts.Count; index++)
+                    {
+                        NutView nut = bolt.Nuts[index];
+                        if (nut == null) continue;
+                        nut.CancelReveal();
+                        nut.SetCompletionGlow(Color.black, 0f);
+                        RestoreNutToStack(bolt, nut, index);
+                    }
+                    bolt.DeactivateCap();
+                }
         }
 
         private void CancelLevelEntry()
