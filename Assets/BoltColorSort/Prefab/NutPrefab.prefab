@@ -395,6 +395,8 @@ MonoBehaviour:
   questionMarkScale: 0.5
   faceCamera: 1
   useContinuousBillboard: 1
+  questionMarkFacingCorrection: {x: 0, y: 180, z: 0}
+  questionMarkFrontAxis: 1
   textOutlineWidth: 0.18
   gameplayCamera: {fileID: 0}
   revealDuration: 0.3

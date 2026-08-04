@@ -10,6 +10,8 @@ namespace NutBoltSort
     /// </summary>
     public class NutView : MonoBehaviour
     {
+        private enum QuestionMarkFrontAxis { Forward, Backward, Right, Left }
+
         [Header("Visual Components")]
         [SerializeField] private Renderer mainRenderer;
         [SerializeField] private Renderer bevelRenderer;
@@ -31,6 +33,9 @@ namespace NutBoltSort
         [SerializeField, Min(.01f)] private float questionMarkScale = 1f;
         [SerializeField] private bool faceCamera = true;
         [SerializeField] private bool useContinuousBillboard = true;
+        [Tooltip("Applied once to the camera rotation before front-face validation.")]
+        [SerializeField] private Vector3 questionMarkFacingCorrection = new Vector3(0f, 180f, 0f);
+        [SerializeField] private QuestionMarkFrontAxis questionMarkFrontAxis = QuestionMarkFrontAxis.Backward;
         [SerializeField, Range(0f, 1f)] private float textOutlineWidth = .18f;
         [SerializeField] private Camera gameplayCamera;
         [SerializeField, Min(.01f)] private float revealDuration = .30f;
@@ -51,6 +56,9 @@ namespace NutBoltSort
         private Sequence revealSequence;
         private MaterialPropertyBlock completionGlowProperties;
         private bool cameraLookupAttempted;
+        private Quaternion originalQuestionMarkLocalRotation = Quaternion.identity;
+        private Vector3 originalQuestionMarkLocalScale = Vector3.one;
+        private bool capturedQuestionMarkLocalTransform;
 
         private void Awake()
         {
@@ -204,6 +212,7 @@ namespace NutBoltSort
             if (questionMarkText.transform.parent != questionMarkAnchor)
                 questionMarkText.transform.SetParent(questionMarkAnchor, false);
 
+            CaptureQuestionMarkLocalTransform();
             ResetQuestionMarkVisual();
             ApplyQuestionMarkTextSettings();
         }
@@ -224,39 +233,126 @@ namespace NutBoltSort
         {
             if (questionMarkAnchor == null) return;
 
+            // Report an authored or pooled negative scale before restoring the safe values.
+            ValidateQuestionMarkScales(false);
             float zScale = Mathf.Max(.0001f, Mathf.Abs(transform.lossyScale.z));
             float localSurfaceOffset = questionMarkSurfaceOffset / zScale;
             questionMarkAnchor.localPosition = questionMarkFrontFaceLocalPosition + Vector3.back * localSurfaceOffset;
-            questionMarkAnchor.localScale = Vector3.one * questionMarkScale;
+            questionMarkAnchor.localScale = Vector3.one * Mathf.Abs(questionMarkScale);
             if (questionMarkText != null)
             {
+                CaptureQuestionMarkLocalTransform();
                 questionMarkText.transform.localPosition = Vector3.zero;
-                // TMP's front is opposite this prefab's anchor forward direction.
-                // Flip the glyph child only; the anchor still owns camera billboard rotation.
-                questionMarkText.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                questionMarkText.transform.localScale = Vector3.one;
+                questionMarkText.transform.localRotation = originalQuestionMarkLocalRotation;
+                questionMarkText.transform.localScale = originalQuestionMarkLocalScale;
             }
-            OrientQuestionMarkToCamera();
+            UpdateQuestionMarkFacing();
         }
 
         private void LateUpdate()
         {
             if (IsHidden && useContinuousBillboard && questionMarkAnchor != null && questionMarkAnchor.gameObject.activeSelf)
-                OrientQuestionMarkToCamera();
+                UpdateQuestionMarkFacing();
         }
 
-        /// <summary>Refreshes the cached-camera billboard after a move or camera change.</summary>
+        /// <summary>Refreshes the cached-camera billboard from a clean, absolute rotation.</summary>
         public void OrientQuestionMarkToCamera()
+        {
+            UpdateQuestionMarkFacing();
+        }
+
+        public void UpdateQuestionMarkFacing()
         {
             if (!faceCamera || questionMarkAnchor == null) return;
             if (gameplayCamera == null) CacheGameplayCamera();
             if (gameplayCamera == null) return;
 
-            // TextMeshPro's readable front points away from the viewing camera.
-            // Using the inverse camera direction keeps the glyph upright instead of mirrored.
-            Vector3 awayFromCamera = questionMarkAnchor.position - gameplayCamera.transform.position;
-            if (awayFromCamera.sqrMagnitude > .000001f)
-                questionMarkAnchor.rotation = Quaternion.LookRotation(awayFromCamera, gameplayCamera.transform.up);
+            Quaternion baseRotation = gameplayCamera.transform.rotation * Quaternion.Euler(questionMarkFacingCorrection);
+            Vector3 toCamera = gameplayCamera.transform.position - questionMarkAnchor.position;
+            if (toCamera.sqrMagnitude <= .000001f) return;
+            toCamera.Normalize();
+
+            Quaternion textRotation = capturedQuestionMarkLocalTransform
+                ? originalQuestionMarkLocalRotation : Quaternion.identity;
+            Vector3 frontDirection = baseRotation * textRotation * GetQuestionMarkLocalFrontAxis();
+            if (Vector3.Dot(frontDirection, toCamera) < 0f)
+                baseRotation *= Quaternion.Euler(0f, 180f, 0f);
+
+            // This is an assignment from camera rotation, never an accumulated rotation.
+            questionMarkAnchor.rotation = baseRotation;
+        }
+
+        private Vector3 GetQuestionMarkLocalFrontAxis()
+        {
+            switch (questionMarkFrontAxis)
+            {
+                case QuestionMarkFrontAxis.Forward: return Vector3.forward;
+                case QuestionMarkFrontAxis.Right: return Vector3.right;
+                case QuestionMarkFrontAxis.Left: return Vector3.left;
+                default: return Vector3.back;
+            }
+        }
+
+        private void CaptureQuestionMarkLocalTransform()
+        {
+            if (capturedQuestionMarkLocalTransform || questionMarkText == null) return;
+            originalQuestionMarkLocalRotation = questionMarkText.transform.localRotation;
+            Vector3 scale = questionMarkText.transform.localScale;
+            if (scale.x <= 0f || scale.y <= 0f || scale.z <= 0f)
+                Debug.LogWarning($"[HiddenNutQuestionMark] {name}: QuestionMarkText authored with a non-positive local scale {scale}. Restoring a positive scale.", questionMarkText);
+            originalQuestionMarkLocalScale = new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
+            capturedQuestionMarkLocalTransform = true;
+        }
+
+        [ContextMenu("Force Question Mark Facing Refresh")]
+        private void ForceQuestionMarkFacingRefresh()
+        {
+            ResetQuestionMarkVisual();
+            ValidateQuestionMarkScales(true);
+            UpdateQuestionMarkFacing();
+            LogQuestionMarkOrientation();
+        }
+
+        [ContextMenu("Validate Question Mark Orientation")]
+        private void ValidateQuestionMarkOrientation()
+        {
+            ValidateQuestionMarkScales(true);
+            LogQuestionMarkOrientation();
+        }
+
+        private void ValidateQuestionMarkScales(bool logPositiveScales)
+        {
+            ValidateScale(transform, "NutRoot", logPositiveScales);
+            ValidateScale(questionMarkAnchor, "QuestionMarkAnchor", logPositiveScales);
+            ValidateScale(questionMarkText != null ? questionMarkText.transform : null, "QuestionMarkText", logPositiveScales);
+        }
+
+        private void ValidateScale(Transform target, string label, bool logPositiveScales)
+        {
+            if (target == null) return;
+            Vector3 local = target.localScale;
+            Vector3 lossy = target.lossyScale;
+            bool negative = local.x <= 0f || local.y <= 0f || local.z <= 0f ||
+                            lossy.x <= 0f || lossy.y <= 0f || lossy.z <= 0f;
+            if (negative)
+                Debug.LogWarning($"[HiddenNutQuestionMark] {name}: {label} has a non-positive scale. local={local}, lossy={lossy}", target);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            else if (logPositiveScales)
+                Debug.Log($"[HiddenNutQuestionMark] {name}: {label} local={local}, lossy={lossy}", target);
+#endif
+        }
+
+        private void LogQuestionMarkOrientation()
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (questionMarkAnchor == null || questionMarkText == null || gameplayCamera == null) return;
+            Quaternion baseRotation = gameplayCamera.transform.rotation * Quaternion.Euler(questionMarkFacingCorrection);
+            Vector3 toCamera = (gameplayCamera.transform.position - questionMarkAnchor.position).normalized;
+            Vector3 front = baseRotation * (capturedQuestionMarkLocalTransform ? originalQuestionMarkLocalRotation : Quaternion.identity) * GetQuestionMarkLocalFrontAxis();
+            float dot = Vector3.Dot(front, toCamera);
+            bool correctionApplied = dot < 0f;
+            Debug.Log($"[HiddenNutQuestionMark] {name}: anchorLocal={questionMarkAnchor.localScale}, anchorLossy={questionMarkAnchor.lossyScale}, textLocal={questionMarkText.transform.localScale}, front={front}, toCamera={toCamera}, dot={dot:F3}, correctionApplied={correctionApplied}", questionMarkAnchor);
+#endif
         }
 
         private void CacheGameplayCamera()
