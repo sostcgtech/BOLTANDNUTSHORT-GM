@@ -14,15 +14,25 @@ namespace NutBoltSort
         [SerializeField] private Renderer mainRenderer;
         [SerializeField] private Renderer bevelRenderer;
         [SerializeField] private GameObject optionalHighlight;
+        [SerializeField] private Transform rotatingNutVisual;
         [Header("Hidden Nut Visual")]
         [SerializeField] private Material hiddenMaterial;
+        [SerializeField] private Transform questionMarkAnchor;
         [SerializeField] private TextMeshPro questionMarkText;
         [SerializeField] private UnityEngine.Color questionMarkColor = UnityEngine.Color.white;
         [Tooltip("The TextMeshPro font size used by the hidden-nut question mark.")]
         [FormerlySerializedAs("questionMarkSize")]
         [SerializeField, Min(.01f)] private float questionMarkFontSize = 3f;
-        [Tooltip("Fallback placement used only when no Question Mark Text is assigned on the prefab.")]
-        [SerializeField] private Vector3 questionMarkLocalOffset = new Vector3(0f, .02f, -.04f);
+        [Tooltip("Centre of the visible front face in NutRoot local space. The negative Z side faces the gameplay camera.")]
+        [FormerlySerializedAs("questionMarkLocalOffset")]
+        [SerializeField] private Vector3 questionMarkFrontFaceLocalPosition = new Vector3(0f, 0f, -.04f);
+        [Tooltip("World-space distance kept between the front face and the question-mark text.")]
+        [SerializeField, Range(.005f, .02f)] private float questionMarkSurfaceOffset = .012f;
+        [SerializeField, Min(.01f)] private float questionMarkScale = 1f;
+        [SerializeField] private bool faceCamera = true;
+        [SerializeField] private bool useContinuousBillboard = true;
+        [SerializeField, Range(0f, 1f)] private float textOutlineWidth = .18f;
+        [SerializeField] private Camera gameplayCamera;
         [SerializeField, Min(.01f)] private float revealDuration = .30f;
         [SerializeField] private float revealRotationDegrees = 180f;
         [SerializeField, Range(.7f, 1f)] private float revealAnticipationScale = .88f;
@@ -34,14 +44,18 @@ namespace NutBoltSort
         public bool IsRevealing { get; private set; }
         public Quaternion RestingLocalRotation { get; set; }
         public Vector3 RestingLocalScale { get; set; }
+        public Quaternion RestingVisualLocalRotation { get; private set; }
+        public Transform RotatingNutVisual => rotatingNutVisual != null ? rotatingNutVisual : transform;
         private Material realColorMaterial;
         private Material runtimeHiddenMaterial;
         private Sequence revealSequence;
         private MaterialPropertyBlock completionGlowProperties;
+        private bool cameraLookupAttempted;
 
         private void Awake()
         {
             CaptureRestingTransform();
+            CacheGameplayCamera();
 
             if (optionalHighlight != null)
                 optionalHighlight.SetActive(false);
@@ -50,8 +64,7 @@ namespace NutBoltSort
         private void OnValidate()
         {
             if (questionMarkText == null) return;
-            questionMarkText.fontSize = questionMarkFontSize;
-            questionMarkText.color = questionMarkColor;
+            ApplyQuestionMarkTextSettings();
         }
 
         /// <summary>
@@ -62,6 +75,7 @@ namespace NutBoltSort
         {
             RestingLocalRotation = transform.localRotation;
             RestingLocalScale = transform.localScale;
+            RestingVisualLocalRotation = RotatingNutVisual.localRotation;
         }
 
         /// <summary>
@@ -102,9 +116,10 @@ namespace NutBoltSort
             IsRevealing = true;
             revealSequence?.Kill(false);
             Transform tr = transform;
+            Transform visual = RotatingNutVisual;
             revealSequence = DOTween.Sequence().SetTarget(tr);
             revealSequence.Append(tr.DOScale(RestingLocalScale * revealAnticipationScale, revealDuration * .25f).SetEase(Ease.InQuad));
-            revealSequence.Append(tr.DORotate(Vector3.up * revealRotationDegrees, revealDuration * .50f, RotateMode.LocalAxisAdd).SetEase(Ease.InOutCubic));
+            revealSequence.Append(visual.DORotate(Vector3.up * revealRotationDegrees, revealDuration * .50f, RotateMode.LocalAxisAdd).SetEase(Ease.InOutCubic));
             revealSequence.InsertCallback(revealDuration * .48f, () =>
             {
                 IsRevealed = true;
@@ -116,6 +131,7 @@ namespace NutBoltSort
             {
                 tr.localRotation = RestingLocalRotation;
                 tr.localScale = RestingLocalScale;
+                visual.localRotation = RestingVisualLocalRotation;
                 IsRevealing = false;
                 revealSequence = null;
             });
@@ -155,26 +171,99 @@ namespace NutBoltSort
 
         private void EnsureQuestionMark()
         {
-            bool wasCreated = false;
+            if (rotatingNutVisual == null)
+            {
+                // Preserve the same separation for the procedural fallback and older
+                // prefab variants: all current mesh children become the spinning visual.
+                var visual = new GameObject("RotatingNutVisual").transform;
+                visual.SetParent(transform, false);
+                for (int i = transform.childCount - 2; i >= 0; i--)
+                {
+                    Transform child = transform.GetChild(i);
+                    if (child != questionMarkAnchor && (questionMarkAnchor == null || !child.IsChildOf(questionMarkAnchor)))
+                        child.SetParent(visual, true);
+                }
+                rotatingNutVisual = visual;
+                RestingVisualLocalRotation = Quaternion.identity;
+            }
+
+            if (questionMarkAnchor == null)
+            {
+                var anchor = new GameObject("QuestionMarkAnchor");
+                anchor.transform.SetParent(transform, false);
+                questionMarkAnchor = anchor.transform;
+            }
+
             if (questionMarkText == null)
             {
                 var go = new GameObject("QuestionMarkText");
-                go.transform.SetParent(transform, false);
+                go.transform.SetParent(questionMarkAnchor, false);
                 questionMarkText = go.AddComponent<TextMeshPro>();
-                wasCreated = true;
             }
 
-            // A prefab-assigned text object owns its authored placement and rotation.
-            // The offset is used only by the automatic fallback object.
-            if (wasCreated)
-            {
-                questionMarkText.transform.localPosition = questionMarkLocalOffset;
-                questionMarkText.transform.localRotation = Quaternion.identity;
-            }
+            if (questionMarkText.transform.parent != questionMarkAnchor)
+                questionMarkText.transform.SetParent(questionMarkAnchor, false);
+
+            ResetQuestionMarkVisual();
+            ApplyQuestionMarkTextSettings();
+        }
+
+        private void ApplyQuestionMarkTextSettings()
+        {
+            if (questionMarkText == null) return;
             questionMarkText.text = "?";
             questionMarkText.alignment = TextAlignmentOptions.Center;
             questionMarkText.fontSize = questionMarkFontSize;
             questionMarkText.color = questionMarkColor;
+            questionMarkText.fontStyle = FontStyles.Bold;
+            // Outline width is exposed for the authored TMP material. Do not assign
+            // fontMaterial here: that would create a material instance per hidden nut.
+        }
+
+        private void ResetQuestionMarkVisual()
+        {
+            if (questionMarkAnchor == null) return;
+
+            float zScale = Mathf.Max(.0001f, Mathf.Abs(transform.lossyScale.z));
+            float localSurfaceOffset = questionMarkSurfaceOffset / zScale;
+            questionMarkAnchor.localPosition = questionMarkFrontFaceLocalPosition + Vector3.back * localSurfaceOffset;
+            questionMarkAnchor.localScale = Vector3.one * questionMarkScale;
+            if (questionMarkText != null)
+            {
+                questionMarkText.transform.localPosition = Vector3.zero;
+                // TMP's front is opposite this prefab's anchor forward direction.
+                // Flip the glyph child only; the anchor still owns camera billboard rotation.
+                questionMarkText.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                questionMarkText.transform.localScale = Vector3.one;
+            }
+            OrientQuestionMarkToCamera();
+        }
+
+        private void LateUpdate()
+        {
+            if (IsHidden && useContinuousBillboard && questionMarkAnchor != null && questionMarkAnchor.gameObject.activeSelf)
+                OrientQuestionMarkToCamera();
+        }
+
+        /// <summary>Refreshes the cached-camera billboard after a move or camera change.</summary>
+        public void OrientQuestionMarkToCamera()
+        {
+            if (!faceCamera || questionMarkAnchor == null) return;
+            if (gameplayCamera == null) CacheGameplayCamera();
+            if (gameplayCamera == null) return;
+
+            // TextMeshPro's readable front points away from the viewing camera.
+            // Using the inverse camera direction keeps the glyph upright instead of mirrored.
+            Vector3 awayFromCamera = questionMarkAnchor.position - gameplayCamera.transform.position;
+            if (awayFromCamera.sqrMagnitude > .000001f)
+                questionMarkAnchor.rotation = Quaternion.LookRotation(awayFromCamera, gameplayCamera.transform.up);
+        }
+
+        private void CacheGameplayCamera()
+        {
+            if (gameplayCamera != null || cameraLookupAttempted) return;
+            cameraLookupAttempted = true;
+            gameplayCamera = Camera.main;
         }
 
         private Material GetHiddenMaterial()
@@ -198,7 +287,14 @@ namespace NutBoltSort
 
         private void SetQuestionMarkVisible(bool visible)
         {
-            if (questionMarkText != null) questionMarkText.gameObject.SetActive(visible);
+            if (questionMarkAnchor == null && visible) EnsureQuestionMark();
+            if (questionMarkAnchor == null) return;
+            if (visible)
+            {
+                ResetQuestionMarkVisual();
+                questionMarkAnchor.gameObject.SetActive(true);
+            }
+            else questionMarkAnchor.gameObject.SetActive(false);
         }
 
         /// <summary>

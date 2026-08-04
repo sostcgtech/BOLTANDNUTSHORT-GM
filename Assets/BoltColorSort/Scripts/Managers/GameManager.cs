@@ -535,6 +535,7 @@ namespace NutBoltSort
                 int     srcIdx   = toMove.Count - 1 - q;
                 NutView nut      = toMove[srcIdx];
                 Transform tr     = nut.transform;
+                Transform visual = nut.RotatingNutVisual;
                 KillNutTween(nut);
 
                 int     destIdx   = destStartIdx + q;
@@ -546,7 +547,7 @@ namespace NutBoltSort
                 Vector3 liftTarget = sourceHover;
                 Sequence liftSeq = DOTween.Sequence();
                 liftSeq.Join(tr.DOMove(liftTarget, liftDuration).SetEase(Ease.OutCubic));
-                liftSeq.Join(tr.DORotate(Vector3.up * (selectionRotationSpeed * liftDuration),
+                liftSeq.Join(visual.DORotate(Vector3.up * (selectionRotationSpeed * liftDuration),
                     liftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                 nutSeq.Append(liftSeq);
 
@@ -558,7 +559,7 @@ namespace NutBoltSort
                 float horizDuration = Mathf.Max(travelDurationMin, horizDist * travelDurationPerUnit);
                 Sequence travelSeq = DOTween.Sequence();
                 travelSeq.Append(tr.DOMove(horizontalDest, horizDuration).SetEase(Ease.InOutSine));
-                travelSeq.Join(tr.DORotate(Vector3.up * (travelRotationSpeed * horizDuration),
+                travelSeq.Join(visual.DORotate(Vector3.up * (travelRotationSpeed * horizDuration),
                     horizDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                 nutSeq.Append(travelSeq);
 
@@ -728,7 +729,7 @@ namespace NutBoltSort
 
             Sequence liftSeq = DOTween.Sequence().SetTarget(liftedNut.transform);
             liftSeq.Join(liftedNut.transform.DOMove(hoverTarget, selectionLiftDuration).SetEase(Ease.OutCubic));
-            liftSeq.Join(liftedNut.transform.DORotate(
+            liftSeq.Join(liftedNut.RotatingNutVisual.DORotate(
                 Vector3.up * (selectionRotationSpeed * selectionLiftDuration),
                 selectionLiftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
 
@@ -792,7 +793,7 @@ namespace NutBoltSort
             KillNutTween(returningNut);
             Sequence returnSeq = DOTween.Sequence().SetTarget(returningNut.transform);
             returnSeq.Join(returningNut.transform.DOMove(returnTarget, returnDuration).SetEase(Ease.InOutCubic));
-            returnSeq.Join(returningNut.transform.DORotate(
+            returnSeq.Join(returningNut.RotatingNutVisual.DORotate(
                 Vector3.down * (selectionRotationSpeed * returnDuration),
                 returnDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
 
@@ -824,6 +825,7 @@ namespace NutBoltSort
                 int      srcIdx = moving.Count - 1 - q;
                 NutView  nut    = moving[srcIdx];
                 Transform tr    = nut.transform;
+                Transform visual = nut.RotatingNutVisual;
                 KillNutTween(nut);
 
                 int     destIdx   = destStartIdx + q;
@@ -842,7 +844,7 @@ namespace NutBoltSort
                     Vector3 liftTarget = sourceHover;
                     Sequence liftSeq = DOTween.Sequence();
                     liftSeq.Join(tr.DOMove(liftTarget, liftDuration).SetEase(Ease.OutCubic));
-                    liftSeq.Join(tr.DORotate(
+                    liftSeq.Join(visual.DORotate(
                         Vector3.up * (selectionRotationSpeed * liftDuration),
                         liftDuration, RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                     nutSeq.Append(liftSeq);
@@ -858,7 +860,7 @@ namespace NutBoltSort
 
                 Sequence travelSeq = DOTween.Sequence();
                 travelSeq.Append(tr.DOMove(horizontalDest, horizDuration).SetEase(Ease.InOutSine));
-                travelSeq.Join(tr.DORotate(Vector3.up * rotDeg, horizDuration,
+                travelSeq.Join(visual.DORotate(Vector3.up * rotDeg, horizDuration,
                     RotateMode.WorldAxisAdd).SetEase(Ease.Linear));
                 nutSeq.Append(travelSeq);
 
@@ -985,7 +987,8 @@ namespace NutBoltSort
                     DOTween.Kill(nutTransform, false);
                     nutTransform.SetParent(bolt.NutContainer, false);
                     nutTransform.localPosition = bolt.GetStackPosition(i) + Vector3.up * nutEntryHeight;
-                    nutTransform.localRotation = nut.RestingLocalRotation * Quaternion.Euler(0f, nutEntryRotation, 0f);
+                    nutTransform.localRotation = nut.RestingLocalRotation;
+                    nut.RotatingNutVisual.localRotation = nut.RestingVisualLocalRotation * Quaternion.Euler(0f, nutEntryRotation, 0f);
                     nutTransform.localScale = nut.RestingLocalScale * nutEntryStartScale;
                     nut.gameObject.SetActive(false);
 
@@ -998,7 +1001,7 @@ namespace NutBoltSort
                     Sequence nutEntry = DOTween.Sequence().SetTarget(nutTransform).SetDelay(nutStart);
                     nutEntry.AppendCallback(() => nut.gameObject.SetActive(true));
                     nutEntry.Append(nutTransform.DOLocalMove(bolt.GetStackPosition(nutIndex), nutEntryDuration).SetEase(Ease.OutCubic));
-                    nutEntry.Join(nutTransform.DOLocalRotateQuaternion(nut.RestingLocalRotation, nutEntryDuration).SetEase(Ease.OutCubic));
+                    nutEntry.Join(nut.RotatingNutVisual.DOLocalRotateQuaternion(nut.RestingVisualLocalRotation, nutEntryDuration).SetEase(Ease.OutCubic));
                     nutEntry.Join(nutTransform.DOScale(nut.RestingLocalScale, nutEntryDuration * .70f).SetEase(Ease.OutCubic));
                     nutEntry.Append(nutTransform.DOScale(nut.RestingLocalScale * nutSettleScale, nutSettleDuration * .45f).SetEase(Ease.OutQuad));
                     nutEntry.Append(nutTransform.DOScale(nut.RestingLocalScale, nutSettleDuration * .55f).SetEase(Ease.OutBack));
@@ -1214,13 +1217,14 @@ namespace NutBoltSort
             if (nutSequence == null || nut == null || destination == null) return;
 
             Transform tr = nut.transform;
+            Transform visual = nut.RotatingNutVisual;
             Vector3 destinationWorld = destination.NutContainer.TransformPoint(destination.GetStackPosition(destinationIndex));
 
             nutSequence.AppendCallback(() =>
             {
                 tr.SetParent(destination.NutContainer, worldPositionStays: true);
                 if (useLandingRotationVariation && landingRotationVariation > 0f)
-                    tr.Rotate(Vector3.up, UnityEngine.Random.Range(-landingRotationVariation, landingRotationVariation), Space.World);
+                    visual.Rotate(Vector3.up, UnityEngine.Random.Range(-landingRotationVariation, landingRotationVariation), Space.World);
             });
 
             // A tiny beat makes the transition from horizontal travel into threading legible.
@@ -1239,7 +1243,7 @@ namespace NutBoltSort
 
             Sequence threadDown = DOTween.Sequence();
             threadDown.Append(tr.DOMove(destinationWorld, threadedDuration).SetEase(dropEase));
-            threadDown.Join(tr.DORotate(Vector3.down * threadDegrees, threadedDuration,
+            threadDown.Join(visual.DORotate(Vector3.down * threadDegrees, threadedDuration,
                 RotateMode.WorldAxisAdd).SetEase(dropEase));
             threadDown.Insert(compressionStart,
                 tr.DOScale(compressedScale, compressionDuration).SetEase(Ease.InQuad));
@@ -1471,7 +1475,9 @@ namespace NutBoltSort
 
         private static void KillNutTween(NutView nut)
         {
-            if (nut != null) DOTween.Kill(nut.transform, false);
+            if (nut == null) return;
+            DOTween.Kill(nut.transform, false);
+            DOTween.Kill(nut.RotatingNutVisual, false);
         }
 
         private void ClearSelection()
@@ -1540,6 +1546,8 @@ namespace NutBoltSort
             if (tr.parent != bolt.NutContainer) tr.SetParent(bolt.NutContainer, false);
             tr.localPosition = bolt.GetStackPosition(index);
             tr.localRotation = nut.RestingLocalRotation;
+            nut.RotatingNutVisual.localRotation = nut.RestingVisualLocalRotation;
+            nut.OrientQuestionMarkToCamera();
         }
 
         // ─────────────────────────────────────────────────────────────────────

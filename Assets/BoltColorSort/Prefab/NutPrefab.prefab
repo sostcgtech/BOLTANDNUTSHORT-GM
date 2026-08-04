@@ -1,5 +1,69 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &910000000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000000000000002}
+  m_Layer: 0
+  m_Name: RotatingNutVisual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910000000000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000000000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6205567775927138661}
+  m_Father: {fileID: 8371855624592364451}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &910000000000000003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 910000000000000004}
+  m_Layer: 0
+  m_Name: QuestionMarkAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &910000000000000004
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 910000000000000003}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.04114286}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7773835091940448658}
+  m_Father: {fileID: 8371855624592364451}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1253954807813589228
 GameObject:
   m_ObjectHideFlags: 0
@@ -12,7 +76,7 @@ GameObject:
   - component: {fileID: 6701988837806990135}
   - component: {fileID: 1793423858533407882}
   m_Layer: 0
-  m_Name: Nut
+  m_Name: NutMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +95,7 @@ Transform:
   m_LocalScale: {x: 10, y: 10, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8371855624592364451}
+  m_Father: {fileID: 910000000000000002}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!33 &6701988837806990135
 MeshFilter:
@@ -102,7 +166,7 @@ GameObject:
   - component: {fileID: 6730228305434749116}
   - component: {fileID: 3495207464626759712}
   m_Layer: 0
-  m_Name: QestionMark
+  m_Name: QuestionMarkText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -116,16 +180,16 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1268385486728740747}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.03}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8371855624592364451}
+  m_Father: {fileID: 910000000000000004}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0.06518, y: 0.06156}
+  m_SizeDelta: {x: 0.02925, y: 0.02762}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &6730228305434749116
 MeshRenderer:
@@ -223,8 +287,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 3
-  m_fontSizeBase: 3
+  m_fontSize: 0.27
+  m_fontSizeBase: 0.27
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -301,8 +365,8 @@ Transform:
   m_LocalScale: {x: 10.5, y: 12.9, z: 10.5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6205567775927138661}
-  - {fileID: 7773835091940448658}
+  - {fileID: 910000000000000002}
+  - {fileID: 910000000000000004}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6738112415320462758
@@ -320,11 +384,19 @@ MonoBehaviour:
   mainRenderer: {fileID: 1793423858533407882}
   bevelRenderer: {fileID: 0}
   optionalHighlight: {fileID: 0}
+  rotatingNutVisual: {fileID: 910000000000000002}
   hiddenMaterial: {fileID: 2100000, guid: 1cf38610ae897d137b8cc0c16203c075, type: 2}
+  questionMarkAnchor: {fileID: 910000000000000004}
   questionMarkText: {fileID: 3495207464626759712}
   questionMarkColor: {r: 1, g: 1, b: 1, a: 1}
-  questionMarkFontSize: 3
-  questionMarkLocalOffset: {x: 0, y: 0, z: 0.03}
+  questionMarkFontSize: 0.27
+  questionMarkFrontFaceLocalPosition: {x: 0, y: 0.005, z: -0.04}
+  questionMarkSurfaceOffset: 0.012
+  questionMarkScale: 0.5
+  faceCamera: 1
+  useContinuousBillboard: 1
+  textOutlineWidth: 0.18
+  gameplayCamera: {fileID: 0}
   revealDuration: 0.3
   revealRotationDegrees: 360
   revealAnticipationScale: 0.88
