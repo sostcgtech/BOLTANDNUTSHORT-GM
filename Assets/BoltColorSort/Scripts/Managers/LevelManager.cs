@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using DG.Tweening;
 using UnityEngine;
 
 namespace NutBoltSort
@@ -17,12 +16,6 @@ namespace NutBoltSort
 
         [Header("Grid Layout Settings")]
         [SerializeField] private BoltGridLayoutSettings gridLayoutSettings = new BoltGridLayoutSettings();
-
-        [Header("Board Entry")]
-        [SerializeField, Range(.1f, .5f)] private float boardEntryDuration = .26f;
-        [SerializeField, Range(.03f, .06f)] private float boardEntryStagger = .045f;
-        [SerializeField] private float boardEntryDropOffset = .28f;
-        [SerializeField, Range(.8f, 1f)] private float boardEntryStartScale = .9f;
 
         [Header("Level Data Assets")]
         [SerializeField] private List<LevelDataSO> levelDataList = new List<LevelDataSO>();
@@ -276,27 +269,6 @@ namespace NutBoltSort
                 }
             }
 
-            // Keep the camera exactly where Levels 1–5 leave it. Procedural layouts only
-            // control bolt positions, never camera position or orthographic size.
-            if (data != null && data.isProcedural) PlayBoardEntry();
-        }
-
-        private void PlayBoardEntry()
-        {
-            for (int index = 0; index < activeBolts.Count; index++)
-            {
-                BoltView bolt = activeBolts[index];
-                if (bolt == null) continue;
-                Transform tr = bolt.transform;
-                Vector3 finalPosition = tr.localPosition;
-                Vector3 finalScale = bolt.RestingLocalScale;
-                tr.localPosition = finalPosition + Vector3.down * boardEntryDropOffset;
-                tr.localScale = finalScale * boardEntryStartScale;
-                Sequence sequence = DOTween.Sequence().SetTarget(tr);
-                sequence.SetDelay(index * boardEntryStagger);
-                sequence.Join(tr.DOLocalMove(finalPosition, boardEntryDuration).SetEase(Ease.OutCubic));
-                sequence.Join(tr.DOScale(finalScale, boardEntryDuration).SetEase(Ease.OutBack));
-            }
         }
 
         private BoltView SpawnBolt(int boltIndex)

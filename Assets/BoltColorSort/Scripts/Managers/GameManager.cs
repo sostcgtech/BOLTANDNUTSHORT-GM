@@ -90,20 +90,25 @@ namespace NutBoltSort
 
         // Entry Animation ─────────────────────────────────────────────────────
         [Header("Entry Animation")]
-        [Tooltip("Height above final slot each nut starts from.")]
-        [SerializeField, Range(.3f, .7f)]   private float entryHeightOffset = .50f;
-
-        [Tooltip("Minimum random Y-rotation added to each nut at entry start.")]
-        [SerializeField, Range(90f, 360f)]  private float entryRotMin       = 90f;
-
-        [Tooltip("Maximum random Y-rotation added to each nut at entry start.")]
-        [SerializeField, Range(90f, 360f)]  private float entryRotMax       = 270f;
-
-        [Tooltip("Bottom-to-top gap used by the ordered startup queue on each bolt.")]
-        [SerializeField, Range(0f, .30f)]   private float entryMaxDelay     = .20f;
-
-        [Tooltip("Duration of each nut's drop animation.")]
-        [SerializeField, Range(.15f, .50f)] private float entryDuration     = .27f;
+        [SerializeField] private Vector3 boltEntryOffset = new Vector3(0f, -.35f, 0f);
+        [SerializeField, Range(.85f, .92f)] private float boltEntryStartScale = .90f;
+        [SerializeField, Range(.22f, .32f)] private float boltEntryDuration = .26f;
+        [SerializeField, Range(.03f, .06f)] private float boltEntryStagger = .04f;
+        [SerializeField, Range(.08f, .14f)] private float rowEntryDelay = .10f;
+        [SerializeField] private bool animateBoltsInParallel = true;
+        [SerializeField, Range(1, 4)] private int maximumConcurrentBoltEntrySequences = 4;
+        [FormerlySerializedAs("entryHeightOffset")]
+        [SerializeField, Range(.55f, .85f)] private float nutEntryHeight = .65f;
+        [SerializeField, Range(.88f, .95f)] private float nutEntryStartScale = .92f;
+        [FormerlySerializedAs("entryDuration")]
+        [SerializeField, Range(.18f, .28f)] private float nutEntryDuration = .22f;
+        [FormerlySerializedAs("entryMaxDelay")]
+        [SerializeField, Range(.05f, .09f)] private float nutEntryStagger = .07f;
+        [SerializeField, Range(120f, 300f)] private float nutEntryRotation = 180f;
+        [SerializeField, Range(1.02f, 1.04f)] private float nutSettleScale = 1.025f;
+        [SerializeField, Range(.05f, .10f)] private float nutSettleDuration = .08f;
+        [SerializeField] private bool useClearanceBasedNutStagger = true;
+        [SerializeField] private bool allowParallelNutEntryAcrossBolts = true;
 
         // Completion Cap ──────────────────────────────────────────────────────
         [Header("Completion Cap")]
@@ -149,6 +154,11 @@ namespace NutBoltSort
         private int activeTransferCount;
         private readonly List<Sequence>              hoverSequences = new List<Sequence>();
         private readonly Dictionary<BoltView, Sequence> capSequences  = new Dictionary<BoltView, Sequence>();
+        private readonly List<Sequence> entrySequences = new List<Sequence>();
+        private int activeBoltEntryCount;
+        private int activeNutEntryCount;
+        private int entryGenerationVersion;
+        private bool isLevelEntryPlaying;
 
         private bool inputLocked;
         private bool won;
@@ -180,6 +190,10 @@ namespace NutBoltSort
         public int RemainingExpandUses => remainingExpandUses;
         public bool IsUndoAdRequestActive => isUndoAdRequestActive;
         public bool IsExpandAdRequestActive => isExpandAdRequestActive;
+        public int ActiveBoltEntryCount => activeBoltEntryCount;
+        public int ActiveNutEntryCount => activeNutEntryCount;
+        public int EntryGenerationVersion => entryGenerationVersion;
+        public bool IsLevelEntryPlaying => isLevelEntryPlaying;
         /// <summary>Display availability: only uses and move history control the Undo button's visual state.</summary>
         public bool HasUndoAction => remainingUndoUses > 0 && undoManager != null && undoManager.CanUndo;
         /// <summary>Display availability: only uses and an unexpanded bolt control the Expand button's visual state.</summary>
@@ -884,58 +898,131 @@ namespace NutBoltSort
         private IEnumerator PlayEntryAnimation()
         {
             inputLocked = true;
+            int version = ++entryGenerationVersion;
+            isLevelEntryPlaying = true;
+            activeBoltEntryCount = 0;
+            activeNutEntryCount = 0;
+            entrySequences.Clear();
 
             if (levelManager == null || levelManager.ActiveBolts.Count == 0)
             {
                 ShowSilentCaps();
                 tutorialController?.OnBoardReady(currentLevelNumber);
+                isLevelEntryPlaying = false;
                 inputLocked = false;
                 uiManager?.RefreshActionButtonStates();
                 yield break;
             }
 
-            Sequence entrySeq = DOTween.Sequence();
+            int boltOrdinal = 0;
+            int concurrentBoltLimit = animateBoltsInParallel
+                ? Mathf.Clamp(maximumConcurrentBoltEntrySequences, 1, 4) : 1;
+            float boltBatchDuration = boltEntryDuration + (concurrentBoltLimit - 1) * boltEntryStagger;
 
             foreach (BoltView bolt in levelManager.ActiveBolts)
             {
                 if (bolt == null) continue;
+                Transform boltTransform = bolt.transform;
+                DOTween.Kill(boltTransform, false);
+
+                Vector3 finalBoltPosition = boltTransform.localPosition;
+                Quaternion finalBoltRotation = boltTransform.localRotation;
+                Vector3 finalBoltScale = bolt.RestingLocalScale;
+                int row = GetEntryRowIndex(bolt);
+                int batch = boltOrdinal / concurrentBoltLimit;
+                int batchSlot = boltOrdinal % concurrentBoltLimit;
+                float boltStart = batch * boltBatchDuration + batchSlot * boltEntryStagger + row * rowEntryDelay;
+
+                boltTransform.localPosition = finalBoltPosition + boltEntryOffset;
+                boltTransform.localRotation = finalBoltRotation;
+                boltTransform.localScale = finalBoltScale * boltEntryStartScale;
+
+                activeBoltEntryCount++;
+                Sequence boltEntry = DOTween.Sequence().SetTarget(boltTransform).SetDelay(boltStart);
+                boltEntry.Join(boltTransform.DOLocalMove(finalBoltPosition, boltEntryDuration).SetEase(Ease.OutCubic));
+                boltEntry.Join(boltTransform.DOScale(finalBoltScale, boltEntryDuration).SetEase(Ease.OutBack));
+                boltEntry.OnComplete(() =>
+                {
+                    if (version != entryGenerationVersion) return;
+                    boltTransform.localPosition = finalBoltPosition;
+                    boltTransform.localRotation = finalBoltRotation;
+                    boltTransform.localScale = finalBoltScale;
+                    activeBoltEntryCount--;
+                    entrySequences.Remove(boltEntry);
+                });
+                entrySequences.Add(boltEntry);
+
+                float nutStartBase = boltStart + boltEntryDuration * .70f;
+                float safeNutStagger = GetSafeNutEntryStagger(bolt);
                 for (int i = 0; i < bolt.Nuts.Count; i++)
                 {
                     NutView nut = bolt.Nuts[i];
                     if (nut == null) continue;
 
-                    Vector3 finalWorld  = bolt.NutContainer.TransformPoint(bolt.GetStackPosition(i));
-                    Vector3 startWorld  = finalWorld + Vector3.up * entryHeightOffset;
-                    float   randomYRot  = UnityEngine.Random.Range(entryRotMin, entryRotMax);
-                    float   entryClearanceDelay = Mathf.Max(entryMaxDelay, entryDuration * .65f);
-                    float   delay = i * entryClearanceDelay;
+                    Transform nutTransform = nut.transform;
+                    DOTween.Kill(nutTransform, false);
+                    nutTransform.SetParent(bolt.NutContainer, false);
+                    nutTransform.localPosition = bolt.GetStackPosition(i) + Vector3.up * nutEntryHeight;
+                    nutTransform.localRotation = nut.RestingLocalRotation * Quaternion.Euler(0f, nutEntryRotation, 0f);
+                    nutTransform.localScale = nut.RestingLocalScale * nutEntryStartScale;
+                    nut.gameObject.SetActive(false);
 
-                    nut.transform.position     = startWorld;
-                    nut.transform.localRotation = Quaternion.Euler(
-                        nut.RestingLocalRotation.eulerAngles.x,
-                        nut.RestingLocalRotation.eulerAngles.y + randomYRot,
-                        nut.RestingLocalRotation.eulerAngles.z);
+                    int nutIndex = i;
+                    float nutStart = nutStartBase + nutIndex * safeNutStagger;
+                    if (!allowParallelNutEntryAcrossBolts)
+                        nutStart += boltOrdinal * (nutEntryDuration + nutSettleDuration + safeNutStagger * 3f);
 
-                    BoltView capturedBolt = bolt;
-                    NutView  capturedNut  = nut;
-                    int      capturedIdx  = i;
-
-                    Sequence nutEntry = DOTween.Sequence().SetTarget(nut.transform);
-                    nutEntry.Append(nut.transform.DOMove(finalWorld, entryDuration).SetEase(Ease.OutCubic));
-                    nutEntry.Join(nut.transform.DOLocalRotateQuaternion(
-                        nut.RestingLocalRotation, entryDuration).SetEase(Ease.OutCubic));
-                    nutEntry.OnComplete(() => SnapNutToStack(capturedBolt, capturedNut, capturedIdx));
-
-                    entrySeq.Insert(delay, nutEntry);
+                    activeNutEntryCount++;
+                    Sequence nutEntry = DOTween.Sequence().SetTarget(nutTransform).SetDelay(nutStart);
+                    nutEntry.AppendCallback(() => nut.gameObject.SetActive(true));
+                    nutEntry.Append(nutTransform.DOLocalMove(bolt.GetStackPosition(nutIndex), nutEntryDuration).SetEase(Ease.OutCubic));
+                    nutEntry.Join(nutTransform.DOLocalRotateQuaternion(nut.RestingLocalRotation, nutEntryDuration).SetEase(Ease.OutCubic));
+                    nutEntry.Join(nutTransform.DOScale(nut.RestingLocalScale, nutEntryDuration * .70f).SetEase(Ease.OutCubic));
+                    nutEntry.Append(nutTransform.DOScale(nut.RestingLocalScale * nutSettleScale, nutSettleDuration * .45f).SetEase(Ease.OutQuad));
+                    nutEntry.Append(nutTransform.DOScale(nut.RestingLocalScale, nutSettleDuration * .55f).SetEase(Ease.OutBack));
+                    nutEntry.OnComplete(() =>
+                    {
+                        if (version != entryGenerationVersion) return;
+                        SnapNutToStack(bolt, nut, nutIndex);
+                        activeNutEntryCount--;
+                        entrySequences.Remove(nutEntry);
+                    });
+                    entrySequences.Add(nutEntry);
                 }
+
+                boltOrdinal++;
             }
 
-            yield return entrySeq.WaitForCompletion();
+            while (version == entryGenerationVersion && (activeBoltEntryCount > 0 || activeNutEntryCount > 0))
+                yield return null;
+
+            if (version != entryGenerationVersion) yield break;
 
             ShowSilentCaps();
             tutorialController?.OnBoardReady(currentLevelNumber);
+            isLevelEntryPlaying = false;
             inputLocked = false;
             uiManager?.RefreshActionButtonStates();
+        }
+
+        private float GetSafeNutEntryStagger(BoltView bolt)
+        {
+            float configured = Mathf.Clamp(nutEntryStagger, .05f, .09f);
+            if (!useClearanceBasedNutStagger || bolt == null || bolt.Nuts.Count < 2) return configured;
+
+            float slotSpacing = Mathf.Abs(bolt.GetStackPosition(1).y - bolt.GetStackPosition(0).y);
+            float entrySpeed = Mathf.Max(.01f, nutEntryHeight / Mathf.Max(.01f, nutEntryDuration));
+            return Mathf.Max(configured, slotSpacing / entrySpeed);
+        }
+
+        private int GetEntryRowIndex(BoltView bolt)
+        {
+            if (bolt == null || levelManager == null) return 0;
+            float maxZ = float.NegativeInfinity;
+            foreach (BoltView candidate in levelManager.ActiveBolts)
+                if (candidate != null) maxZ = Mathf.Max(maxZ, candidate.transform.localPosition.z);
+            float spacing = Mathf.Max(.01f, levelManager.GridLayoutSettings.RowDepthSpacing);
+            return Mathf.Max(0, Mathf.RoundToInt((maxZ - bolt.transform.localPosition.z) / spacing));
         }
 
         private void ShowSilentCaps()
@@ -1252,6 +1339,7 @@ namespace NutBoltSort
 
         private void KillAllTweens()
         {
+            CancelLevelEntry();
             KillGameplayTweens();
             foreach (Sequence moveSequence in activeMoveSequences)
                 if (moveSequence != null && moveSequence.IsActive()) moveSequence.Kill(false);
@@ -1263,6 +1351,17 @@ namespace NutBoltSort
             if (levelManager != null)
                 foreach (BoltView bolt in levelManager.ActiveBolts)
                     foreach (NutView nut in bolt.Nuts) nut?.CancelReveal();
+        }
+
+        private void CancelLevelEntry()
+        {
+            entryGenerationVersion++;
+            foreach (Sequence sequence in entrySequences)
+                if (sequence != null && sequence.IsActive()) sequence.Kill(false);
+            entrySequences.Clear();
+            activeBoltEntryCount = 0;
+            activeNutEntryCount = 0;
+            isLevelEntryPlaying = false;
         }
 
         private static void KillNutTween(NutView nut)
