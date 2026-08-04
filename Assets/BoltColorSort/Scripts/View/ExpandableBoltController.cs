@@ -119,6 +119,7 @@ namespace NutBoltSort
             }, 1f, settleDuration).SetEase(Ease.OutBack));
             _stageSequence.OnComplete(() =>
             {
+                AudioManager.Play(SfxType.ExpandComplete);
                 _stageOneLocked = false;
                 ClearStageBrightness(stageOne);
                 SetColliderEnabled(true);
@@ -161,6 +162,7 @@ namespace NutBoltSort
             }, 1f, settleDuration * .5f).SetEase(Ease.OutBack));
             _stageSequence.OnComplete(() =>
             {
+                AudioManager.Play(SfxType.ExpandComplete);
                 if (currentStage != null) currentStage.SetActive(false);
                 SetStageVerticalScale(nextCapacity, 1f);
                 AnchorStageBottom(nextStage);

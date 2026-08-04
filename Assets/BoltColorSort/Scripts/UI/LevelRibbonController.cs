@@ -61,6 +61,7 @@ namespace NutBoltSort
 
         public void Show(int levelNumber)
         {
+            AudioManager.Play(SfxType.LevelStart);
             Play(levelNumber, animationStyle);
         }
 

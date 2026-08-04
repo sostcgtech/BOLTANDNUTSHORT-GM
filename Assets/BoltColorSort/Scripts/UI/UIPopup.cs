@@ -48,6 +48,7 @@ namespace NutBoltSort
 
         public void Open(Action onComplete = null)
         {
+            AudioManager.Play(SfxType.PopupOpen);
             IsOpen = true;
             gameObject.SetActive(true);
 
@@ -79,6 +80,7 @@ namespace NutBoltSort
 
         public void Close(Action onComplete = null)
         {
+            AudioManager.Play(SfxType.PopupClose);
             IsOpen = false;
 
             currentSequence?.Kill();

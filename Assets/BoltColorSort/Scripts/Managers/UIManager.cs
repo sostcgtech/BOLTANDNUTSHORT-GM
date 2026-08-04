@@ -101,6 +101,8 @@ namespace NutBoltSort
         public void OnRestartButtonPressed()
         {
             if (gameManager == null) return;
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Vibrate(HapticType.Light);
             CloseAllPopups();
             gameManager.RestartLevel();
             UpdateLevelDisplay();
@@ -110,6 +112,8 @@ namespace NutBoltSort
         public void OnUndoButtonPressed()
         {
             if (gameManager == null) return;
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Vibrate(HapticType.Light);
             if (gameManager.RemainingUndoUses > 0) gameManager.UndoLastMove();
             else gameManager.RequestUndoRewardAd();
         }
@@ -117,6 +121,8 @@ namespace NutBoltSort
         public void OnExpandBoltButtonPressed()
         {
             if (gameManager == null) return;
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Vibrate(HapticType.Light);
             if (gameManager.RemainingExpandUses > 0) gameManager.ExpandFirstAvailableBolt();
             else gameManager.RequestExpandRewardAd();
         }
@@ -124,6 +130,8 @@ namespace NutBoltSort
         public void OnUnlockBoltButtonPressed()
         {
             if (gameManager == null) return;
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Vibrate(HapticType.Light);
             gameManager.UnlockFirstLockedBolt();
         }
 
@@ -167,6 +175,8 @@ namespace NutBoltSort
         public void OnNextLevelWinPressed()
         {
             if (gameManager == null) return;
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Vibrate(HapticType.Light);
 
             if (winPopup != null)
             {

@@ -422,7 +422,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -560,7 +560,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
   m_Navigation:
     m_Mode: 3
@@ -7587,6 +7587,8 @@ GameObject:
   m_Component:
   - component: {fileID: 814769456}
   - component: {fileID: 814769457}
+  - component: {fileID: 814769458}
+  - component: {fileID: 814769459}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -7690,6 +7692,57 @@ MonoBehaviour:
   boltContactDuration: 0.11
   invalidScalePulse: 0.965
   invalidPulseDuration: 0.16
+--- !u!114 &814769458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814769455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73d37f20b7a64a9aaebeb1f973e6f9c1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.AudioManager
+  sfxAudioSource: {fileID: 0}
+  masterSfxVolume: 1
+  minimumRepeatDelay: 0.06
+  debugLogging: 0
+  buttonClick: {fileID: 0}
+  buttonBack: {fileID: 0}
+  popupOpen: {fileID: 0}
+  popupClose: {fileID: 0}
+  nutPickup: {fileID: 0}
+  nutReturn: {fileID: 0}
+  nutTravel: {fileID: 0}
+  nutLand: {fileID: 0}
+  invalidMove: {fileID: 0}
+  selectionSwitch: {fileID: 0}
+  expandBolt: {fileID: 0}
+  expandComplete: {fileID: 0}
+  hiddenNutReveal: {fileID: 0}
+  boltComplete: {fileID: 0}
+  completionCap: {fileID: 0}
+  undo: {fileID: 0}
+  levelStart: {fileID: 0}
+  levelComplete: {fileID: 0}
+  reward: {fileID: 0}
+  victory: {fileID: 0}
+--- !u!114 &814769459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 814769455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f2e5a103c0d4b0ab16b9f15c4329a11, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.HapticManager
+  enableHaptics: 1
+  minimumRepeatDelay: 0.05
+  debugLogging: 0
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

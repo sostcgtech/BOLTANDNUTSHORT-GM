@@ -222,6 +222,7 @@ namespace NutBoltSort
             if (questionMarkText == null) return;
             questionMarkText.text = "?";
             questionMarkText.alignment = TextAlignmentOptions.Center;
+            questionMarkText.enableWordWrapping = false;
             questionMarkText.fontSize = questionMarkFontSize;
             questionMarkText.color = questionMarkColor;
             questionMarkText.fontStyle = FontStyles.Bold;
