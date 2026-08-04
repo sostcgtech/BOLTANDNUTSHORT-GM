@@ -244,13 +244,17 @@
           },
           {
             "name": "LightProbes",
-            "scenes": [],
+            "scenes": [
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
           {
             "name": "LightingSettings",
-            "scenes": [],
+            "scenes": [
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
