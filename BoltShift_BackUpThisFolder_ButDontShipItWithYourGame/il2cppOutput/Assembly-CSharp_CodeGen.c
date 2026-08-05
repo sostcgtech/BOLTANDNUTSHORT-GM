@@ -415,9 +415,12 @@ extern void HapticManager_PlayInternal_mC32FB0ADF9A617AEF4FCB7AEB38BE0EC24395AE6
 extern void HapticManager_InitializeNativeBridge_m226E37011B77F624B7328CF69BAA82E1C65A8EE6 (void);
 extern void HapticManager_CacheEffects_m703DDF6DA191100CB12995C4AA96A0DC4E495CFE (void);
 extern void HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4 (void);
+extern void HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642 (void);
+extern void HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0 (void);
 extern void HapticManager_PlayAndroid_m31D67599354E1FD763A02443CECCB1A30133D73D (void);
 extern void HapticManager_GetLegacyDuration_m984CC95FEF88A40312674C37ABD0079C4BF57626 (void);
 extern void HapticManager_OnDestroy_m357406E1BCEB97329384A9E3E86A40AABD54D56E (void);
+extern void HapticManager_DisposeEffects_m95ACB9A74135D6396EA33CE6ECC33ED70444CDFC (void);
 extern void HapticManager_DisposeNativeBridge_mB2A9DFA9CF183E287217629C0D1238165F188FDE (void);
 extern void HapticManager_DebugLight_mDFB19951566CE2F0C946BDFC1BBCDA359AB4A64D (void);
 extern void HapticManager_DebugMedium_m5479F2952B300C61645033DF4840FD2DA0974BFC (void);
@@ -832,7 +835,7 @@ extern void NutView__ctor_m69F34638DB8EB755B2B90CBB77056012E9B3CF53 (void);
 extern void U3CU3Ec__DisplayClass67_0__ctor_m709AC850551E6F61C5969C0E935D48826CCC5E22 (void);
 extern void U3CU3Ec__DisplayClass67_0_U3CRevealU3Eb__0_mB2FA66DCE57C62FCA1EE308E23A97CDD0DE99345 (void);
 extern void U3CU3Ec__DisplayClass67_0_U3CRevealU3Eb__1_m4898637D402BF80CDAF094D4DA06A0A1FE1423F3 (void);
-static Il2CppMethodPointer s_methodPointers[827] = 
+static Il2CppMethodPointer s_methodPointers[830] = 
 {
 	NutBoltSortPrototype_Awake_mC872F4357D9BB44308BBAFF0FEA5C34456FB6C4E,
 	NutBoltSortPrototype__ctor_m0D36D8A8A2C439BADCE7F8A6B2D1025A13A81A1B,
@@ -1244,9 +1247,12 @@ static Il2CppMethodPointer s_methodPointers[827] =
 	HapticManager_InitializeNativeBridge_m226E37011B77F624B7328CF69BAA82E1C65A8EE6,
 	HapticManager_CacheEffects_m703DDF6DA191100CB12995C4AA96A0DC4E495CFE,
 	HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4,
+	HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642,
+	HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0,
 	HapticManager_PlayAndroid_m31D67599354E1FD763A02443CECCB1A30133D73D,
 	HapticManager_GetLegacyDuration_m984CC95FEF88A40312674C37ABD0079C4BF57626,
 	HapticManager_OnDestroy_m357406E1BCEB97329384A9E3E86A40AABD54D56E,
+	HapticManager_DisposeEffects_m95ACB9A74135D6396EA33CE6ECC33ED70444CDFC,
 	HapticManager_DisposeNativeBridge_mB2A9DFA9CF183E287217629C0D1238165F188FDE,
 	HapticManager_DebugLight_mDFB19951566CE2F0C946BDFC1BBCDA359AB4A64D,
 	HapticManager_DebugMedium_m5479F2952B300C61645033DF4840FD2DA0974BFC,
@@ -1662,7 +1668,7 @@ static Il2CppMethodPointer s_methodPointers[827] =
 	U3CU3Ec__DisplayClass67_0_U3CRevealU3Eb__0_mB2FA66DCE57C62FCA1EE308E23A97CDD0DE99345,
 	U3CU3Ec__DisplayClass67_0_U3CRevealU3Eb__1_m4898637D402BF80CDAF094D4DA06A0A1FE1423F3,
 };
-static const int32_t s_InvokerIndices[827] = 
+static const int32_t s_InvokerIndices[830] = 
 {
 	10535,
 	10535,
@@ -2074,8 +2080,11 @@ static const int32_t s_InvokerIndices[827] =
 	10535,
 	10535,
 	2339,
+	6926,
+	6509,
 	7941,
 	15426,
+	10535,
 	10535,
 	10535,
 	10535,
@@ -2536,7 +2545,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule;
 const Il2CppCodeGenModule g_AssemblyU2DCSharp_CodeGenModule = 
 {
 	"Assembly-CSharp.dll",
-	827,
+	830,
 	s_methodPointers,
 	0,
 	NULL,

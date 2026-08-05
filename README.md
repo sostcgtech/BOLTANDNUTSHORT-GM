@@ -97,3 +97,27 @@ Not included:
 - Undo
 - Locked or special nuts
 - Menus, progression, ads, currency, audio polish, or monetisation
+
+
+
+
+MainMenuManager  ← add MainMenuManager.cs
+MainCamera
+EventSystem
+MainMenuCanvas (Canvas + CanvasScaler + GraphicRaycaster)
+└── SafeArea (SafeArea.cs)
+    ├── BackgroundImage (Image, stretch full screen)
+    ├── GameLogo (Image or TMP_Text)
+    ├── TopBar
+    │   └── SettingsButton (Button)
+    ├── CenterContent
+    │   └── PlayButtonRoot (RectTransform + CanvasGroup)
+    │       └── PlayButton (Button)
+    │           ├── PlayText (TMP_Text → "PLAY")
+    │           └── LevelText (TMP_Text → "LEVEL 1")
+    ├── BottomContent
+    │   └── RemoveAdsButton (Button)
+    ├── SettingsOverlay ← MainMenuSettingsPanel.cs on child SettingsPanel
+    ├── RemoveAdsOverlay ← RemoveAdsPopup.cs on child RemoveAdsPanel
+    └── SceneTransitionOverlay ← SceneTransitionController.cs
+        └── TransitionShape (Image with circle sprite, centered)

@@ -314,6 +314,7 @@ IL2CPP_EXTERN_C RuntimeClass* List_1_tD3AD5D0810B5B2E6119E5994FBC8883CA505DD03_i
 IL2CPP_EXTERN_C RuntimeClass* List_1_tD933257ACFDB3968D4277C164DC9F6DFA6B511BF_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* NutColorU5BU5D_t1A9D729539DB1734F60C4ED9B86DA52E2352FDB1_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* NutColor_t3D6B1C9782B863363552A4C80BF3CCCAE825F7AB_il2cpp_TypeInfo_var;
@@ -615,7 +616,6 @@ IL2CPP_EXTERN_C const RuntimeMethod* U3CU3Ec__DisplayClass181_0_U3CAppendThreade
 IL2CPP_EXTERN_C const RuntimeMethod* U3CU3Ec__DisplayClass181_0_U3CAppendThreadedLandingU3Eb__1_mCA61BAE0B2DAF5BCED9ED9EC0A8FCD5A355F4344_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* U3CU3Ec__DisplayClass181_0_U3CAppendThreadedLandingU3Eb__2_m9E7A9FDCAE852534C66852898EB26923CBDE3C08_RuntimeMethod_var;
 IL2CPP_EXTERN_C const char* U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____08B06BA91C8EC8563FBA7CD4038FA9699D8AD7B3FD34E52E42FDBCBBDA783FFD_RVAStorage;
-IL2CPP_EXTERN_C const char* U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____08BB64BB763C00D3EB1442A7E86CAEFA89C7CE014F7E4B2726516CB18F0BDD36_RVAStorage;
 IL2CPP_EXTERN_C const char* U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____15C7616300AD61F7E69D42C9283EFFDFD8CAF19A9693567278D231F5E77D0395_RVAStorage;
 IL2CPP_EXTERN_C const char* U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____18C874B5FCC604FE3B8241EB4224494C7B800BC98C3A765966DCFACC59767717_RVAStorage;
 IL2CPP_EXTERN_C const char* U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____2A8F66C90DFB6BF0C8E7ED10C69F33BA5FDDB56F597E7F40DFA61DDCA3241797_RVAStorage;
@@ -1102,6 +1102,16 @@ struct IntPtr_t
 {
 	void* ___m_value;
 };
+struct Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682 
+{
+	union
+	{
+		struct
+		{
+		};
+		uint8_t Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682__padding[1];
+	};
+};
 struct Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6 
 {
 	float ___m00;
@@ -1260,21 +1270,6 @@ struct __StaticArrayInitTypeSizeU3D2011_tBC6F51F95EF80341DD446D38FACEEA77AE5AA51
 			};
 		};
 		uint8_t __StaticArrayInitTypeSizeU3D2011_tBC6F51F95EF80341DD446D38FACEEA77AE5AA512__padding[2011];
-	};
-};
-#pragma pack(pop, tp)
-#pragma pack(push, tp, 1)
-struct __StaticArrayInitTypeSizeU3D32_tC3894D25C1E879699FE1C9BAB1BBF2787B405069 
-{
-	union
-	{
-		struct
-		{
-			union
-			{
-			};
-		};
-		uint8_t __StaticArrayInitTypeSizeU3D32_tC3894D25C1E879699FE1C9BAB1BBF2787B405069__padding[32];
 	};
 };
 #pragma pack(pop, tp)
@@ -2293,6 +2288,7 @@ struct HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B  : public MonoBeh
 	bool ___enableHaptics;
 	bool ___useNativeAndroidHaptics;
 	bool ___useLegacyFallback;
+	float ___hapticIntensity;
 	float ___minimumRepeatDelay;
 	bool ___debugHaptics;
 	float ___lastVibrationTime;
@@ -2304,6 +2300,7 @@ struct HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B  : public MonoBeh
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* ___heavyEffect;
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* ___successEffect;
 	int32_t ___androidApiLevel;
+	float ___cachedHapticIntensity;
 };
 struct LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
 {
@@ -2579,7 +2576,6 @@ struct U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49
 {
 	__StaticArrayInitTypeSizeU3D12_t1BDD2193C3F925556BCD5FF35C0AC52DDB0CAB8F ___02433989DC22CF3B439520872116A54CD7D45A171AC418FB24BC2594D82FD250;
 	__StaticArrayInitTypeSizeU3D16_tFB2D94E174C3DFBC336BBEE6AD92E07462831A23 ___08B06BA91C8EC8563FBA7CD4038FA9699D8AD7B3FD34E52E42FDBCBBDA783FFD;
-	__StaticArrayInitTypeSizeU3D32_tC3894D25C1E879699FE1C9BAB1BBF2787B405069 ___08BB64BB763C00D3EB1442A7E86CAEFA89C7CE014F7E4B2726516CB18F0BDD36;
 	__StaticArrayInitTypeSizeU3D16_tFB2D94E174C3DFBC336BBEE6AD92E07462831A23 ___15C7616300AD61F7E69D42C9283EFFDFD8CAF19A9693567278D231F5E77D0395;
 	__StaticArrayInitTypeSizeU3D16_tFB2D94E174C3DFBC336BBEE6AD92E07462831A23 ___18C874B5FCC604FE3B8241EB4224494C7B800BC98C3A765966DCFACC59767717;
 	__StaticArrayInitTypeSizeU3D16_tFB2D94E174C3DFBC336BBEE6AD92E07462831A23 ___2A8F66C90DFB6BF0C8E7ED10C69F33BA5FDDB56F597E7F40DFA61DDCA3241797;
@@ -2636,6 +2632,11 @@ struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2_StaticFields
 struct IntPtr_t_StaticFields
 {
 	intptr_t ___Zero;
+};
+struct Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682_StaticFields
+{
+	float ___Epsilon;
+	float ___ApproxEpsilon;
 };
 struct Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6_StaticFields
 {
@@ -3825,11 +3826,16 @@ inline bool AndroidJavaObject_Call_TisBoolean_t09A6377A54BE2F9E6985A8149F19234FD
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_CacheEffects_m703DDF6DA191100CB12995C4AA96A0DC4E495CFE (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Debug_LogWarning_m23033D7E2F0F298BE465B7F3A63CDF40A4EB70EB (RuntimeObject* ___0_message, Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___1_context, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DisposeNativeBridge_mB2A9DFA9CF183E287217629C0D1238165F188FDE (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DisposeEffects_m95ACB9A74135D6396EA33CE6ECC33ED70444CDFC (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Mathf_Approximately_m1DADD012A8FC82E11FB282501AE2EBBF9A77150B_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) ;
 inline AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63 (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* __this, String_t* ___0_methodName, ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* ___1_args, const RuntimeMethod* method)
 {
 	return ((  AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* (*) (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0*, String_t*, ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*, const RuntimeMethod*))AndroidJavaObject_CallStatic_TisIl2CppSharedGenericObject_mF6EA4A6FC668EA46C5309B3E3A5ABB83600F50F6_gshared)(__this, ___0_methodName, ___1_args, method);
 }
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int64_t HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642 (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, int64_t ___0_milliseconds, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0 (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, int32_t ___0_amplitude, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4 (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, int64_t ___0_milliseconds, int32_t ___1_amplitude, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline (float ___0_a, float ___1_b, float ___2_t, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AndroidJavaObject_Call_mDEF7846E2AB1C5379069BB21049ED55A9D837B1C (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* __this, String_t* ___0_methodName, ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* ___1_args, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int64_t HapticManager_GetLegacyDuration_m984CC95FEF88A40312674C37ABD0079C4BF57626 (int32_t ___0_type, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6 (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* __this, const RuntimeMethod* method) ;
@@ -19439,143 +19445,185 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_CacheEffects_m703DDF6DA191
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C_il2cpp_TypeInfo_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D_il2cpp_TypeInfo_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var);
-		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____08BB64BB763C00D3EB1442A7E86CAEFA89C7CE014F7E4B2726516CB18F0BDD36_RVAStorage);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralE3A105D59F493421481242819787FDF8AA700AF8);
 		s_Il2CppMethodInitialized = true;
 	}
 	//<source_info:<no-source>:1>
 	{
-		int32_t L_0 = __this->___androidApiLevel;
-		if ((((int32_t)L_0) < ((int32_t)((int32_t)29))))
+		HapticManager_DisposeEffects_m95ACB9A74135D6396EA33CE6ECC33ED70444CDFC(__this, NULL);
+		float L_0 = __this->___hapticIntensity;
+		__this->___cachedHapticIntensity = L_0;
+		int32_t L_1 = __this->___androidApiLevel;
+		if ((((int32_t)L_1) < ((int32_t)((int32_t)29))))
 		{
-			goto IL_0079;
+			goto IL_00a0;
 		}
 	}
 	{
-		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_1 = __this->___vibrationEffectClass;
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_2 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_3 = L_2;
-		int32_t L_4 = 2;
-		RuntimeObject* L_5 = Box(il2cpp_defaults.int32_class, &L_4);
-		NullCheck(L_3);
-		ArrayElementTypeCheck (L_3, L_5);
-		(L_3)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_5);
-		NullCheck(L_1);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_6;
-		L_6 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_1, _stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067, L_3, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
-		__this->___lightEffect = L_6;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___lightEffect), (void*)L_6);
-		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_7 = __this->___vibrationEffectClass;
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_8 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_9 = L_8;
-		int32_t L_10 = 0;
-		RuntimeObject* L_11 = Box(il2cpp_defaults.int32_class, &L_10);
-		NullCheck(L_9);
-		ArrayElementTypeCheck (L_9, L_11);
-		(L_9)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_11);
-		NullCheck(L_7);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_12;
-		L_12 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_7, _stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067, L_9, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
-		__this->___mediumEffect = L_12;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___mediumEffect), (void*)L_12);
-		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_13 = __this->___vibrationEffectClass;
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_14 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_15 = L_14;
-		int32_t L_16 = 5;
-		RuntimeObject* L_17 = Box(il2cpp_defaults.int32_class, &L_16);
-		NullCheck(L_15);
-		ArrayElementTypeCheck (L_15, L_17);
-		(L_15)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_17);
-		NullCheck(L_13);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_18;
-		L_18 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_13, _stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067, L_15, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
-		__this->___heavyEffect = L_18;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___heavyEffect), (void*)L_18);
-	}
-
-IL_0079:
-	{
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_19 = __this->___lightEffect;
-		if (L_19)
+		float L_2 = __this->___hapticIntensity;
+		bool L_3;
+		L_3 = Mathf_Approximately_m1DADD012A8FC82E11FB282501AE2EBBF9A77150B_inline(L_2, (1.0f), NULL);
+		if (!L_3)
 		{
-			goto IL_0092;
+			goto IL_00a0;
 		}
 	}
 	{
-		int64_t L_20 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)12),NULL));
+		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_4 = __this->___vibrationEffectClass;
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_5 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_6 = L_5;
+		int32_t L_7 = 2;
+		RuntimeObject* L_8 = Box(il2cpp_defaults.int32_class, &L_7);
+		NullCheck(L_6);
+		ArrayElementTypeCheck (L_6, L_8);
+		(L_6)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_8);
+		NullCheck(L_4);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_9;
+		L_9 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_4, _stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067, L_6, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
+		__this->___lightEffect = L_9;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___lightEffect), (void*)L_9);
+		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_10 = __this->___vibrationEffectClass;
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_11 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_12 = L_11;
+		int32_t L_13 = 0;
+		RuntimeObject* L_14 = Box(il2cpp_defaults.int32_class, &L_13);
+		NullCheck(L_12);
+		ArrayElementTypeCheck (L_12, L_14);
+		(L_12)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_14);
+		NullCheck(L_10);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_15;
+		L_15 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_10, _stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067, L_12, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
+		__this->___mediumEffect = L_15;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___mediumEffect), (void*)L_15);
+		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_16 = __this->___vibrationEffectClass;
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_17 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_18 = L_17;
+		int32_t L_19 = 5;
+		RuntimeObject* L_20 = Box(il2cpp_defaults.int32_class, &L_19);
+		NullCheck(L_18);
+		ArrayElementTypeCheck (L_18, L_20);
+		(L_18)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_20);
+		NullCheck(L_16);
 		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_21;
-		L_21 = HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4(__this, L_20, ((int32_t)80), NULL);
-		__this->___lightEffect = L_21;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___lightEffect), (void*)L_21);
+		L_21 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_16, _stringLiteral517FCA512E951D414485BAFDE62DEEA2F4E04067, L_18, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
+		__this->___heavyEffect = L_21;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___heavyEffect), (void*)L_21);
 	}
 
-IL_0092:
+IL_00a0:
 	{
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_22 = __this->___mediumEffect;
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_22 = __this->___lightEffect;
 		if (L_22)
 		{
-			goto IL_00ae;
+			goto IL_00c5;
 		}
 	}
 	{
-		int64_t L_23 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)25),NULL));
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_24;
-		L_24 = HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4(__this, L_23, ((int32_t)145), NULL);
-		__this->___mediumEffect = L_24;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___mediumEffect), (void*)L_24);
+		int64_t L_23 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)12),NULL));
+		int64_t L_24;
+		L_24 = HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642(__this, L_23, NULL);
+		int32_t L_25;
+		L_25 = HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0(__this, ((int32_t)80), NULL);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_26;
+		L_26 = HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4(__this, L_24, L_25, NULL);
+		__this->___lightEffect = L_26;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___lightEffect), (void*)L_26);
 	}
 
-IL_00ae:
+IL_00c5:
 	{
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_25 = __this->___heavyEffect;
-		if (L_25)
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_27 = __this->___mediumEffect;
+		if (L_27)
 		{
-			goto IL_00ca;
+			goto IL_00ed;
 		}
 	}
 	{
-		int64_t L_26 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)42),NULL));
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_27;
-		L_27 = HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4(__this, L_26, ((int32_t)220), NULL);
-		__this->___heavyEffect = L_27;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___heavyEffect), (void*)L_27);
+		int64_t L_28 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)25),NULL));
+		int64_t L_29;
+		L_29 = HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642(__this, L_28, NULL);
+		int32_t L_30;
+		L_30 = HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0(__this, ((int32_t)145), NULL);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_31;
+		L_31 = HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4(__this, L_29, L_30, NULL);
+		__this->___mediumEffect = L_31;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___mediumEffect), (void*)L_31);
 	}
 
-IL_00ca:
+IL_00ed:
 	{
-		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_28 = __this->___vibrationEffectClass;
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_29 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)3);
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_30 = L_29;
-		Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D* L_31 = (Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D*)(Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D*)SZArrayNew(Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D_il2cpp_TypeInfo_var, (uint32_t)4);
-		Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D* L_32 = L_31;
-		Il2CppFieldRvaData L_33 = {U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields____08BB64BB763C00D3EB1442A7E86CAEFA89C7CE014F7E4B2726516CB18F0BDD36_RVAStorage, sizeof(__StaticArrayInitTypeSizeU3D32_tC3894D25C1E879699FE1C9BAB1BBF2787B405069)};
-		il2cpp_codegen_runtime_helpers_initialize_array((RuntimeArray*)L_32, L_33);
-		NullCheck(L_30);
-		ArrayElementTypeCheck (L_30, L_32);
-		(L_30)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_32);
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_34 = L_30;
-		Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* L_35 = (Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C*)(Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C*)SZArrayNew(Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C_il2cpp_TypeInfo_var, (uint32_t)4);
-		Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* L_36 = L_35;
-		NullCheck(L_36);
-		(L_36)->SetAt(static_cast<il2cpp_array_size_t>(1), (int32_t)((int32_t)90));
-		Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* L_37 = L_36;
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_32 = __this->___heavyEffect;
+		if (L_32)
+		{
+			goto IL_0115;
+		}
+	}
+	{
+		int64_t L_33 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)42),NULL));
+		int64_t L_34;
+		L_34 = HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642(__this, L_33, NULL);
+		int32_t L_35;
+		L_35 = HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0(__this, ((int32_t)220), NULL);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_36;
+		L_36 = HapticManager_CreateOneShot_m9C673703237C50A8F22747DA248589429603BDA4(__this, L_34, L_35, NULL);
+		__this->___heavyEffect = L_36;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___heavyEffect), (void*)L_36);
+	}
+
+IL_0115:
+	{
+		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_37 = __this->___vibrationEffectClass;
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_38 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)3);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_39 = L_38;
+		Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D* L_40 = (Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D*)(Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D*)SZArrayNew(Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D_il2cpp_TypeInfo_var, (uint32_t)4);
+		Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D* L_41 = L_40;
+		int64_t L_42 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)12),NULL));
+		int64_t L_43;
+		L_43 = HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642(__this, L_42, NULL);
+		NullCheck(L_41);
+		(L_41)->SetAt(static_cast<il2cpp_array_size_t>(1), (int64_t)L_43);
+		Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D* L_44 = L_41;
+		int64_t L_45 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)35),NULL));
+		int64_t L_46;
+		L_46 = HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642(__this, L_45, NULL);
+		NullCheck(L_44);
+		(L_44)->SetAt(static_cast<il2cpp_array_size_t>(2), (int64_t)L_46);
+		Int64U5BU5D_tAEDFCBDB5414E2A140A6F34C0538BF97FCF67A1D* L_47 = L_44;
+		int64_t L_48 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(((int32_t)18),NULL));
+		int64_t L_49;
+		L_49 = HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642(__this, L_48, NULL);
+		NullCheck(L_47);
+		(L_47)->SetAt(static_cast<il2cpp_array_size_t>(3), (int64_t)L_49);
+		NullCheck(L_39);
+		ArrayElementTypeCheck (L_39, L_47);
+		(L_39)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_47);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_50 = L_39;
+		Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* L_51 = (Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C*)(Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C*)SZArrayNew(Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C_il2cpp_TypeInfo_var, (uint32_t)4);
+		Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* L_52 = L_51;
+		int32_t L_53;
+		L_53 = HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0(__this, ((int32_t)90), NULL);
+		NullCheck(L_52);
+		(L_52)->SetAt(static_cast<il2cpp_array_size_t>(1), (int32_t)L_53);
+		Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* L_54 = L_52;
+		int32_t L_55;
+		L_55 = HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0(__this, ((int32_t)150), NULL);
+		NullCheck(L_54);
+		(L_54)->SetAt(static_cast<il2cpp_array_size_t>(3), (int32_t)L_55);
+		NullCheck(L_50);
+		ArrayElementTypeCheck (L_50, L_54);
+		(L_50)->SetAt(static_cast<il2cpp_array_size_t>(1), (RuntimeObject*)L_54);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_56 = L_50;
+		int32_t L_57 = (-1);
+		RuntimeObject* L_58 = Box(il2cpp_defaults.int32_class, &L_57);
+		NullCheck(L_56);
+		ArrayElementTypeCheck (L_56, L_58);
+		(L_56)->SetAt(static_cast<il2cpp_array_size_t>(2), (RuntimeObject*)L_58);
 		NullCheck(L_37);
-		(L_37)->SetAt(static_cast<il2cpp_array_size_t>(3), (int32_t)((int32_t)150));
-		NullCheck(L_34);
-		ArrayElementTypeCheck (L_34, L_37);
-		(L_34)->SetAt(static_cast<il2cpp_array_size_t>(1), (RuntimeObject*)L_37);
-		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_38 = L_34;
-		int32_t L_39 = (-1);
-		RuntimeObject* L_40 = Box(il2cpp_defaults.int32_class, &L_39);
-		NullCheck(L_38);
-		ArrayElementTypeCheck (L_38, L_40);
-		(L_38)->SetAt(static_cast<il2cpp_array_size_t>(2), (RuntimeObject*)L_40);
-		NullCheck(L_28);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_41;
-		L_41 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_28, _stringLiteralE3A105D59F493421481242819787FDF8AA700AF8, L_38, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
-		__this->___successEffect = L_41;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___successEffect), (void*)L_41);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_59;
+		L_59 = AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63(L_37, _stringLiteralE3A105D59F493421481242819787FDF8AA700AF8, L_56, AndroidJavaObject_CallStatic_TisAndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0_m398EA96C1DE1BB885F2B1DD0E00E8BBA86B49E63_RuntimeMethod_var);
+		__this->___successEffect = L_59;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___successEffect), (void*)L_59);
 		return;
 	}
 }
@@ -19615,6 +19663,37 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR AndroidJavaObject_t8FFB930F335C1178405B82AC2B
 	}
 }
 // Method Definition Index: 53058
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int64_t HapticManager_ScaleDuration_mAFF92A7F15B3058ACA66A6CBF87047C87E3C7642 (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, int64_t ___0_milliseconds, const RuntimeMethod* method) 
+{
+	//<source_info:<no-source>:1>
+	{
+		int64_t L_0 = ___0_milliseconds;
+		float L_1 = (il2cpp_codegen_conv<float,int64_t,int64_t,false,false>(L_0,NULL));
+		float L_2 = __this->___hapticIntensity;
+		float L_3;
+		L_3 = Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline((0.699999988f), (1.35000002f), ((float)il2cpp_codegen_multiply(L_2, (0.5f))), NULL);
+		int32_t L_4;
+		L_4 = Mathf_RoundToInt_m60F8B66CF27F1FA75AA219342BD184B75771EB4B_inline(((float)il2cpp_codegen_multiply(L_1, L_3)), NULL);
+		int64_t L_5 = (il2cpp_codegen_conv<int64_t,int32_t,int32_t,false,false>(L_4,NULL));
+		return L_5;
+	}
+}
+// Method Definition Index: 53059
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t HapticManager_ScaleAmplitude_mA9070AD63AB140C38DCD7E1DEF855C050EE5C5B0 (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, int32_t ___0_amplitude, const RuntimeMethod* method) 
+{
+	//<source_info:<no-source>:1>
+	{
+		int32_t L_0 = ___0_amplitude;
+		float L_1 = (il2cpp_codegen_conv<float,int32_t,int32_t,false,false>(L_0,NULL));
+		float L_2 = __this->___hapticIntensity;
+		int32_t L_3;
+		L_3 = Mathf_RoundToInt_m60F8B66CF27F1FA75AA219342BD184B75771EB4B_inline(((float)il2cpp_codegen_multiply(L_1, L_2)), NULL);
+		int32_t L_4;
+		L_4 = Mathf_Clamp_m4DC36EEFDBE5F07C16249DA568023C5ECCFF0E7B_inline(L_3, 1, ((int32_t)255), NULL);
+		return L_4;
+	}
+}
+// Method Definition Index: 53060
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_PlayAndroid_m31D67599354E1FD763A02443CECCB1A30133D73D (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, int32_t ___0_type, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -19628,7 +19707,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_PlayAndroid_m31D67599354E1
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* V_0 = NULL;
 	Exception_t* V_1 = NULL;
 	il2cpp::utils::ExceptionSupportStack<RuntimeObject*, 1> __active_exceptions;
-	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B10_0 = NULL;
+	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B12_0 = NULL;
 	{
 		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_0 = __this->___vibrator;
 		if (L_0)
@@ -19646,108 +19725,123 @@ IL_0009:
 	try
 	{
 		{
-			int32_t L_1 = ___0_type;
-			if (!L_1)
+			float L_1 = __this->___cachedHapticIntensity;
+			float L_2 = __this->___hapticIntensity;
+			bool L_3;
+			L_3 = Mathf_Approximately_m1DADD012A8FC82E11FB282501AE2EBBF9A77150B_inline(L_1, L_2, NULL);
+			if (L_3)
 			{
-				goto IL_002d_1;
+				goto IL_0023_1;
 			}
 		}
 		{
-			int32_t L_2 = ___0_type;
-			if ((((int32_t)L_2) == ((int32_t)1)))
-			{
-				goto IL_0025_1;
-			}
-		}
-		{
-			int32_t L_3 = ___0_type;
-			if ((((int32_t)L_3) == ((int32_t)2)))
-			{
-				goto IL_001d_1;
-			}
-		}
-		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_4 = __this->___successEffect;
-			G_B10_0 = L_4;
-			goto IL_0033_1;
+			HapticManager_CacheEffects_m703DDF6DA191100CB12995C4AA96A0DC4E495CFE(__this, NULL);
 		}
 
-IL_001d_1:
+IL_0023_1:
 		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_5 = __this->___heavyEffect;
-			G_B10_0 = L_5;
-			goto IL_0033_1;
-		}
-
-IL_0025_1:
-		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_6 = __this->___mediumEffect;
-			G_B10_0 = L_6;
-			goto IL_0033_1;
-		}
-
-IL_002d_1:
-		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_7 = __this->___lightEffect;
-			G_B10_0 = L_7;
-		}
-
-IL_0033_1:
-		{
-			V_0 = G_B10_0;
-			bool L_8 = __this->___useNativeAndroidHaptics;
-			if (!L_8)
+			int32_t L_4 = ___0_type;
+			if (!L_4)
 			{
-				goto IL_005b_1;
+				goto IL_0046_1;
 			}
 		}
 		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_9 = V_0;
-			if (!L_9)
+			int32_t L_5 = ___0_type;
+			if ((((int32_t)L_5) == ((int32_t)1)))
 			{
-				goto IL_005b_1;
+				goto IL_003e_1;
 			}
 		}
 		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_10 = __this->___vibrator;
-			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_11 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
-			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_12 = L_11;
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_13 = V_0;
-			NullCheck(L_12);
-			ArrayElementTypeCheck (L_12, L_13);
-			(L_12)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_13);
-			NullCheck(L_10);
-			AndroidJavaObject_Call_mDEF7846E2AB1C5379069BB21049ED55A9D837B1C(L_10, _stringLiteral1645079AF0AD68877D5774BC81695A708DB69E30, L_12, NULL);
-			goto IL_0087_1;
+			int32_t L_6 = ___0_type;
+			if ((((int32_t)L_6) == ((int32_t)2)))
+			{
+				goto IL_0036_1;
+			}
+		}
+		{
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_7 = __this->___successEffect;
+			G_B12_0 = L_7;
+			goto IL_004c_1;
 		}
 
-IL_005b_1:
+IL_0036_1:
 		{
-			bool L_14 = __this->___useLegacyFallback;
-			if (!L_14)
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_8 = __this->___heavyEffect;
+			G_B12_0 = L_8;
+			goto IL_004c_1;
+		}
+
+IL_003e_1:
+		{
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_9 = __this->___mediumEffect;
+			G_B12_0 = L_9;
+			goto IL_004c_1;
+		}
+
+IL_0046_1:
+		{
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_10 = __this->___lightEffect;
+			G_B12_0 = L_10;
+		}
+
+IL_004c_1:
+		{
+			V_0 = G_B12_0;
+			bool L_11 = __this->___useNativeAndroidHaptics;
+			if (!L_11)
 			{
-				goto IL_0087_1;
+				goto IL_0074_1;
 			}
 		}
 		{
-			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_15 = __this->___vibrator;
-			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_16 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
-			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_17 = L_16;
-			int32_t L_18 = ___0_type;
-			int64_t L_19;
-			L_19 = HapticManager_GetLegacyDuration_m984CC95FEF88A40312674C37ABD0079C4BF57626(L_18, NULL);
-			int64_t L_20 = L_19;
-			RuntimeObject* L_21 = Box(il2cpp_defaults.int64_class, &L_20);
-			NullCheck(L_17);
-			ArrayElementTypeCheck (L_17, L_21);
-			(L_17)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_21);
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_12 = V_0;
+			if (!L_12)
+			{
+				goto IL_0074_1;
+			}
+		}
+		{
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_13 = __this->___vibrator;
+			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_14 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
+			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_15 = L_14;
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_16 = V_0;
 			NullCheck(L_15);
-			AndroidJavaObject_Call_mDEF7846E2AB1C5379069BB21049ED55A9D837B1C(L_15, _stringLiteral1645079AF0AD68877D5774BC81695A708DB69E30, L_17, NULL);
+			ArrayElementTypeCheck (L_15, L_16);
+			(L_15)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_16);
+			NullCheck(L_13);
+			AndroidJavaObject_Call_mDEF7846E2AB1C5379069BB21049ED55A9D837B1C(L_13, _stringLiteral1645079AF0AD68877D5774BC81695A708DB69E30, L_15, NULL);
+			goto IL_00a0_1;
 		}
 
-IL_0087_1:
+IL_0074_1:
 		{
-			goto IL_00aa;
+			bool L_17 = __this->___useLegacyFallback;
+			if (!L_17)
+			{
+				goto IL_00a0_1;
+			}
+		}
+		{
+			AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_18 = __this->___vibrator;
+			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_19 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)1);
+			ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_20 = L_19;
+			int32_t L_21 = ___0_type;
+			int64_t L_22;
+			L_22 = HapticManager_GetLegacyDuration_m984CC95FEF88A40312674C37ABD0079C4BF57626(L_21, NULL);
+			int64_t L_23 = L_22;
+			RuntimeObject* L_24 = Box(il2cpp_defaults.int64_class, &L_23);
+			NullCheck(L_20);
+			ArrayElementTypeCheck (L_20, L_24);
+			(L_20)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)L_24);
+			NullCheck(L_18);
+			AndroidJavaObject_Call_mDEF7846E2AB1C5379069BB21049ED55A9D837B1C(L_18, _stringLiteral1645079AF0AD68877D5774BC81695A708DB69E30, L_20, NULL);
+		}
+
+IL_00a0_1:
+		{
+			goto IL_00c3;
 		}
 	}
 	catch(Il2CppExceptionWrapper& e)
@@ -19755,46 +19849,46 @@ IL_0087_1:
 		if(il2cpp_codegen_class_is_assignable_from (((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&Exception_t_il2cpp_TypeInfo_var)), il2cpp_codegen_object_class(e.ex)))
 		{
 			IL2CPP_PUSH_ACTIVE_EXCEPTION(e.ex);
-			goto CATCH_0089;
+			goto CATCH_00a2;
 		}
 		throw e;
 	}
 
-CATCH_0089:
+CATCH_00a2:
 	{
 		{
-			Exception_t* L_22 = ((Exception_t*)IL2CPP_GET_ACTIVE_EXCEPTION(Exception_t*));;
-			V_1 = L_22;
-			bool L_23 = __this->___debugHaptics;
-			if (!L_23)
+			Exception_t* L_25 = ((Exception_t*)IL2CPP_GET_ACTIVE_EXCEPTION(Exception_t*));;
+			V_1 = L_25;
+			bool L_26 = __this->___debugHaptics;
+			if (!L_26)
 			{
-				goto IL_00a8;
+				goto IL_00c1;
 			}
 		}
 		{
-			Exception_t* L_24 = V_1;
-			NullCheck(L_24);
-			String_t* L_25;
-			L_25 = VirtualFuncInvoker0< String_t* >::Invoke(5, L_24);
-			String_t* L_26;
-			L_26 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteralE361CC29CB29C0EBCA2AE66AE8F4F54EFC9CC0A6)), L_25, NULL);
+			Exception_t* L_27 = V_1;
+			NullCheck(L_27);
+			String_t* L_28;
+			L_28 = VirtualFuncInvoker0< String_t* >::Invoke(5, L_27);
+			String_t* L_29;
+			L_29 = String_Concat_m9E3155FB84015C823606188F53B47CB44C444991(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteralE361CC29CB29C0EBCA2AE66AE8F4F54EFC9CC0A6)), L_28, NULL);
 			il2cpp_codegen_runtime_class_init_inline(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var)));
-			Debug_LogWarning_m23033D7E2F0F298BE465B7F3A63CDF40A4EB70EB(L_26, __this, NULL);
+			Debug_LogWarning_m23033D7E2F0F298BE465B7F3A63CDF40A4EB70EB(L_29, __this, NULL);
 		}
 
-IL_00a8:
+IL_00c1:
 		{
 			IL2CPP_POP_ACTIVE_EXCEPTION(Exception_t*);
-			goto IL_00aa;
+			goto IL_00c3;
 		}
 	}
 
-IL_00aa:
+IL_00c3:
 	{
 		return;
 	}
 }
-// Method Definition Index: 53059
+// Method Definition Index: 53061
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int64_t HapticManager_GetLegacyDuration_m984CC95FEF88A40312674C37ABD0079C4BF57626 (int32_t ___0_type, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -19844,7 +19938,7 @@ IL_0020:
 		return L_4;
 	}
 }
-// Method Definition Index: 53060
+// Method Definition Index: 53062
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_OnDestroy_m357406E1BCEB97329384A9E3E86A40AABD54D56E (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -19853,8 +19947,8 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_OnDestroy_m357406E1BCEB973
 		return;
 	}
 }
-// Method Definition Index: 53061
-IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DisposeNativeBridge_mB2A9DFA9CF183E287217629C0D1238165F188FDE (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
+// Method Definition Index: 53063
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DisposeEffects_m95ACB9A74135D6396EA33CE6ECC33ED70444CDFC (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* V_0 = NULL;
@@ -19866,12 +19960,6 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DisposeNativeBridge_mB2A9D
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B7_0 = NULL;
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B11_0 = NULL;
 	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B10_0 = NULL;
-	AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* G_B14_0 = NULL;
-	AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* G_B13_0 = NULL;
-	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B17_0 = NULL;
-	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B16_0 = NULL;
-	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B20_0 = NULL;
-	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B19_0 = NULL;
 	{
 		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_0 = __this->___lightEffect;
 		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_1 = L_0;
@@ -19957,85 +20045,100 @@ IL_003f:
 
 IL_0044:
 	{
-		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_8 = __this->___vibrationEffectClass;
-		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_9 = L_8;
-		if (L_9)
-		{
-			G_B14_0 = L_9;
-			goto IL_0050;
-		}
-		G_B13_0 = L_9;
-	}
-	{
-		goto IL_0055;
-	}
-
-IL_0050:
-	{
-		NullCheck(G_B14_0);
-		AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6(G_B14_0, NULL);
-	}
-
-IL_0055:
-	{
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_10 = __this->___vibrator;
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_11 = L_10;
-		if (L_11)
-		{
-			G_B17_0 = L_11;
-			goto IL_0061;
-		}
-		G_B16_0 = L_11;
-	}
-	{
-		goto IL_0066;
-	}
-
-IL_0061:
-	{
-		NullCheck(G_B17_0);
-		AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6(G_B17_0, NULL);
-	}
-
-IL_0066:
-	{
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_12 = __this->___activity;
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_13 = L_12;
-		if (L_13)
-		{
-			G_B20_0 = L_13;
-			goto IL_0072;
-		}
-		G_B19_0 = L_13;
-	}
-	{
-		goto IL_0077;
-	}
-
-IL_0072:
-	{
-		NullCheck(G_B20_0);
-		AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6(G_B20_0, NULL);
-	}
-
-IL_0077:
-	{
 		V_0 = (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0*)NULL;
 		__this->___successEffect = (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___successEffect), (void*)(AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0*)NULL);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_14 = V_0;
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_15 = L_14;
-		V_0 = L_15;
-		__this->___heavyEffect = L_15;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___heavyEffect), (void*)L_15);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_16 = V_0;
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_17 = L_16;
-		V_0 = L_17;
-		__this->___mediumEffect = L_17;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___mediumEffect), (void*)L_17);
-		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_18 = V_0;
-		__this->___lightEffect = L_18;
-		Il2CppCodeGenWriteBarrier((void**)(&__this->___lightEffect), (void*)L_18);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_8 = V_0;
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_9 = L_8;
+		V_0 = L_9;
+		__this->___heavyEffect = L_9;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___heavyEffect), (void*)L_9);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_10 = V_0;
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_11 = L_10;
+		V_0 = L_11;
+		__this->___mediumEffect = L_11;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___mediumEffect), (void*)L_11);
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_12 = V_0;
+		__this->___lightEffect = L_12;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___lightEffect), (void*)L_12);
+		return;
+	}
+}
+// Method Definition Index: 53064
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DisposeNativeBridge_mB2A9DFA9CF183E287217629C0D1238165F188FDE (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
+{
+	//<source_info:<no-source>:1>
+	AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* G_B2_0 = NULL;
+	AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* G_B1_0 = NULL;
+	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B5_0 = NULL;
+	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B4_0 = NULL;
+	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B8_0 = NULL;
+	AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* G_B7_0 = NULL;
+	{
+		HapticManager_DisposeEffects_m95ACB9A74135D6396EA33CE6ECC33ED70444CDFC(__this, NULL);
+		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_0 = __this->___vibrationEffectClass;
+		AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03* L_1 = L_0;
+		if (L_1)
+		{
+			G_B2_0 = L_1;
+			goto IL_0012;
+		}
+		G_B1_0 = L_1;
+	}
+	{
+		goto IL_0017;
+	}
+
+IL_0012:
+	{
+		NullCheck(G_B2_0);
+		AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6(G_B2_0, NULL);
+	}
+
+IL_0017:
+	{
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_2 = __this->___vibrator;
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_3 = L_2;
+		if (L_3)
+		{
+			G_B5_0 = L_3;
+			goto IL_0023;
+		}
+		G_B4_0 = L_3;
+	}
+	{
+		goto IL_0028;
+	}
+
+IL_0023:
+	{
+		NullCheck(G_B5_0);
+		AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6(G_B5_0, NULL);
+	}
+
+IL_0028:
+	{
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_4 = __this->___activity;
+		AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0* L_5 = L_4;
+		if (L_5)
+		{
+			G_B8_0 = L_5;
+			goto IL_0034;
+		}
+		G_B7_0 = L_5;
+	}
+	{
+		goto IL_0039;
+	}
+
+IL_0034:
+	{
+		NullCheck(G_B8_0);
+		AndroidJavaObject_Dispose_m2B1593C20B3CE1C8FF95982F638F50985F9DD9E6(G_B8_0, NULL);
+	}
+
+IL_0039:
+	{
 		__this->___vibrationEffectClass = (AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03*)NULL;
 		Il2CppCodeGenWriteBarrier((void**)(&__this->___vibrationEffectClass), (void*)(AndroidJavaClass_tE6296B30CC4BF84434A9B765267F3FD0DD8DDB03*)NULL);
 		__this->___vibrator = (AndroidJavaObject_t8FFB930F335C1178405B82AC2BF512BB1EEF9EB0*)NULL;
@@ -20045,7 +20148,7 @@ IL_0077:
 		return;
 	}
 }
-// Method Definition Index: 53062
+// Method Definition Index: 53065
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugLight_mDFB19951566CE2F0C946BDFC1BBCDA359AB4A64D (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20054,7 +20157,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugLight_mDFB19951566CE2
 		return;
 	}
 }
-// Method Definition Index: 53063
+// Method Definition Index: 53066
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugMedium_m5479F2952B300C61645033DF4840FD2DA0974BFC (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20063,7 +20166,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugMedium_m5479F2952B300
 		return;
 	}
 }
-// Method Definition Index: 53064
+// Method Definition Index: 53067
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugHeavy_m66E2EA07D2EC33ED1F13B665C523239262BC1A82 (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20072,7 +20175,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugHeavy_m66E2EA07D2EC33
 		return;
 	}
 }
-// Method Definition Index: 53065
+// Method Definition Index: 53068
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugSuccess_mA22D0E2F24A0AC091DE3DD7F4C338458EF818D8F (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20081,7 +20184,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager_DebugSuccess_mA22D0E2F24A0
 		return;
 	}
 }
-// Method Definition Index: 53066
+// Method Definition Index: 53069
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager__ctor_m8DBCA4FDFEAC6B61E12652CE65D6BAD2A84991FF (HapticManager_t11FC221995BEDFD2B85D197CEAADC18537EBCD6B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20089,7 +20192,9 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager__ctor_m8DBCA4FDFEAC6B61E12
 		__this->___enableHaptics = (bool)1;
 		__this->___useNativeAndroidHaptics = (bool)1;
 		__this->___useLegacyFallback = (bool)1;
+		__this->___hapticIntensity = (1.0f);
 		__this->___minimumRepeatDelay = (0.0500000007f);
+		__this->___cachedHapticIntensity = (-1.0f);
 		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
 		return;
 	}
@@ -20102,7 +20207,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void HapticManager__ctor_m8DBCA4FDFEAC6B61E12
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 53067
+// Method Definition Index: 53070
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* LevelManager_get_ActiveBolts_m9B5BF65818169E127AB99B3FBA7E731C9F5E4C24 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20111,7 +20216,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* LevelManager_get_ActiveBolts_m
 		return L_0;
 	}
 }
-// Method Definition Index: 53068
+// Method Definition Index: 53071
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t LevelManager_IndexOfBolt_m21903EE9F853411AF89AE06357387C83CC39615F (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* ___0_bolt, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20146,7 +20251,7 @@ IL_000b:
 		return L_4;
 	}
 }
-// Method Definition Index: 53069
+// Method Definition Index: 53072
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltGridLayoutSettings_t54E2D317C7F938ED845893D8F6FA1052D31D9B7A* LevelManager_get_GridLayoutSettings_m8804BE372DC57623F1FE13730618848B5AE7C303 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20155,7 +20260,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltGridLayoutSettings_t54E2D317C7F938ED84589
 		return L_0;
 	}
 }
-// Method Definition Index: 53070
+// Method Definition Index: 53073
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t LevelManager_get_TotalLevels_mD0461873EDC76BDF161D2D67F860A6B26C33B249 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20186,7 +20291,7 @@ IL_0010:
 		return L_2;
 	}
 }
-// Method Definition Index: 53071
+// Method Definition Index: 53074
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_Awake_mBE1CC6EADF3B8755607DC86D3822A5645CAAFCFD (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -20196,7 +20301,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_Awake_mBE1CC6EADF3B8755607D
 		return;
 	}
 }
-// Method Definition Index: 53072
+// Method Definition Index: 53075
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_EnsureLevelDataList_mA2527BC382C22EB4FCA803FE78EC72FFCE108F5D (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20322,7 +20427,7 @@ IL_0078:
 		return;
 	}
 }
-// Method Definition Index: 53073
+// Method Definition Index: 53076
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_EnsureBoardRoot_m00683A207C9F828D5C7ED2BE6BC585C1CDA0F015 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20514,7 +20619,7 @@ IL_0100:
 		return;
 	}
 }
-// Method Definition Index: 53074
+// Method Definition Index: 53077
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LevelManager_BuildLevel_m248FB8BC678CB7B1FB4A3420BF2BECE355384002 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, int32_t ___0_levelIndex, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B** ___1_loadedData, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20582,7 +20687,7 @@ IL_0030:
 		return L_13;
 	}
 }
-// Method Definition Index: 53075
+// Method Definition Index: 53078
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LevelManager_BuildLevel_m8C8E469E3D27458EBA3F5395B746C241197478AA (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___0_data, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B** ___1_loadedData, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20958,7 +21063,7 @@ IL_017d:
 		return (bool)1;
 	}
 }
-// Method Definition Index: 53076
+// Method Definition Index: 53079
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_ClearBoard_m811F8C462680752C2AA5E0CCEF45782CB9AE4555 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21040,7 +21145,7 @@ IL_004d:
 		return;
 	}
 }
-// Method Definition Index: 53077
+// Method Definition Index: 53080
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_ApplyGridLayout_m70EE6BF123FACF398239B6FC58BC8C93A60FAB1D (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -21049,7 +21154,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_ApplyGridLayout_m70EE6BF123
 		return;
 	}
 }
-// Method Definition Index: 53078
+// Method Definition Index: 53081
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_ApplyGridLayout_mCAF1491F40D7F791948FBD884BFA878EB3D3C18F (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___0_data, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21344,7 +21449,7 @@ IL_0158:
 		return;
 	}
 }
-// Method Definition Index: 53079
+// Method Definition Index: 53082
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* LevelManager_SpawnBolt_m3466A27C3F29F08A1D9AA4FE88F1ADBB0D6DBB2D (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, int32_t ___0_boltIndex, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21528,7 +21633,7 @@ IL_0080:
 		return L_63;
 	}
 }
-// Method Definition Index: 53080
+// Method Definition Index: 53083
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* LevelManager_SpawnNut_mD5E6CF76A95CA5FEA57F3288A87B33EDF06C5F98 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* ___0_bolt, int32_t ___1_color, int32_t ___2_slotIndex, bool ___3_startsHidden, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21767,7 +21872,7 @@ IL_0189:
 		return L_72;
 	}
 }
-// Method Definition Index: 53081
+// Method Definition Index: 53084
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* LevelManager_CreatePrimitive_mAEFBE5267F174840F7D54975886ABCA6624A85E6 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, int32_t ___0_type, String_t* ___1_name, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___2_parent, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___3_pos, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___4_scale, Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* ___5_mat, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21833,7 +21938,7 @@ IL_0045:
 		return G_B2_0;
 	}
 }
-// Method Definition Index: 53082
+// Method Definition Index: 53085
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* LevelManager_GetOrCreateMetalMaterial_mDB3247CA69793E4EE6127D2AF9469129D58D610C (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21872,7 +21977,7 @@ IL_0015:
 		return L_5;
 	}
 }
-// Method Definition Index: 53083
+// Method Definition Index: 53086
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* LevelManager_GetOrCreateCustomMaterial_m7ED8A097D7DA71E6938117F637611E84395A2DA7 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, String_t* ___0_key, Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___1_color, float ___2_metallic, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -21961,7 +22066,7 @@ IL_0033:
 		return L_18;
 	}
 }
-// Method Definition Index: 53084
+// Method Definition Index: 53087
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* LevelManager_GetOrCreateMaterial_m3EE542516DEE6462BA8885531F72BD5609146B95 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, int32_t ___0_color, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22055,7 +22160,7 @@ IL_003c:
 		return L_20;
 	}
 }
-// Method Definition Index: 53085
+// Method Definition Index: 53088
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool LevelManager_ValidateLevelData_m5A3501C14E6F75F13E452E76EC5255B17FA01DB3 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___0_data, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22323,7 +22428,7 @@ IL_012e:
 		return L_57;
 	}
 }
-// Method Definition Index: 53086
+// Method Definition Index: 53089
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_CreateFallbackLevelData_mC63360FFE0B39D670C7C8963C64CA1CB62C6D1BA (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22667,7 +22772,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager_CreateFallbackLevelData_mC6
 		return;
 	}
 }
-// Method Definition Index: 53087
+// Method Definition Index: 53090
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager__ctor_m7BB70B0A6307330F41995CD4422BD0A4E3152815 (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22797,7 +22902,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void LevelManager__ctor_m7BB70B0A6307330F4199
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 53088
+// Method Definition Index: 53091
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__cctor_m1B50EDE4E42DC6B6D8C412DD32E34A01AEC36CBE (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22815,7 +22920,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__cctor_m1B50EDE4E42DC6B6D8C412DD
 		return;
 	}
 }
-// Method Definition Index: 53089
+// Method Definition Index: 53092
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__ctor_m144E0FFC2C71D442CB788656A841276F4A5B3330 (U3CU3Ec_t883F35EDF12D1D302A260F093A5749E4A32BFDAE* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -22824,7 +22929,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__ctor_m144E0FFC2C71D442CB788656A
 		return;
 	}
 }
-// Method Definition Index: 53090
+// Method Definition Index: 53093
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t U3CU3Ec_U3CEnsureLevelDataListU3Eb__18_0_mBC87693178FBC9BB828520DCC4745B89E35D9380 (U3CU3Ec_t883F35EDF12D1D302A260F093A5749E4A32BFDAE* __this, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___0_a, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___1_b, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -22848,7 +22953,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t U3CU3Ec_U3CEnsureLevelDataListU3Eb__1
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 53091
+// Method Definition Index: 53094
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_get_CurrentSnapshot_m563DF6653D8F0F8451544F3AD9C67CF96F3C3124 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -22857,7 +22962,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FA
 		return L_0;
 	}
 }
-// Method Definition Index: 53092
+// Method Definition Index: 53095
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void StructuredLevelProvider_Awake_m1593AFDCE766919A5142F33C5A85805E862A85B5 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -22955,7 +23060,7 @@ IL_0050:
 		return;
 	}
 }
-// Method Definition Index: 53093
+// Method Definition Index: 53096
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_GetLevelData_mA844DB1FA8083FAB6D59810B198BE1174C3266D5 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, int32_t ___0_levelNumber, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23057,7 +23162,7 @@ IL_0058:
 		return L_19;
 	}
 }
-// Method Definition Index: 53094
+// Method Definition Index: 53097
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_BuildIntroductoryLevel_m4F4784AD4EAFD09746749AF620AE9EFE7BE7035A (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, int32_t ___0_levelNumber, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -23133,7 +23238,7 @@ IL_0041:
 		return L_6;
 	}
 }
-// Method Definition Index: 53095
+// Method Definition Index: 53098
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_BuildLevel1_mC89194DD0C1CF2F1F80E027756E670A11FA1C271 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23241,7 +23346,7 @@ IL_0039:
 		return L_26;
 	}
 }
-// Method Definition Index: 53096
+// Method Definition Index: 53099
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_BuildLevel2_mEECF2D6852A3A08E2996B0C2D7BFC9E2D170B1BC (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23308,7 +23413,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FA
 		return L_22;
 	}
 }
-// Method Definition Index: 53097
+// Method Definition Index: 53100
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_BuildLevel3_m18034F62ACF61A17DE174BA07F34250C30ACF4BD (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23398,7 +23503,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FA
 		return L_31;
 	}
 }
-// Method Definition Index: 53098
+// Method Definition Index: 53101
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_BuildLevel4_m58BCDE57287E20E6582587A71157F880F0762255 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23495,7 +23600,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FA
 		return L_35;
 	}
 }
-// Method Definition Index: 53099
+// Method Definition Index: 53102
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_BuildLevel5_mC3A971B93E663C29768161B016B6BA530D48885E (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23599,7 +23704,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FA
 		return L_41;
 	}
 }
-// Method Definition Index: 53100
+// Method Definition Index: 53103
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_GenerateProcedural_mE600D6B06058DEFAAA3DDE65F3873321EE226B6D (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, int32_t ___0_levelNumber, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23816,7 +23921,7 @@ IL_00f2:
 		return L_51;
 	}
 }
-// Method Definition Index: 53101
+// Method Definition Index: 53104
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_ValidateOrFallback_m8815A1EB7E74A8475ED0D202DDF9A14E1A1A39DF (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___0_data, int32_t ___1_levelNumber, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -23992,7 +24097,7 @@ IL_00af:
 		return L_35;
 	}
 }
-// Method Definition Index: 53102
+// Method Definition Index: 53105
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_ValidateLevel5_mB4AEECB6A773CFED94A7CBA34A5378DB7ECB5472 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* ___0_data, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24703,7 +24808,7 @@ IL_03ba:
 		return L_181;
 	}
 }
-// Method Definition Index: 53103
+// Method Definition Index: 53106
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_MakeLevelData_m8CCAE4C6017494BA36DB883B08542C3784B3AC7A (int32_t ___0_levelNumber, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24734,7 +24839,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FA
 		return L_4;
 	}
 }
-// Method Definition Index: 53104
+// Method Definition Index: 53107
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltNutStackData_tEA6BAEEEFACF9112B022CF1A1F993C3BBE165FA5* StructuredLevelProvider_MakeBolt_m464DC9F210A465495B26EE9E1B5757DB2CB23A4D (NutColorU5BU5D_t1A9D729539DB1734F60C4ED9B86DA52E2352FDB1* ___0_colors, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24787,7 +24892,7 @@ IL_0010:
 		return L_5;
 	}
 }
-// Method Definition Index: 53105
+// Method Definition Index: 53108
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltNutStackData_tEA6BAEEEFACF9112B022CF1A1F993C3BBE165FA5* StructuredLevelProvider_MakeExpandableBolt_mB57F40729216E82A5DE4B29EE5067152F3C45A43 (int32_t ___0_startCapacity, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24817,7 +24922,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltNutStackData_tEA6BAEEEFACF9112B022CF1A1F9
 		return L_4;
 	}
 }
-// Method Definition Index: 53106
+// Method Definition Index: 53109
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltNutStackData_tEA6BAEEEFACF9112B022CF1A1F993C3BBE165FA5* StructuredLevelProvider_MakeLockedBolt_m900006C2A9A13FC72881FFAA9168E5AECCC2901F (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24843,7 +24948,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BoltNutStackData_tEA6BAEEEFACF9112B022CF1A1F9
 		return L_3;
 	}
 }
-// Method Definition Index: 53107
+// Method Definition Index: 53110
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR NutColorU5BU5D_t1A9D729539DB1734F60C4ED9B86DA52E2352FDB1* StructuredLevelProvider_FillArray_m8D0A946DAEFFB797397139E024537A2052F464F8 (int32_t ___0_color, int32_t ___1_count, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -24888,7 +24993,7 @@ IL_0013:
 		return L_8;
 	}
 }
-// Method Definition Index: 53108
+// Method Definition Index: 53111
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void StructuredLevelProvider__ctor_m40E12C98A0583159C28C7569837E30667CB511D4 (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -24988,7 +25093,7 @@ IL_0006:
 		return L_3;
 	}
 }
-// Method Definition Index: 53067
+// Method Definition Index: 53070
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* LevelManager_get_ActiveBolts_m9B5BF65818169E127AB99B3FBA7E731C9F5E4C24_inline (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -24997,7 +25102,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* LevelManager_get_A
 		return L_0;
 	}
 }
-// Method Definition Index: 53331
+// Method Definition Index: 53334
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool BoltView_get_IsLocked_mAC0E9007EB0A251057E5979A70B612756E93F8C0_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25006,7 +25111,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool BoltView_get_IsLocked_mAC0E9
 		return L_0;
 	}
 }
-// Method Definition Index: 53091
+// Method Definition Index: 53094
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR LevelDataSO_t98ECCB729E642D5BACD7F7A5F5F772FAF221A49B* StructuredLevelProvider_get_CurrentSnapshot_m563DF6653D8F0F8451544F3AD9C67CF96F3C3124_inline (StructuredLevelProvider_t060425B6805D2887F024C6194FE6B7B1A9F369D1* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25038,7 +25143,7 @@ IL_0006:
 		return L_3;
 	}
 }
-// Method Definition Index: 53413
+// Method Definition Index: 53416
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool LockedBoltController_get_IsUnlocked_mEE528CA337629662B97FE52BAD4126AE394DDC14_inline (LockedBoltController_tFEA4E79ADF85C88B9DAE0CE7EDAE38BE908E3248* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25047,7 +25152,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool LockedBoltController_get_IsU
 		return L_0;
 	}
 }
-// Method Definition Index: 53333
+// Method Definition Index: 53336
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR List_1_tCBB60A613DC56192CE2157D1EFAEB67D0B381A0E* BoltView_get_Nuts_mAA2EE6630782E2E15A6F15C9A042473742E801F9_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25056,7 +25161,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR List_1_tCBB60A613DC56192CE2157D1E
 		return L_0;
 	}
 }
-// Method Definition Index: 53425
+// Method Definition Index: 53428
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t NutView_get_Color_m60F6AFBCAEE948375724311830BAD5DFCFBC1349_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25102,7 +25207,7 @@ IL_000c:
 		return L_6;
 	}
 }
-// Method Definition Index: 53069
+// Method Definition Index: 53072
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR BoltGridLayoutSettings_t54E2D317C7F938ED845893D8F6FA1052D31D9B7A* LevelManager_get_GridLayoutSettings_m8804BE372DC57623F1FE13730618848B5AE7C303_inline (LevelManager_tE33F2D5AFCD9CF6DA46CF3D6B8019627C3760BEB* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25131,7 +25236,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_RoundToInt_m60F8B66
 		return L_3;
 	}
 }
-// Method Definition Index: 53337
+// Method Definition Index: 53340
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 BoltView_get_CompletionCapRestingLocalScale_mF6BEB6209F6F747348BD5D6592C3B0997BE8B52C_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25140,7 +25245,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_0;
 	}
 }
-// Method Definition Index: 53436
+// Method Definition Index: 53439
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 NutView_get_RestingLocalScale_mCB10E58BEF39BD641F3CFC7262AD5616CCF58302_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25297,7 +25402,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D
 		return L_0;
 	}
 }
-// Method Definition Index: 53329
+// Method Definition Index: 53332
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 BoltView_get_RestingLocalScale_m920E8714CCA80191AF15DD990C8B300F259EA0F7_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25329,7 +25434,7 @@ IL_0006:
 		return L_3;
 	}
 }
-// Method Definition Index: 53368
+// Method Definition Index: 53371
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t ExpandableBoltController_get_CurrentCapacity_m63858DF4349B8B6D185B6443239137199960142A_inline (ExpandableBoltController_t30FC6CC7A802AE806AFB1ABA9C91E23684ADDAA5* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25349,7 +25454,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Color_tD001788D726C3A7F1379BEED02
 		return L_0;
 	}
 }
-// Method Definition Index: 53325
+// Method Definition Index: 53328
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t BoltView_get_BoltIndex_m5CFDF4D6057CC73E862FFA6A14ACDC0AF6149371_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25358,7 +25463,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t BoltView_get_BoltIndex_m5
 		return L_0;
 	}
 }
-// Method Definition Index: 53427
+// Method Definition Index: 53430
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool NutView_get_StartsHidden_mF2153AC46A2527056A245739327FDA14620F6557_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25367,7 +25472,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool NutView_get_StartsHidden_mF2
 		return L_0;
 	}
 }
-// Method Definition Index: 53430
+// Method Definition Index: 53433
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool NutView_get_IsRevealed_m80179912E48E7D500416F1EEEA7528DE814782BC_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25376,7 +25481,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool NutView_get_IsRevealed_m8017
 		return L_0;
 	}
 }
-// Method Definition Index: 53434
+// Method Definition Index: 53437
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 NutView_get_RestingLocalRotation_mA5CEBD505FE6DC85CF9BC5C6BB53D8D138BB465B_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25385,7 +25490,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E
 		return L_0;
 	}
 }
-// Method Definition Index: 53438
+// Method Definition Index: 53441
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 NutView_get_RestingVisualLocalRotation_m11069F86C6451479DD897BD91ACCEF8086BC5A51_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25434,7 +25539,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Matrix4x4_tDB70CF134A14BA38190C59
 		return L_0;
 	}
 }
-// Method Definition Index: 57530
+// Method Definition Index: 57533
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* GUISkin_get_button_m51948EBD478CF9223522AD29B7FBD1BABAABE289_inline (GUISkin_t8C65CE1424D4B5D8D73022E266BDAD3BDE8612D9* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25459,7 +25564,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Rect__ctor_m18C3033D135097BE
 		return;
 	}
 }
-// Method Definition Index: 57524
+// Method Definition Index: 57527
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR GUIStyle_t20BA2F9F3FE9D13AAA607EEEBE5547835A6F6580* GUISkin_get_label_m99E1A8D6D8592F88F581437D24DB1EDE05C63E5E_inline (GUISkin_t8C65CE1424D4B5D8D73022E266BDAD3BDE8612D9* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25644,7 +25749,7 @@ IL_000c:
 		return L_6;
 	}
 }
-// Method Definition Index: 53432
+// Method Definition Index: 53435
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool NutView_get_IsRevealing_m947999F4EC08A394BAFCD1AF6E65FECD1DCA429E_inline (NutView_t2757B8C8C46ED2E71D0B36DABCC11E9401DD288C* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25685,6 +25790,49 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void HapticManager_set_Instance_m
 		return;
 	}
 }
+// Method Definition Index: 36405
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Mathf_Approximately_m1DADD012A8FC82E11FB282501AE2EBBF9A77150B_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	//<source_info:<no-source>:1>
+	{
+		float L_0 = ___1_b;
+		float L_1 = ___0_a;
+		float L_2;
+		L_2 = fabsf(((float)il2cpp_codegen_subtract(L_0, L_1)));
+		float L_3 = ___0_a;
+		float L_4;
+		L_4 = fabsf(L_3);
+		float L_5 = ___1_b;
+		float L_6;
+		L_6 = fabsf(L_5);
+		float L_7;
+		L_7 = Mathf_Max_mF5379E63D2BBAC76D090748695D833934F8AD051_inline(L_4, L_6, NULL);
+		float L_8 = ((Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682_StaticFields*)il2cpp_codegen_static_fields_for(Mathf_tE284D016E3B297B72311AAD9EB8F0E643F6A4682_il2cpp_TypeInfo_var))->___ApproxEpsilon;
+		float L_9;
+		L_9 = Mathf_Max_mF5379E63D2BBAC76D090748695D833934F8AD051_inline(((float)il2cpp_codegen_multiply((9.99999997E-07f), L_7)), L_8, NULL);
+		return (bool)((((float)L_2) < ((float)L_9))? 1 : 0);
+	}
+}
+// Method Definition Index: 36403
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Lerp_m47EF2FFB7647BD0A1FDC26DC03E28B19812139B5_inline (float ___0_a, float ___1_b, float ___2_t, const RuntimeMethod* method) 
+{
+	//<source_info:<no-source>:1>
+	{
+		float L_0 = ___0_a;
+		float L_1 = ___1_b;
+		float L_2 = ___0_a;
+		float L_3 = ___2_t;
+		float L_4;
+		L_4 = Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline(L_3, NULL);
+		return ((float)il2cpp_codegen_add(L_0, ((float)il2cpp_codegen_multiply(((float)il2cpp_codegen_subtract(L_1, L_2)), L_4))));
+	}
+}
 // Method Definition Index: 36383
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Abs_mD945EDDEA0D62D21BFDBAB7B1C0F18DFF1CEC905_inline (int32_t ___0_value, const RuntimeMethod* method) 
 {
@@ -25703,7 +25851,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Abs_mD945EDDEA0D62D
 		return L_1;
 	}
 }
-// Method Definition Index: 53328
+// Method Definition Index: 53331
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void BoltView_set_HomePosition_m3749F0421FE334EBADEC6A9D307D34B0A1EDF458_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_value, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25713,7 +25861,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void BoltView_set_HomePosition_m3
 		return;
 	}
 }
-// Method Definition Index: 53326
+// Method Definition Index: 53329
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void BoltView_set_BoltIndex_m56ACF8A5CAE3CFCFE85226C68C55DF465A664E0C_inline (BoltView_tFDFC311485A521E4A3908A8EE6676F4D7A819B29* __this, int32_t ___0_value, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -25947,7 +26095,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Il2CppSharedGenericObject* Enumer
 		return L_0;
 	}
 }
-// Method Definition Index: 59397
+// Method Definition Index: 59400
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Il2CppSharedGenericObject* Enumerator_get_Current_m06AE6B158E72B471CF5FC6BCF63AA55CE70CC9A4_gshared_inline (Enumerator_t21DE302BED6606A0927F65B97AD5C1633699E17B* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>

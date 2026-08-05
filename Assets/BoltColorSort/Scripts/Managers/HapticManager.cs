@@ -20,6 +20,8 @@ namespace NutBoltSort
         [SerializeField] private bool enableHaptics = true;
         [SerializeField] private bool useNativeAndroidHaptics = true;
         [SerializeField] private bool useLegacyFallback = true;
+        [Tooltip("1 uses Android's native predefined effects. Other values use scaled native VibrationEffects.")]
+        [SerializeField, Range(.25f, 2f)] private float hapticIntensity = 1f;
         [SerializeField, Min(0f)] private float minimumRepeatDelay = .05f;
         [SerializeField] private bool debugHaptics;
         private float lastVibrationTime;
@@ -33,6 +35,7 @@ namespace NutBoltSort
         private AndroidJavaObject heavyEffect;
         private AndroidJavaObject successEffect;
         private int androidApiLevel;
+        private float cachedHapticIntensity = -1f;
 #endif
 
         public static HapticManager EnsureInstance(GameObject host)
@@ -99,27 +102,36 @@ namespace NutBoltSort
 
         private void CacheEffects()
         {
-            if (androidApiLevel >= ApiPredefinedEffects)
+            DisposeEffects();
+            cachedHapticIntensity = hapticIntensity;
+            // Predefined effects are device-tuned. Use them at the neutral setting;
+            // an adjusted intensity deliberately uses amplitude-controlled effects.
+            if (androidApiLevel >= ApiPredefinedEffects && Mathf.Approximately(hapticIntensity, 1f))
             {
                 lightEffect = vibrationEffectClass.CallStatic<AndroidJavaObject>("createPredefined", EffectTick);
                 mediumEffect = vibrationEffectClass.CallStatic<AndroidJavaObject>("createPredefined", EffectClick);
                 heavyEffect = vibrationEffectClass.CallStatic<AndroidJavaObject>("createPredefined", EffectHeavyClick);
             }
-            if (lightEffect == null) lightEffect = CreateOneShot(12, 80);
-            if (mediumEffect == null) mediumEffect = CreateOneShot(25, 145);
-            if (heavyEffect == null) heavyEffect = CreateOneShot(42, 220);
+            if (lightEffect == null) lightEffect = CreateOneShot(ScaleDuration(12), ScaleAmplitude(80));
+            if (mediumEffect == null) mediumEffect = CreateOneShot(ScaleDuration(25), ScaleAmplitude(145));
+            if (heavyEffect == null) heavyEffect = CreateOneShot(ScaleDuration(42), ScaleAmplitude(220));
             successEffect = vibrationEffectClass.CallStatic<AndroidJavaObject>("createWaveform",
-                new long[] { 0, 12, 35, 18 }, new int[] { 0, 90, 0, 150 }, -1);
+                new long[] { 0, ScaleDuration(12), ScaleDuration(35), ScaleDuration(18) },
+                new int[] { 0, ScaleAmplitude(90), 0, ScaleAmplitude(150) }, -1);
         }
 
         private AndroidJavaObject CreateOneShot(long milliseconds, int amplitude) =>
             vibrationEffectClass.CallStatic<AndroidJavaObject>("createOneShot", milliseconds, amplitude);
+
+        private long ScaleDuration(long milliseconds) => Mathf.RoundToInt(milliseconds * Mathf.Lerp(.7f, 1.35f, hapticIntensity * .5f));
+        private int ScaleAmplitude(int amplitude) => Mathf.Clamp(Mathf.RoundToInt(amplitude * hapticIntensity), 1, 255);
 
         private void PlayAndroid(HapticType type)
         {
             if (vibrator == null) return;
             try
             {
+                if (!Mathf.Approximately(cachedHapticIntensity, hapticIntensity)) CacheEffects();
                 AndroidJavaObject effect = type == HapticType.Light ? lightEffect :
                                            type == HapticType.Medium ? mediumEffect :
                                            type == HapticType.Heavy ? heavyEffect : successEffect;
@@ -146,11 +158,15 @@ namespace NutBoltSort
         }
 
         private void OnDestroy() => DisposeNativeBridge();
-        private void DisposeNativeBridge()
+        private void DisposeEffects()
         {
             lightEffect?.Dispose(); mediumEffect?.Dispose(); heavyEffect?.Dispose(); successEffect?.Dispose();
-            vibrationEffectClass?.Dispose(); vibrator?.Dispose(); activity?.Dispose();
             lightEffect = mediumEffect = heavyEffect = successEffect = null;
+        }
+        private void DisposeNativeBridge()
+        {
+            DisposeEffects();
+            vibrationEffectClass?.Dispose(); vibrator?.Dispose(); activity?.Dispose();
             vibrationEffectClass = null; vibrator = null; activity = null;
         }
 #endif
