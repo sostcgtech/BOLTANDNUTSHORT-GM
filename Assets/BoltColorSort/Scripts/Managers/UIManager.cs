@@ -111,7 +111,7 @@ namespace NutBoltSort
         {
             if (gameManager == null) return;
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             CloseAllPopups();
             gameManager.RestartLevel();
             UpdateLevelDisplay();
@@ -122,7 +122,7 @@ namespace NutBoltSort
         {
             if (gameManager == null) return;
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             if (gameManager.RemainingUndoUses > 0) gameManager.UndoLastMove();
             else gameManager.RequestUndoRewardAd();
         }
@@ -131,7 +131,7 @@ namespace NutBoltSort
         {
             if (gameManager == null) return;
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             if (gameManager.RemainingExpandUses > 0) gameManager.ExpandFirstAvailableBolt();
             else gameManager.RequestExpandRewardAd();
         }
@@ -140,7 +140,7 @@ namespace NutBoltSort
         {
             if (gameManager == null) return;
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             gameManager.UnlockFirstLockedBolt();
         }
 
@@ -192,7 +192,7 @@ namespace NutBoltSort
         public void OnSettingsButtonPressed()
         {
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             settingsPanelController?.OpenSettings();
         }
 
@@ -200,7 +200,7 @@ namespace NutBoltSort
         {
             if (gameManager == null) return;
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
 
             if (winPopup != null)
             {

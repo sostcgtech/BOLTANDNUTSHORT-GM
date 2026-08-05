@@ -346,7 +346,7 @@ namespace NutBoltSort
 
             // Play one light test vibration only when turning vibration ON.
             if (isOn)
-                HapticManager.Vibrate(HapticType.Light);
+                HapticManager.Play(HapticType.Light);
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -361,7 +361,7 @@ namespace NutBoltSort
         private void OnContactUsPressed()
         {
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
 
             if (string.IsNullOrWhiteSpace(supportEmail))
             {
@@ -416,7 +416,7 @@ namespace NutBoltSort
         public void OnHomePressed()
         {
             AudioManager.Play(SfxType.ButtonClick);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
 
             // TODO: Replace with SceneManager.LoadScene("MainMenu") when ready.
             Debug.Log("[SettingsPanelController] Home pressed — main menu not yet implemented.");

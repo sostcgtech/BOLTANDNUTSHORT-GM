@@ -390,7 +390,7 @@ namespace NutBoltSort
                     if (increased)
                     {
                         AudioManager.Play(SfxType.ExpandBolt);
-                        HapticManager.Vibrate(HapticType.Medium);
+                        HapticManager.Play(HapticType.Medium);
                         remainingExpandUses = Mathf.Max(0, remainingExpandUses - 1);
                         tutorialController?.OnExpandableBoltUsed();
                         uiManager?.RefreshActionButtonStates();
@@ -648,7 +648,7 @@ namespace NutBoltSort
 
             liftedNut = selectedNuts[selectedNuts.Count - 1];
             AudioManager.Play(SfxType.NutPickup);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             source.SetSelectionEffect(true);
             inputLocked = true;
             uiManager?.RefreshActionButtonStates();
@@ -668,7 +668,7 @@ namespace NutBoltSort
         private void BeginSelectionSwitch(BoltView nextBolt)
         {
             AudioManager.Play(SfxType.SelectionSwitch);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             if (selectionRoutine != null) StopCoroutine(selectionRoutine);
             StopHover();
             inputLocked = true;
@@ -1087,7 +1087,7 @@ namespace NutBoltSort
             bolt.LockBoltSilently();
             AudioManager.Play(SfxType.CompletionCap);
             AudioManager.Play(SfxType.BoltComplete);
-            HapticManager.Vibrate(HapticType.Heavy);
+            HapticManager.Play(HapticType.Heavy);
             return true;
         }
 
@@ -1269,7 +1269,7 @@ namespace NutBoltSort
                 SnapNutPositionAndRotation(destination, nut, destinationIndex);
                 PulseBoltAttach(destination);
                 AudioManager.Play(SfxType.NutLand);
-                HapticManager.Vibrate(HapticType.Light);
+                HapticManager.Play(HapticType.Light);
                 OnNutLanded?.Invoke(nut, destination);
             });
 
@@ -1286,7 +1286,7 @@ namespace NutBoltSort
         private IEnumerator PulseInvalidDestination(BoltView bolt)
         {
             AudioManager.Play(SfxType.InvalidMove);
-            HapticManager.Vibrate(HapticType.Medium);
+            HapticManager.Play(HapticType.Medium);
             inputLocked = true;
             PulseBoltScale(bolt, new Vector3(1.02f, invalidScalePulse, 1.02f), invalidPulseDuration);
             yield return new WaitForSeconds(invalidPulseDuration);
@@ -1432,7 +1432,7 @@ namespace NutBoltSort
             NutView top = bolt.Nuts[bolt.Nuts.Count - 1];
             if (top == null || !top.IsHidden || top.IsRevealing) yield break;
             AudioManager.Play(SfxType.HiddenNutReveal);
-            HapticManager.Vibrate(HapticType.Light);
+            HapticManager.Play(HapticType.Light);
             Sequence reveal = top.Reveal();
             if (reveal != null) yield return reveal.WaitForCompletion();
         }
@@ -1445,7 +1445,7 @@ namespace NutBoltSort
             if (won)
             {
                 AudioManager.Play(SfxType.LevelComplete);
-                HapticManager.Vibrate(HapticType.Success);
+                HapticManager.Play(HapticType.Success);
             }
         }
 
