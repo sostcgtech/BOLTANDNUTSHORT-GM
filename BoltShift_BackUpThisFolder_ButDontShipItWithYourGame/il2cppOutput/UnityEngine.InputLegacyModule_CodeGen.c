@@ -39,6 +39,7 @@ extern void Input_GetLastPenContactEvent_mAB37B70407FDE3DE8230B55D3D4828DC50EAF0
 extern void Input_ClearLastPenContactEvent_m3240C9BA6CE089E85624BD0FA031A48CDE2664A3 (void);
 extern void Input_GetKey_mE5681EF775F3CEBA7EAD7C63984F7B34C8E8D434 (void);
 extern void Input_GetKeyDown_mB237DEA6244132670D38990BAB77D813FBB028D2 (void);
+extern void Input_GetKeyDown_m789DB780D0567DCC23B501D15AABD4F2E3591A3F (void);
 extern void Input_get_anyKey_m6FF00BB4F01FA996E2FB3F3727EBC414C8EB2CEB (void);
 extern void Input_get_mousePosition_mFF21FBD2647DAE2A23BD4C45571CA95D05A0A42C (void);
 extern void Input_get_mouseScrollDelta_mD112408E9182AA0F529179FF31E21D8DCD5CFA74 (void);
@@ -62,6 +63,7 @@ extern void Input_get_compositionCursorPos_Injected_m67C1CB8A21F4708CA76FAB39E3B
 extern void Input_set_compositionCursorPos_Injected_m46E4934CD2A9F2E97B8A86D52169C848EF6D91E8 (void);
 extern void InputUnsafeUtility_GetKeyString__Unmanaged_mD736022C3E6C98ED4B4AEA824AC2DA98A3A1B223 (void);
 extern void InputUnsafeUtility_GetKeyUpString__Unmanaged_mFD0D4ED74B64E565CB3F543CBBE38F6AE84AC27A (void);
+extern void InputUnsafeUtility_GetKeyDownString_mE43ABE7F9E5C458B03A2CB535089C7C6E5060F41 (void);
 extern void InputUnsafeUtility_GetKeyDownString__Unmanaged_m53E2CCD225AC1CE7CB40002403EDC5AEF266EB8D (void);
 extern void InputUnsafeUtility_GetAxis_m034889C00C914572B94F091E8EC646E86408A29F (void);
 extern void InputUnsafeUtility_GetAxis__Unmanaged_m288AEE066E04CCFDD229629882CA42DBD1D85CF2 (void);
@@ -71,10 +73,11 @@ extern void InputUnsafeUtility_GetButton__Unmanaged_m270892EB7D8C88443200DF972F7
 extern void InputUnsafeUtility_GetButtonDown_mB35B46B92DA28196820B996E2420E5E320088EE4 (void);
 extern void InputUnsafeUtility_GetButtonDown__Unmanaged_m411E8743768382A33B3778E734AF072F8DBDECC4 (void);
 extern void InputUnsafeUtility_GetButtonUp__Unmanaged_mCCE34158CE05432541102B1C2AEC6545E25D0732 (void);
+extern void InputUnsafeUtility_GetKeyDownString_Injected_m170F1AC0E421448646190A6DB3135866E2C10A27 (void);
 extern void InputUnsafeUtility_GetAxis_Injected_m7617B11C7695077D77C9C2F3F068734E5F35E12E (void);
 extern void InputUnsafeUtility_GetAxisRaw_Injected_mB5CF61FFB2DE889CB33B56AB77AE94BB8F16D31D (void);
 extern void InputUnsafeUtility_GetButtonDown_Injected_m14E4D5FEFEE423F495E54FE1CACC08567ABDAA29 (void);
-static Il2CppMethodPointer s_methodPointers[67] = 
+static Il2CppMethodPointer s_methodPointers[70] = 
 {
 	EmbeddedAttribute__ctor_mD186A3EECAEA1F33E2DF7020B8BB5B7498869351,
 	RefSafetyRulesAttribute__ctor_m151599E27DEEB22884EC61292629B3F3A766EBD1,
@@ -108,6 +111,7 @@ static Il2CppMethodPointer s_methodPointers[67] =
 	Input_ClearLastPenContactEvent_m3240C9BA6CE089E85624BD0FA031A48CDE2664A3,
 	Input_GetKey_mE5681EF775F3CEBA7EAD7C63984F7B34C8E8D434,
 	Input_GetKeyDown_mB237DEA6244132670D38990BAB77D813FBB028D2,
+	Input_GetKeyDown_m789DB780D0567DCC23B501D15AABD4F2E3591A3F,
 	Input_get_anyKey_m6FF00BB4F01FA996E2FB3F3727EBC414C8EB2CEB,
 	Input_get_mousePosition_mFF21FBD2647DAE2A23BD4C45571CA95D05A0A42C,
 	Input_get_mouseScrollDelta_mD112408E9182AA0F529179FF31E21D8DCD5CFA74,
@@ -131,6 +135,7 @@ static Il2CppMethodPointer s_methodPointers[67] =
 	Input_set_compositionCursorPos_Injected_m46E4934CD2A9F2E97B8A86D52169C848EF6D91E8,
 	InputUnsafeUtility_GetKeyString__Unmanaged_mD736022C3E6C98ED4B4AEA824AC2DA98A3A1B223,
 	InputUnsafeUtility_GetKeyUpString__Unmanaged_mFD0D4ED74B64E565CB3F543CBBE38F6AE84AC27A,
+	InputUnsafeUtility_GetKeyDownString_mE43ABE7F9E5C458B03A2CB535089C7C6E5060F41,
 	InputUnsafeUtility_GetKeyDownString__Unmanaged_m53E2CCD225AC1CE7CB40002403EDC5AEF266EB8D,
 	InputUnsafeUtility_GetAxis_m034889C00C914572B94F091E8EC646E86408A29F,
 	InputUnsafeUtility_GetAxis__Unmanaged_m288AEE066E04CCFDD229629882CA42DBD1D85CF2,
@@ -140,6 +145,7 @@ static Il2CppMethodPointer s_methodPointers[67] =
 	InputUnsafeUtility_GetButtonDown_mB35B46B92DA28196820B996E2420E5E320088EE4,
 	InputUnsafeUtility_GetButtonDown__Unmanaged_m411E8743768382A33B3778E734AF072F8DBDECC4,
 	InputUnsafeUtility_GetButtonUp__Unmanaged_mCCE34158CE05432541102B1C2AEC6545E25D0732,
+	InputUnsafeUtility_GetKeyDownString_Injected_m170F1AC0E421448646190A6DB3135866E2C10A27,
 	InputUnsafeUtility_GetAxis_Injected_m7617B11C7695077D77C9C2F3F068734E5F35E12E,
 	InputUnsafeUtility_GetAxisRaw_Injected_mB5CF61FFB2DE889CB33B56AB77AE94BB8F16D31D,
 	InputUnsafeUtility_GetButtonDown_Injected_m14E4D5FEFEE423F495E54FE1CACC08567ABDAA29,
@@ -181,7 +187,7 @@ static Il2CppTokenAdjustorThunkPair s_adjustorThunks[17] =
 	{ 0x06000012, Touch_get_radius_m5BC9C50DABBB17B07742BAFC6CC36A6736AE7960_AdjustorThunk },
 	{ 0x06000013, Touch_get_radiusVariance_m6F54BE964B91C3B2F8FA2A483E1FDB644B282B21_AdjustorThunk },
 };
-static const int32_t s_InvokerIndices[67] = 
+static const int32_t s_InvokerIndices[70] = 
 {
 	10520,
 	7931,
@@ -202,60 +208,63 @@ static const int32_t s_InvokerIndices[67] =
 	10411,
 	10411,
 	10411,
-	15553,
-	15553,
-	15220,
-	15228,
-	15228,
-	15228,
-	15228,
-	15228,
-	15652,
-	16085,
-	16188,
-	15228,
-	15228,
-	16027,
+	15555,
+	15555,
+	15221,
+	15229,
+	15229,
+	15229,
+	15229,
+	15229,
+	15654,
+	16087,
+	16190,
+	15229,
+	15229,
+	15221,
+	16029,
+	16186,
 	16184,
-	16182,
-	16063,
-	15782,
-	16014,
-	16182,
-	15803,
-	16027,
-	16027,
-	16027,
-	16027,
-	16027,
-	16063,
-	14797,
-	15770,
-	15770,
-	15770,
-	15770,
-	15770,
-	15770,
-	14000,
-	14000,
-	14000,
-	15553,
-	14557,
-	15553,
-	14557,
-	14000,
-	15220,
-	14000,
-	14000,
-	15553,
-	15553,
-	15220,
+	16065,
+	15784,
+	16016,
+	16184,
+	15805,
+	16029,
+	16029,
+	16029,
+	16029,
+	16029,
+	16065,
+	14798,
+	15772,
+	15772,
+	15772,
+	15772,
+	15772,
+	15772,
+	14001,
+	14001,
+	15221,
+	14001,
+	15555,
+	14558,
+	15555,
+	14558,
+	14001,
+	15221,
+	14001,
+	14001,
+	15221,
+	15555,
+	15555,
+	15221,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_InputLegacyModule_CodeGenModule;
 const Il2CppCodeGenModule g_UnityEngine_InputLegacyModule_CodeGenModule = 
 {
 	"UnityEngine.InputLegacyModule.dll",
-	67,
+	70,
 	s_methodPointers,
 	17,
 	s_adjustorThunks,

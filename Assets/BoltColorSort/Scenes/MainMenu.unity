@@ -379,9 +379,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.MainMenuManager
   backgroundImage: {fileID: 266225494}
   gameLogo: {fileID: 0}
-  playButton: {fileID: 0}
-  playButtonRoot: {fileID: 0}
-  playText: {fileID: 0}
+  playButton: {fileID: 936155647}
+  playButtonRoot: {fileID: 936155646}
+  playText: {fileID: 1502033215}
   currentLevelText: {fileID: 0}
   settingsButton: {fileID: 1711585474}
   removeAdsButton: {fileID: 0}

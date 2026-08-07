@@ -2945,7 +2945,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: dbab4642c38b8b6afbcb398da22d12b4, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c8e67c7a37af676d2beac9bbfedf6c6d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -10331,7 +10331,7 @@ MonoBehaviour:
   gridLayoutSettings:
     MaximumColumns: 5
     HorizontalSpacing: 0.9
-    RowDepthSpacing: 1.23
+    RowDepthSpacing: 1.7
     AlternateRowHorizontalOffset: 0
     GridCenterOffset: {x: 0, y: 0, z: -0.25}
     FillBackRowFirst: 1
