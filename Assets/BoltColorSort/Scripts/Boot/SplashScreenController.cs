@@ -74,6 +74,7 @@ namespace NutBoltSort
         private float _actualProgress;
         private float _displayedProgress;
         private int   _lastDisplayedPercent = -1;   // -1 forces first update
+        private bool  _isComplete;                  // when true, Update() holds bar at 100%
         private Tween _logoPulseTween;
 
         // ─────────────────────────────────────────────────────────────────────
@@ -100,6 +101,11 @@ namespace NutBoltSort
 
         private void Update()
         {
+            // Once complete, lock the bar at 100% and do nothing else.
+            // Without this guard, the maxProgressLead offset would pull
+            // _displayedProgress back from 1.0 to ~0.96 every frame.
+            if (_isComplete) return;
+
             // Smooth display progress toward actual progress.
             float target = Mathf.Clamp(_actualProgress - maxProgressLead, 0f, _actualProgress);
             _displayedProgress = Mathf.MoveTowards(_displayedProgress, target,
@@ -155,6 +161,10 @@ namespace NutBoltSort
             const float maxWait = 1.5f;
             while (_displayedProgress < 0.99f && Time.realtimeSinceStartup - waitStart < maxWait)
                 yield return null;
+
+            // Lock Update() BEFORE writing 100% so it cannot pull the value back
+            // down via the maxProgressLead offset on the very next frame.
+            _isComplete = true;
 
             // Force full — bar shows exactly 100%.
             _displayedProgress = 1f;

@@ -22,11 +22,11 @@ static Il2CppMethodPointer s_methodPointers[5] =
 };
 static const int32_t s_InvokerIndices[5] = 
 {
-	16218,
-	10520,
-	10520,
-	3381,
-	10520,
+	16234,
+	10534,
+	10534,
+	3387,
+	10534,
 };
 IL2CPP_EXTERN_C const Il2CppCodeGenModule g_MK_Toon_URP_CodeGenModule;
 const Il2CppCodeGenModule g_MK_Toon_URP_CodeGenModule = 

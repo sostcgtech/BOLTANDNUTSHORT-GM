@@ -57,6 +57,7 @@
           {
             "name": "AudioBehaviour",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -72,6 +73,7 @@
           {
             "name": "AudioListener",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -141,6 +143,7 @@
           {
             "name": "Camera",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -162,6 +165,7 @@
           {
             "name": "Cubemap",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -183,6 +187,7 @@
           {
             "name": "EditorExtension",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -198,6 +203,7 @@
           {
             "name": "GameObject",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -231,6 +237,7 @@
           {
             "name": "LevelGameManager",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -240,6 +247,7 @@
           {
             "name": "Light",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -271,6 +279,7 @@
           {
             "name": "LightmapSettings",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -292,6 +301,7 @@
           {
             "name": "Material",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -325,6 +335,7 @@
           {
             "name": "MonoBehaviour",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -340,6 +351,7 @@
           {
             "name": "MonoScript",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -349,6 +361,7 @@
           {
             "name": "NamedObject",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -388,6 +401,7 @@
           {
             "name": "RectTransform",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -403,6 +417,7 @@
           {
             "name": "RenderSettings",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -436,6 +451,7 @@
           {
             "name": "Shader",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -463,6 +479,7 @@
           {
             "name": "Sprite",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -1789,6 +1806,7 @@
           {
             "name": "Font",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -1852,6 +1870,7 @@
           {
             "name": "Canvas",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -1861,6 +1880,7 @@
           {
             "name": "CanvasGroup",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
@@ -1870,6 +1890,7 @@
           {
             "name": "CanvasRenderer",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/00_Boot.unity",
               "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],

@@ -470,7 +470,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ScriptableRendererFeature__ctor_mA05EC95
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 61736
+// Method Definition Index: 61840
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR MonoScriptData_t76CBF64C34979998B722F97CB23CBB7718174135 UnitySourceGeneratedAssemblyMonoScriptTypes_v1_Get_m7D659D7E6403160DD71D8CB441783DCD296AE287 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -505,7 +505,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR MonoScriptData_t76CBF64C34979998B722F97CB23CB
 		return L_6;
 	}
 }
-// Method Definition Index: 61737
+// Method Definition Index: 61841
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UnitySourceGeneratedAssemblyMonoScriptTypes_v1__ctor_m7F072996BC2A96BCD04C79629C8E81D581064674 (UnitySourceGeneratedAssemblyMonoScriptTypes_v1_t41D5A2CD9A5DD065B9280C4200902F1B6CB203A5* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -592,7 +592,7 @@ IL2CPP_EXTERN_C void MonoScriptData_t76CBF64C34979998B722F97CB23CBB7718174135_ma
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 61738
+// Method Definition Index: 61842
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MKToonPerObjectOutlines_Create_mDF9C37E7160B5C90C8ED56AE6CCC09001A742A1A (MKToonPerObjectOutlines_tCA415061CCBD6268C97FB08F8791C4CB3136B772* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -643,7 +643,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MKToonPerObjectOutlines_Create_mDF9C37E7
 		return;
 	}
 }
-// Method Definition Index: 61739
+// Method Definition Index: 61843
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MKToonPerObjectOutlines_AddRenderPasses_mFDDCB9CD5F26E20C58C752497FEA10D2262CC33C (MKToonPerObjectOutlines_tCA415061CCBD6268C97FB08F8791C4CB3136B772* __this, ScriptableRenderer_tF15B95BB85F26BE4B4719901D909831B89DC8892* ___0_renderer, RenderingData_tAAA01190551D6D5954314E3E1E85B58DD45EED71* ___1_renderingData, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
@@ -664,7 +664,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MKToonPerObjectOutlines_AddRenderPasses_
 		return;
 	}
 }
-// Method Definition Index: 61740
+// Method Definition Index: 61844
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MKToonPerObjectOutlines__ctor_mA397EE8DD75A9BEBC5C9724051505448346E9F7B (MKToonPerObjectOutlines_tCA415061CCBD6268C97FB08F8791C4CB3136B772* __this, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>
