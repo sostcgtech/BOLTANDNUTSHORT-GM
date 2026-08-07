@@ -57,7 +57,8 @@
           {
             "name": "AudioBehaviour",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -71,7 +72,8 @@
           {
             "name": "AudioListener",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -139,7 +141,8 @@
           {
             "name": "Camera",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -159,7 +162,8 @@
           {
             "name": "Cubemap",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -179,7 +183,8 @@
           {
             "name": "EditorExtension",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 1,
             "icon": null
@@ -193,7 +198,8 @@
           {
             "name": "GameObject",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -225,7 +231,8 @@
           {
             "name": "LevelGameManager",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 1,
             "icon": null
@@ -233,7 +240,8 @@
           {
             "name": "Light",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -263,7 +271,8 @@
           {
             "name": "LightmapSettings",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -283,7 +292,8 @@
           {
             "name": "Material",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -315,7 +325,8 @@
           {
             "name": "MonoBehaviour",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -329,7 +340,8 @@
           {
             "name": "MonoScript",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 1,
             "icon": null
@@ -337,7 +349,8 @@
           {
             "name": "NamedObject",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 1,
             "icon": null
@@ -375,7 +388,8 @@
           {
             "name": "RectTransform",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -389,7 +403,8 @@
           {
             "name": "RenderSettings",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -421,7 +436,8 @@
           {
             "name": "Shader",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -447,7 +463,8 @@
           {
             "name": "Sprite",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -1772,7 +1789,8 @@
           {
             "name": "Font",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -1834,7 +1852,8 @@
           {
             "name": "Canvas",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -1842,7 +1861,8 @@
           {
             "name": "CanvasGroup",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
@@ -1850,7 +1870,8 @@
           {
             "name": "CanvasRenderer",
             "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null

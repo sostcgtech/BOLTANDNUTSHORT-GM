@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/BoltColorSort/Scenes/MainMenu.unity
+    guid: 57317c4e43d2bd4ad941703a53fb137e
+  - enabled: 1
     path: Assets/BoltColorSort/Scenes/BoltNutSortGM.unity
     guid: 8ebcf4f3ed5112ea88b9a3ed8755a520
   m_configObjects:
