@@ -7,10 +7,13 @@ namespace NutBoltSort
     /// </summary>
     public static class SceneNames
     {
-        /// <summary>The main menu scene (index 0 in Build Settings).</summary>
+        /// <summary>The splash / boot scene (index 0 in Build Settings).</summary>
+        public const string Boot = "00_Boot";
+
+        /// <summary>The main menu scene (index 1 in Build Settings).</summary>
         public const string MainMenu = "MainMenu";
 
-        /// <summary>The gameplay scene (index 1 in Build Settings).</summary>
+        /// <summary>The gameplay scene (index 2 in Build Settings).</summary>
         public const string Gameplay = "BoltNutSortGM";
     }
 }
