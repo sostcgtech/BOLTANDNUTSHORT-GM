@@ -10199,6 +10199,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.LevelManager
   boltPrefab: {fileID: 8886823225530323966, guid: a50ce0c9df5797903a7f0154b533ae83, type: 3}
   nutPrefab: {fileID: 6738112415320462758, guid: 2a8c858255f5dc0b7a67172e97ad817b, type: 3}
+  nutMasterMaterial: {fileID: 0}
   boardRoot: {fileID: 392807724}
   gridLayoutSettings:
     MaximumColumns: 5
@@ -10209,12 +10210,6 @@ MonoBehaviour:
     FillBackRowFirst: 1
     OptionalRowHeightOffset: 1
   levelDataList: []
-  nutMaterialTemplate: {fileID: 0}
-  nutNormalMap: {fileID: 0}
-  nutOcclusionMap: {fileID: 0}
-  nutOcclusionStrength: 1
-  nutThicknessMap: {fileID: 0}
-  nutThickness: 1
 --- !u!1 &1044805410
 GameObject:
   m_ObjectHideFlags: 0

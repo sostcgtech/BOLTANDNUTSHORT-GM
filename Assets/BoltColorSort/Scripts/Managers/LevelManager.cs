@@ -12,6 +12,8 @@ namespace NutBoltSort
         [Header("Prefabs & Hierarchy")]
         [SerializeField] private BoltView boltPrefab;
         [SerializeField] private NutView nutPrefab;
+        [Tooltip("Shared baked URP/Lit material used by the procedural fallback when NutPrefab is unavailable.")]
+        [SerializeField] private Material nutMasterMaterial;
         [SerializeField] private Transform boardRoot;
 
         [Header("Grid Layout Settings")]
@@ -20,23 +22,6 @@ namespace NutBoltSort
         [Header("Level Data Assets")]
         [SerializeField] private List<LevelDataSO> levelDataList = new List<LevelDataSO>();
 
-        private readonly Dictionary<NutColor, Color> defaultColors = new Dictionary<NutColor, Color>
-        {
-            { NutColor.Red,    new Color(.95f, .19f, .20f) },
-            { NutColor.Blue,   new Color(.12f, .48f, .96f) },
-            { NutColor.Green,  new Color(.16f, .76f, .43f) },
-            { NutColor.Yellow, new Color(1f,   .68f, .08f) },
-            { NutColor.Purple, new Color(.58f, .12f, .90f) },
-            { NutColor.Orange, new Color(1f,   .50f, .10f) },
-            { NutColor.Pink,   new Color(.96f, .30f, .58f) },
-            { NutColor.Cyan,   new Color(.08f, .78f, .90f) },
-            { NutColor.Lime,   new Color(.55f, .86f, .14f) },
-            { NutColor.White,  new Color(.88f, .91f, .95f) },
-            { NutColor.DarkBlue, new Color(.15f, .27f, .66f) },
-            { NutColor.Magenta,new Color(.84f, .12f, .72f) }
-        };
-
-        private readonly Dictionary<NutColor, Material> cachedMaterials = new Dictionary<NutColor, Material>();
         private readonly Dictionary<string, Material> customMaterials = new Dictionary<string, Material>();
         private Material metalMaterial;
         private readonly List<BoltView> activeBolts = new List<BoltView>();
@@ -312,7 +297,7 @@ namespace NutBoltSort
 
         private NutView SpawnNut(BoltView bolt, NutColor color, int slotIndex, bool startsHidden)
         {
-            Material mat = GetOrCreateMaterial(color);
+            Material mat = GetNutMasterMaterial();
             Vector3 localPos = bolt.GetStackPosition(slotIndex);
             Transform container = bolt.NutContainer;
 
@@ -326,7 +311,7 @@ namespace NutBoltSort
                 // size its imported mesh; forcing Vector3.one made nuts appear tiny
                 // until the first landing animation restored their cached prefab scale.
                 nutInstance.CaptureRestingTransform();
-                nutInstance.Initialize(color, mat, startsHidden);
+                nutInstance.Initialize(color, startsHidden);
                 return nutInstance;
             }
 
@@ -338,15 +323,11 @@ namespace NutBoltSort
             var body = CreatePrimitive(PrimitiveType.Cylinder, "Nut ring", n.transform, Vector3.zero, new Vector3(.62f, .19f, .62f), mat);
             if (body.TryGetComponent<Collider>(out var c1)) c1.enabled = false;
 
-            Color baseColor = defaultColors.ContainsKey(color) ? defaultColors[color] : Color.white;
-            Color bevelColor = Color.Lerp(baseColor, Color.white, .17f);
-            Material bevelMat = GetOrCreateCustomMaterial(color + "_Bevel", bevelColor, .15f);
-
-            var bevel = CreatePrimitive(PrimitiveType.Cylinder, "Nut bevel", n.transform, new Vector3(0, .13f, 0), new Vector3(.51f, .07f, .51f), bevelMat);
+            var bevel = CreatePrimitive(PrimitiveType.Cylinder, "Nut bevel", n.transform, new Vector3(0, .13f, 0), new Vector3(.51f, .07f, .51f), mat);
             if (bevel.TryGetComponent<Collider>(out var c2)) c2.enabled = false;
 
             var nutView = n.AddComponent<NutView>();
-            nutView.Initialize(color, mat, startsHidden);
+            nutView.Initialize(color, startsHidden);
             return nutView;
         }
 
@@ -382,15 +363,15 @@ namespace NutBoltSort
             return mat;
         }
 
-        private Material GetOrCreateMaterial(NutColor color)
+        private Material GetNutMasterMaterial()
         {
-            if (cachedMaterials.TryGetValue(color, out var mat) && mat != null)
-                return mat;
+            if (nutMasterMaterial != null) return nutMasterMaterial;
 
-            Color c = defaultColors.ContainsKey(color) ? defaultColors[color] : Color.magenta;
-            mat = GetOrCreateCustomMaterial(color.ToString(), c, .22f);
-            cachedMaterials[color] = mat;
-            return mat;
+            Renderer prefabRenderer = nutPrefab != null ? nutPrefab.GetComponentInChildren<Renderer>() : null;
+            if (prefabRenderer != null) return prefabRenderer.sharedMaterial;
+
+            Debug.LogError("[LevelManager] NutPrefab or M_Nut_Master must be assigned before spawning procedural nuts.", this);
+            return null;
         }
 
         public bool ValidateLevelData(LevelDataSO data)

@@ -311,7 +311,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: bb8b8d72ea92a75989bbf2e9977e8500, type: 2}
+  - {fileID: 2100000, guid: c2b736ea6d8544e0a3dff8085c089dea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -385,7 +385,7 @@ MonoBehaviour:
   bevelRenderer: {fileID: 260730116403920357}
   optionalHighlight: {fileID: 0}
   rotatingNutVisual: {fileID: 910000000000000002}
-  hiddenMaterial: {fileID: 2100000, guid: 1cf38610ae897d137b8cc0c16203c075, type: 2}
+  hiddenBaseColor: {r: 0.52, g: 0.55, b: 0.59, a: 1}
   questionMarkAnchor: {fileID: 910000000000000004}
   questionMarkText: {fileID: 3495207464626759712}
   questionMarkColor: {r: 1, g: 1, b: 1, a: 1}

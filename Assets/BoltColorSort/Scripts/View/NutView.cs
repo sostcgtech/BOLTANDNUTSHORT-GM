@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 namespace NutBoltSort
 {
     /// <summary>
-    /// Component attached to NutPrefab managing visual rendering, material assignment, and local transform state.
+    /// Component attached to NutPrefab managing visual rendering and local transform state.
     /// </summary>
     public class NutView : MonoBehaviour
     {
@@ -18,7 +18,7 @@ namespace NutBoltSort
         [SerializeField] private GameObject optionalHighlight;
         [SerializeField] private Transform rotatingNutVisual;
         [Header("Hidden Nut Visual")]
-        [SerializeField] private Material hiddenMaterial;
+        [SerializeField] private UnityEngine.Color hiddenBaseColor = new UnityEngine.Color(.52f, .55f, .59f, 1f);
         [SerializeField] private Transform questionMarkAnchor;
         [SerializeField] private TextMeshPro questionMarkText;
         [SerializeField] private UnityEngine.Color questionMarkColor = UnityEngine.Color.white;
@@ -51,10 +51,9 @@ namespace NutBoltSort
         public Vector3 RestingLocalScale { get; set; }
         public Quaternion RestingVisualLocalRotation { get; private set; }
         public Transform RotatingNutVisual => rotatingNutVisual != null ? rotatingNutVisual : transform;
-        private Material realColorMaterial;
-        private Material runtimeHiddenMaterial;
         private Sequence revealSequence;
         private MaterialPropertyBlock completionGlowProperties;
+        private MaterialPropertyBlock colorProperties;
         private bool cameraLookupAttempted;
         private Quaternion originalQuestionMarkLocalRotation = Quaternion.identity;
         private Vector3 originalQuestionMarkLocalScale = Vector3.one;
@@ -87,9 +86,9 @@ namespace NutBoltSort
         }
 
         /// <summary>
-        /// Assigns logical color and material at runtime.
+        /// Assigns the logical color without replacing the prefab's shared baked material.
         /// </summary>
-        public void Initialize(NutColor nutColor, Material material, bool startsHidden = false)
+        public void Initialize(NutColor nutColor, bool startsHidden = false)
         {
             Color = nutColor;
             StartsHidden = startsHidden;
@@ -102,9 +101,8 @@ namespace NutBoltSort
                 if (renderers.Length > 1) bevelRenderer = renderers[1];
             }
 
-            realColorMaterial = material;
             EnsureQuestionMark();
-            ApplyDisplayMaterial(IsHidden ? GetHiddenMaterial() : realColorMaterial);
+            ApplyBaseColor(IsHidden ? hiddenBaseColor : NutColorToUnityColor(Color));
             SetQuestionMarkVisible(IsHidden);
         }
 
@@ -113,7 +111,7 @@ namespace NutBoltSort
         {
             if (!IsHidden) return;
             IsRevealed = true;
-            ApplyDisplayMaterial(realColorMaterial);
+            ApplyBaseColor(NutColorToUnityColor(Color));
             SetQuestionMarkVisible(false);
         }
 
@@ -131,7 +129,7 @@ namespace NutBoltSort
             revealSequence.InsertCallback(revealDuration * .48f, () =>
             {
                 IsRevealed = true;
-                ApplyDisplayMaterial(realColorMaterial);
+                ApplyBaseColor(NutColorToUnityColor(Color));
                 SetQuestionMarkVisible(false);
             });
             revealSequence.Append(tr.DOScale(RestingLocalScale, revealDuration * .25f).SetEase(Ease.OutBack));
@@ -157,7 +155,7 @@ namespace NutBoltSort
         {
             CancelReveal();
             IsRevealed = !StartsHidden;
-            ApplyDisplayMaterial(IsHidden ? GetHiddenMaterial() : realColorMaterial);
+            ApplyBaseColor(IsHidden ? hiddenBaseColor : NutColorToUnityColor(Color));
             SetQuestionMarkVisible(IsHidden);
         }
 
@@ -363,23 +361,19 @@ namespace NutBoltSort
             gameplayCamera = Camera.main;
         }
 
-        private Material GetHiddenMaterial()
+        private void ApplyBaseColor(UnityEngine.Color color)
         {
-            if (hiddenMaterial != null) return hiddenMaterial;
-            if (runtimeHiddenMaterial == null && realColorMaterial != null)
-            {
-                runtimeHiddenMaterial = new Material(realColorMaterial);
-                UnityEngine.Color gray = new UnityEngine.Color(.52f, .55f, .59f, 1f);
-                runtimeHiddenMaterial.color = gray;
-                if (runtimeHiddenMaterial.HasProperty("_BaseColor")) runtimeHiddenMaterial.SetColor("_BaseColor", gray);
-            }
-            return runtimeHiddenMaterial;
+            ApplyBaseColor(mainRenderer, color);
+            if (bevelRenderer != mainRenderer) ApplyBaseColor(bevelRenderer, color);
         }
 
-        private void ApplyDisplayMaterial(Material material)
+        private void ApplyBaseColor(Renderer renderer, UnityEngine.Color color)
         {
-            if (mainRenderer != null && material != null) mainRenderer.material = material;
-            if (bevelRenderer != null && material != null) bevelRenderer.material = material;
+            if (renderer == null || renderer.sharedMaterial == null || !renderer.sharedMaterial.HasProperty("_BaseColor")) return;
+            if (colorProperties == null) colorProperties = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(colorProperties);
+            colorProperties.SetColor("_BaseColor", color);
+            renderer.SetPropertyBlock(colorProperties);
         }
 
         private void SetQuestionMarkVisible(bool visible)
