@@ -1807,8 +1807,7 @@
             "name": "Font",
             "scenes": [
               "Assets/BoltColorSort/Scenes/00_Boot.unity",
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
-              "Assets/BoltColorSort/Scenes/MainMenu.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
             ],
             "dependencyType": 0,
             "icon": null
