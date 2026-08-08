@@ -14,10 +14,13 @@ namespace NutBoltSort
     ///   - Entry animation (logo, play button, UI buttons).
     ///   - Logo idle breath animation.
     ///   - Play button idle pulse animation.
+    ///   - Remove Ads / Shop icon idle animations via MainMenuButtonAnimator.
+    ///   - Remove Ads / Shop button press feedback → popup open.
     ///   - Play button reads current saved level from PlayerPrefs.
     ///   - Asynchronous gameplay scene load with color-iris transition.
     ///   - Settings button → MainMenuSettingsPanel.
     ///   - Remove Ads button → RemoveAdsPopup.
+    ///   - Shop button → ShopPopup.
     ///   - Android Back button routing.
     ///
     /// Add this script to the MainMenuManager GameObject in the Main Menu scene.
@@ -55,8 +58,44 @@ namespace NutBoltSort
         [Header("Top Bar")]
         [SerializeField] private Button settingsButton;
 
+        // ─────────────────────────────────────────────────────────────────────
+        // Inspector — Bottom Buttons
+        // ─────────────────────────────────────────────────────────────────────
+
         [Header("Bottom Content")]
         [SerializeField] private Button removeAdsButton;
+        [SerializeField] private Button shopButton;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Inspector — Coin Section
+        // ─────────────────────────────────────────────────────────────────────
+
+        [Header("Coin Section")]
+        [Tooltip("TMP_Text that shows the player's current coin balance in the Main Menu.")]
+        [SerializeField] private TMP_Text coinDisplayText;
+
+        [Tooltip("The + button next to the coin display. Clicking it opens the Shop popup.")]
+        [SerializeField] private Button   coinPlusButton;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Inspector — Extra Remove Ads Triggers
+        // ─────────────────────────────────────────────────────────────────────
+
+        [Header("Banner / Extra Buttons")]
+        [Tooltip("Any additional buttons that should also open the Remove Ads popup. " +
+                 "e.g. the X close button on an ad banner. Add as many as needed.")]
+        [SerializeField] private Button[] extraRemoveAdsButtons;
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Inspector — Button Animators
+        // ─────────────────────────────────────────────────────────────────────
+
+        [Header("Button Animators")]
+        [Tooltip("MainMenuButtonAnimator on the Remove Ads icon visual child.")]
+        [SerializeField] private MainMenuButtonAnimator removeAdsAnimator;
+
+        [Tooltip("MainMenuButtonAnimator on the Shop icon visual child.")]
+        [SerializeField] private MainMenuButtonAnimator shopAnimator;
 
         // ─────────────────────────────────────────────────────────────────────
         // Inspector — Panels
@@ -67,6 +106,9 @@ namespace NutBoltSort
 
         [Header("Remove Ads")]
         [SerializeField] private RemoveAdsPopup removeAdsPopup;
+
+        [Header("Shop")]
+        [SerializeField] private ShopPopup shopPopup;
 
         // ─────────────────────────────────────────────────────────────────────
         // Inspector — Transition
@@ -104,9 +146,9 @@ namespace NutBoltSort
         // State
         // ─────────────────────────────────────────────────────────────────────
 
-        private bool   isLoading;
-        private Tween  logoPulseTween;
-        private Tween  playPulseTween;
+        private bool     isLoading;
+        private Tween    logoPulseTween;
+        private Tween    playPulseTween;
         private Sequence entrySequence;
 
         // ─────────────────────────────────────────────────────────────────────
@@ -128,9 +170,14 @@ namespace NutBoltSort
             // Hide overlays cleanly regardless of their editor state.
             settingsPanel?.HideImmediate();
             removeAdsPopup?.HideImmediate();
+            shopPopup?.HideImmediate();
 
+            RefreshCoinDisplay(PlayerWallet.GetCoins());
             RefreshLevelText();
             PlayEntryAnimation();
+
+            // Keep the coin display in sync whenever the balance changes.
+            PlayerWallet.OnCoinsChanged += RefreshCoinDisplay;
         }
 
         private void Update()
@@ -152,7 +199,23 @@ namespace NutBoltSort
                 return;
             }
 
+            if (shopPopup != null && shopPopup.IsOpen)
+            {
+                shopPopup.Close();
+                return;
+            }
+
             // Nothing open — Back on Main Menu does nothing (exit confirmation out of scope).
+        }
+
+        private void OnDestroy()
+        {
+            logoPulseTween?.Kill();
+            playPulseTween?.Kill();
+            entrySequence?.Kill();
+
+            // Always unsubscribe to avoid memory leaks after scene unload.
+            PlayerWallet.OnCoinsChanged -= RefreshCoinDisplay;
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -178,6 +241,31 @@ namespace NutBoltSort
                 removeAdsButton.onClick.RemoveAllListeners();
                 removeAdsButton.onClick.AddListener(OnRemoveAdsPressed);
             }
+
+            if (shopButton != null)
+            {
+                shopButton.onClick.RemoveAllListeners();
+                shopButton.onClick.AddListener(OnShopPressed);
+            }
+
+            // Coin section + button — opens the Shop popup.
+            if (coinPlusButton != null)
+            {
+                coinPlusButton.onClick.RemoveAllListeners();
+                coinPlusButton.onClick.AddListener(OnShopPressed);
+            }
+
+            // Wire every extra button (banner X, secondary buttons, etc.) to open
+            // the Remove Ads popup — same handler, no animator press feedback.
+            if (extraRemoveAdsButtons != null)
+            {
+                foreach (Button btn in extraRemoveAdsButtons)
+                {
+                    if (btn == null) continue;
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(OnExtraRemoveAdsPressed);
+                }
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -197,6 +285,16 @@ namespace NutBoltSort
                 currentLevelText.text = $"LEVEL {level}";
         }
 
+        /// <summary>
+        /// Updates the coin display text with the given balance.
+        /// Signature matches PlayerWallet.OnCoinsChanged so it can be subscribed directly.
+        /// </summary>
+        private void RefreshCoinDisplay(int newBalance)
+        {
+            if (coinDisplayText != null)
+                coinDisplayText.text = newBalance.ToString("N0");
+        }
+
         // ─────────────────────────────────────────────────────────────────────
         // Entry Animation
         // ─────────────────────────────────────────────────────────────────────
@@ -208,6 +306,7 @@ namespace NutBoltSort
             SetEntryStartState(playButtonRoot,  startAlpha: 0f, startScale: 0.88f);
             SetEntryStartState(settingsButton,  startAlpha: 0f);
             SetEntryStartState(removeAdsButton, startAlpha: 0f);
+            SetEntryStartState(shopButton,      startAlpha: 0f);
 
             entrySequence?.Kill();
             entrySequence = DOTween.Sequence();
@@ -218,19 +317,22 @@ namespace NutBoltSort
             AppendEntryItem(entrySequence, playButtonRoot,  ref t);
             AppendEntryItem(entrySequence, settingsButton,  ref t);
             AppendEntryItem(entrySequence, removeAdsButton, ref t);
+            AppendEntryItem(entrySequence, shopButton,      ref t);
 
             entrySequence.OnComplete(() =>
             {
                 // Begin idle animations only after entry finishes.
                 StartLogoIdleAnimation();
                 StartPlayButtonIdleAnimation();
+                StartButtonIdleAnimations();
             });
         }
 
         private static void SetEntryStartState(Component target, float startAlpha = 0f, float startScale = -1f)
         {
             if (target == null) return;
-            var cg = target.GetComponent<CanvasGroup>() ?? target.gameObject.AddComponent<CanvasGroup>();
+            var cg = target.GetComponent<CanvasGroup>();
+            if (cg == null) cg = target.gameObject.AddComponent<CanvasGroup>();
             cg.alpha = startAlpha;
             if (startScale > 0f)
                 target.transform.localScale = Vector3.one * startScale;
@@ -240,7 +342,8 @@ namespace NutBoltSort
         {
             if (target == null) { currentTime += entryStagger; return; }
 
-            var cg = target.GetComponent<CanvasGroup>() ?? target.gameObject.AddComponent<CanvasGroup>();
+            var cg = target.GetComponent<CanvasGroup>();
+            if (cg == null) cg = target.gameObject.AddComponent<CanvasGroup>();
 
             Sequence itemSeq = DOTween.Sequence();
             itemSeq.Join(cg.DOFade(1f, entryItemDuration).SetEase(Ease.OutCubic));
@@ -274,10 +377,24 @@ namespace NutBoltSort
                 .SetLoops(-1, LoopType.Yoyo);
         }
 
+        /// <summary>
+        /// Starts the attention-animation loops on both icon animators.
+        /// Remove Ads and Shop use different wait ranges so they rarely fire
+        /// at the same time.
+        /// </summary>
+        private void StartButtonIdleAnimations()
+        {
+            removeAdsAnimator?.StartIdleAnimation();
+            shopAnimator?.StartIdleAnimation();
+        }
+
         private void StopIdleAnimations()
         {
             logoPulseTween?.Kill();
             playPulseTween?.Kill();
+
+            removeAdsAnimator?.StopIdleAnimation();
+            shopAnimator?.StopIdleAnimation();
 
             // Snap back to neutral scale so the transition starts cleanly.
             if (gameLogo       != null) gameLogo.localScale       = Vector3.one;
@@ -294,6 +411,7 @@ namespace NutBoltSort
             if (isLoading || SceneTransitionController.TransitionInFlight) return;
             if (settingsPanel  != null && settingsPanel.IsOpen)  return;
             if (removeAdsPopup != null && removeAdsPopup.IsOpen) return;
+            if (shopPopup      != null && shopPopup.IsOpen)      return;
 
             isLoading = true;
 
@@ -358,9 +476,60 @@ namespace NutBoltSort
         private void OnRemoveAdsPressed()
         {
             if (isLoading) return;
+            if (removeAdsPopup != null && removeAdsPopup.IsOpen) return;
+
+            if (removeAdsPopup == null)
+            {
+                Debug.LogError("[MainMenuManager] 'removeAdsPopup' is not assigned in the Inspector! " +
+                               "Drag the RemoveAdsPopup component into the Remove Ads field.", this);
+                return;
+            }
+
             AudioManager.Play(SfxType.ButtonClick);
             HapticManager.Play(HapticType.Light);
-            removeAdsPopup?.Open();
+
+            // Press feedback first — popup opens in the callback.
+            if (removeAdsAnimator != null)
+                removeAdsAnimator.PlayPressAnimation(() => removeAdsPopup?.Open());
+            else
+                removeAdsPopup?.Open();
+        }
+
+        /// <summary>
+        /// Called by banner close buttons and any other secondary buttons
+        /// that should open the Remove Ads popup.
+        /// Opens the popup directly — no icon press animation.
+        /// </summary>
+        private void OnExtraRemoveAdsPressed()
+        {
+            if (isLoading) return;
+            if (removeAdsPopup != null && removeAdsPopup.IsOpen) return;
+
+            if (removeAdsPopup == null)
+            {
+                Debug.LogError("[MainMenuManager] 'removeAdsPopup' is not assigned — " +
+                               "extra Remove Ads button has no popup to open.", this);
+                return;
+            }
+
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+            removeAdsPopup.Open();
+        }
+
+        private void OnShopPressed()
+        {
+            if (isLoading) return;
+            if (shopPopup != null && shopPopup.IsOpen) return;
+
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            // Press feedback first — popup opens in the callback.
+            if (shopAnimator != null)
+                shopAnimator.PlayPressAnimation(() => shopPopup?.Open());
+            else
+                shopPopup?.Open();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -377,17 +546,6 @@ namespace NutBoltSort
             if (playButton != null) playButton.interactable = true;
             RefreshLevelText();
             PlayEntryAnimation();
-        }
-
-        // ─────────────────────────────────────────────────────────────────────
-        // Cleanup
-        // ─────────────────────────────────────────────────────────────────────
-
-        private void OnDestroy()
-        {
-            logoPulseTween?.Kill();
-            playPulseTween?.Kill();
-            entrySequence?.Kill();
         }
     }
 }

@@ -1049,13 +1049,17 @@
         "dependencies": [
           {
             "name": "ParticleSystem",
-            "scenes": [],
+            "scenes": [
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },
           {
             "name": "ParticleSystemRenderer",
-            "scenes": [],
+            "scenes": [
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           }
@@ -1807,7 +1811,8 @@
             "name": "Font",
             "scenes": [
               "Assets/BoltColorSort/Scenes/00_Boot.unity",
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
+              "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
             "icon": null
