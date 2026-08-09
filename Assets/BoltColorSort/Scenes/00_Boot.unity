@@ -1194,6 +1194,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1898010370}
   - component: {fileID: 1898010369}
+  - component: {fileID: 1898010371}
   m_Layer: 0
   m_Name: CoreSystem
   m_TagString: Untagged
@@ -1233,6 +1234,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1898010371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898010368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c06fc09ec400d1e508339605e5e781e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.FPSCounter
+  updateInterval: 0.5
+  corner: 1
+  padding: {x: 16, y: 16}
+  goodFps: 55
+  acceptableFps: 40
 --- !u!1 &1981366446
 GameObject:
   m_ObjectHideFlags: 0
