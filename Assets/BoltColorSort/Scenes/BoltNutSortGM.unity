@@ -24096,9 +24096,9 @@ MonoBehaviour:
   levelCompleteText: {fileID: 0}
   levelCompleteTextGroup: {fileID: 0}
   confettiObject: {fileID: 2544450791650597969, guid: 8b7048d8365846c888987c88f490fce3, type: 3}
-  confettiParticleSystem: {fileID: 0}
+  confettiParticleSystem: {fileID: 2742641339629500480, guid: 8b7048d8365846c888987c88f490fce3, type: 3}
   confettiSpawnPoint: {fileID: 1165127835}
-  confettiScale: 1
+  confettiScale: 10
   confettiDelay: 0.15
   rewardCoinPile: {fileID: 1820846117}
   rewardAmountText: {fileID: 1059899234}

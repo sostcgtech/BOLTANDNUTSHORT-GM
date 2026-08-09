@@ -611,14 +611,14 @@ namespace NutBoltSort
                 if (ps != null) confettiObject = ps.gameObject;
             }
 
-            // If confettiObject is a project prefab (not instantiated in scene), instantiate once.
+            // A standard 3D particle prefab must live in world space. Spawn it at
+            // the assigned point rather than parenting it to the UI hierarchy.
             if (confettiObject != null && !confettiObject.scene.IsValid())
             {
-                Transform parent = confettiSpawnPoint != null ? confettiSpawnPoint : transform;
-                GameObject instance = Instantiate(confettiObject, parent);
+                Vector3 spawnPosition = confettiSpawnPoint != null ? confettiSpawnPoint.position : transform.position;
+                Quaternion spawnRotation = confettiSpawnPoint != null ? confettiSpawnPoint.rotation : transform.rotation;
+                GameObject instance = Instantiate(confettiObject, spawnPosition, spawnRotation);
                 instance.name = "Confetti_Celebration (Pooled)";
-                instance.transform.localPosition = Vector3.zero;
-                instance.transform.localRotation = Quaternion.identity;
                 confettiObject = instance;
             }
 
@@ -635,6 +635,12 @@ namespace NutBoltSort
         private void PlayConfetti()
         {
             if (confettiObject == null || confettiSystems.Count == 0) return;
+
+            // Honour the Inspector's spawn point for every celebration.
+            if (confettiSpawnPoint != null)
+            {
+                confettiObject.transform.SetPositionAndRotation(confettiSpawnPoint.position, confettiSpawnPoint.rotation);
+            }
 
             confettiObject.SetActive(true);
             confettiObject.transform.localScale = Vector3.one * confettiScale;
