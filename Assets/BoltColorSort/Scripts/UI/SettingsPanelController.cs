@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using DG.Tweening;
 
@@ -120,6 +121,7 @@ namespace NutBoltSort
         private Coroutine  toastCoroutine;
         private bool       pendingWinPopup;
         private bool       initialized;
+        private bool       isNavigatingHome;
 
         /// <summary>True while the settings panel is visible and interactive.</summary>
         public bool IsOpen { get; private set; }
@@ -146,6 +148,7 @@ namespace NutBoltSort
         {
             EnsureInitialized();
             IsOpen = false;
+            isNavigatingHome = false;
             if (settingsOverlay != null)
                 settingsOverlay.SetActive(false);
             if (toastLabel != null)
@@ -209,6 +212,7 @@ namespace NutBoltSort
         {
             if (IsOpen) return;
             IsOpen = true;
+            isNavigatingHome = false;
 
             // Initialise state before showing — no sounds/haptics during init.
             InitialiseToggles();
@@ -409,18 +413,35 @@ namespace NutBoltSort
         }
 
         /// <summary>
-        /// Placeholder for future Main Menu navigation.
-        /// Structure this so wiring in a real scene load later requires only
-        /// replacing the single TODO comment below.
+        /// Navigates back to the Main Menu scene.
         /// </summary>
         public void OnHomePressed()
         {
+            if (isNavigatingHome) return;
+            isNavigatingHome = true;
+
             AudioManager.Play(SfxType.ButtonClick);
             HapticManager.Play(HapticType.Light);
 
-            // TODO: Replace with SceneManager.LoadScene("MainMenu") when ready.
-            Debug.Log("[SettingsPanelController] Home pressed — main menu not yet implemented.");
-            ShowToast("Home screen will be added later.");
+            // Disable panel interaction immediately so further taps are blocked
+            if (panelCanvasGroup != null)
+            {
+                panelCanvasGroup.interactable   = false;
+                panelCanvasGroup.blocksRaycasts = false;
+            }
+
+            var transition = FindAnyObjectByType<SceneTransitionController>();
+            if (transition != null)
+            {
+                transition.PlayClose(onCovered: () =>
+                {
+                    SceneManager.LoadScene(SceneNames.MainMenu);
+                });
+            }
+            else
+            {
+                SceneManager.LoadScene(SceneNames.MainMenu);
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────
