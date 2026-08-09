@@ -99,6 +99,9 @@ namespace NutBoltSort
 
         public void RefreshCoinDisplay(int newBalance)
         {
+            // Do not abruptly jump the coin display if the win reward counter is currently interpolating.
+            if (winRewardAnimator != null && winRewardAnimator.IsClaiming) return;
+
             if (coinDisplayText != null)
                 coinDisplayText.text = newBalance.ToString("N0");
         }

@@ -1049,6 +1049,7 @@
           {
             "name": "ParticleSystem",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
@@ -1057,6 +1058,7 @@
           {
             "name": "ParticleSystemRenderer",
             "scenes": [
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,

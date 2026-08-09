@@ -2316,7 +2316,7 @@ MonoBehaviour:
   winPopup: {fileID: 0}
   nextLevelWinButton: {fileID: 1597198086}
   winRewardAnimator: {fileID: 1633287922}
-  levelRewardAmount: 150
+  levelRewardAmount: 10
   settingsPanelController: {fileID: 1547001881}
   settingsButton: {fileID: 1769902850}
   undoButton: {fileID: 538451186}
@@ -8089,7 +8089,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -421}
+  m_AnchoredPosition: {x: 0, y: -336}
   m_SizeDelta: {x: 0, y: 159.4026}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &736723620
@@ -8105,7 +8105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.66566384, g: 0.66566384, b: 0.66566384, a: 0.105882354}
+  m_Color: {r: 0.401533, g: 0.35872418, b: 0.35872418, a: 0.105882354}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17161,7 +17161,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1163755221
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17181,6 +17181,41 @@ RectTransform:
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1165127834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1165127835}
+  m_Layer: 5
+  m_Name: ConfettiSpwanpOint (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1165127835
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1165127834}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2.22, y: 2.22, z: 2.22}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 2098791044}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 36.984, y: -189.70856}
+  m_SizeDelta: {x: 917.11, y: 530.2172}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1170758468
 GameObject:
@@ -19759,8 +19794,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Level 10
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5ed9dbcc60b71ef4c9b039cd0a16fa22, type: 2}
+  m_sharedMaterial: {fileID: 6114456813851876622, guid: 5ed9dbcc60b71ef4c9b039cd0a16fa22, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -19784,10 +19819,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 36
+  m_fontSize: 64
+  m_fontSizeBase: 64
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -24060,6 +24095,11 @@ MonoBehaviour:
   ribbon: {fileID: 1629924659}
   levelCompleteText: {fileID: 0}
   levelCompleteTextGroup: {fileID: 0}
+  confettiObject: {fileID: 2544450791650597969, guid: 8b7048d8365846c888987c88f490fce3, type: 3}
+  confettiParticleSystem: {fileID: 0}
+  confettiSpawnPoint: {fileID: 1165127835}
+  confettiScale: 1
+  confettiDelay: 0.15
   rewardCoinPile: {fileID: 1820846117}
   rewardAmountText: {fileID: 1059899234}
   rewardAmountGroup: {fileID: 0}
@@ -24074,7 +24114,7 @@ MonoBehaviour:
   flyingCoinPrefab: {fileID: 6925140224633533791, guid: 4126170706eaec77eaa7426c6d48d9cf, type: 3}
   pooledCoinCount: 10
   coinsPerTransfer: 10
-  defaultRewardAmount: 150
+  defaultRewardAmount: 10
   gameManager: {fileID: 814769457}
   requestRewardedAd:
     m_PersistentCalls:
@@ -26987,6 +27027,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1885341279}
   m_CullTransparentMesh: 1
+--- !u!1 &1903583194
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1903583195}
+  m_Layer: 5
+  m_Name: ConfettiSpwanpOint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1903583195
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1903583194}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2098791044}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: -256, y: -96}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!21 &1916684497
 Material:
   serializedVersion: 8
@@ -28499,7 +28574,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 684.7521, y: 115.1225}
+  m_SizeDelta: {x: 980.91, y: 164.9134}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2047033430
 MonoBehaviour:
@@ -28523,8 +28598,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: a1fde6a50abc259efb39d3dee16dc75f, type: 2}
-  m_sharedMaterial: {fileID: -8095606103131556661, guid: a1fde6a50abc259efb39d3dee16dc75f, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5ed9dbcc60b71ef4c9b039cd0a16fa22, type: 2}
+  m_sharedMaterial: {fileID: 6114456813851876622, guid: 5ed9dbcc60b71ef4c9b039cd0a16fa22, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -28548,10 +28623,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 36
+  m_fontSize: 48
+  m_fontSizeBase: 48
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -28954,6 +29029,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1903583195}
+  - {fileID: 1165127835}
   - {fileID: 1629924659}
   - {fileID: 475916935}
   - {fileID: 1410618756}

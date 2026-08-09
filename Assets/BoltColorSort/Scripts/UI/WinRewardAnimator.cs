@@ -11,9 +11,8 @@ namespace NutBoltSort
 {
     /// <summary>
     /// Single, authoritative controller for the Level Complete / Win Panel.
-    /// Handles panel entrance, reward display, button feedback, coin-transfer animation,
-    /// wallet interpolation, haptics, and advancing to the next level.
-    /// Reads and syncs directly with PlayerWallet.
+    /// Handles panel entrance, crown/ribbon pop, confetti celebration, reward display,
+    /// button feedback, coin-transfer animation, wallet interpolation, haptics, and advancing to the next level.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class WinRewardAnimator : MonoBehaviour
@@ -24,6 +23,18 @@ namespace NutBoltSort
         [SerializeField] private RectTransform ribbon;
         [SerializeField] private TMP_Text levelCompleteText;
         [SerializeField] private CanvasGroup levelCompleteTextGroup;
+
+        [Header("Confetti Celebration")]
+        [Tooltip("Drag your Confetti GameObject or Prefab here (e.g. Confetti_blast_multicolor). All child particle systems will play together.")]
+        [SerializeField] private GameObject confettiObject;
+        [Tooltip("Legacy scene reference for the confetti particle system. Kept so existing scenes retain their assigned effect.")]
+        [SerializeField] private ParticleSystem confettiParticleSystem;
+        [Tooltip("Spawn point / transform where the confetti appears (e.g. ConfettiSpawnPoint above Crown).")]
+        [SerializeField] private Transform confettiSpawnPoint;
+        [Tooltip("Scale multiplier for the confetti burst (default: 3.0).")]
+        [SerializeField, Range(1f, 10f)] private float confettiScale = 3f;
+        [Tooltip("Delay in seconds after Win Panel opens before confetti bursts (default: 0.15s).")]
+        [SerializeField, Range(0f, 0.50f)] private float confettiDelay = 0.15f;
 
         [Header("Reward Entrance")]
         [SerializeField] private RectTransform rewardCoinPile;
@@ -52,6 +63,8 @@ namespace NutBoltSort
         [SerializeField] private UnityEvent requestRewardedAd;
 
         private readonly List<RectTransform> coinPool = new List<RectTransform>();
+        private readonly List<ParticleSystem> confettiSystems = new List<ParticleSystem>();
+
         private Sequence entranceSequence;
         private Sequence transferSequence;
 
@@ -77,6 +90,7 @@ namespace NutBoltSort
         private Action onAllTransfersComplete;
 
         public bool IsOpen => isShowing || isClaiming || (gameObject.activeSelf && (panelGroup == null || panelGroup.alpha > 0.05f));
+        public bool IsClaiming => isClaiming;
 
         private void Awake()
         {
@@ -85,6 +99,7 @@ namespace NutBoltSort
             if (oldPopup != null) oldPopup.enabled = false;
 
             AutoDiscoverReferences();
+            InitializeConfetti();
             CacheRestState();
             BindButtons();
             CreatePool();
@@ -102,6 +117,7 @@ namespace NutBoltSort
             PlayerWallet.OnCoinsChanged -= OnWalletCoinsChanged;
             entranceSequence?.Kill();
             transferSequence?.Kill();
+            StopConfetti();
             foreach (RectTransform coin in coinPool)
             {
                 if (coin != null) DOTween.Kill(coin);
@@ -125,7 +141,7 @@ namespace NutBoltSort
             }
         }
 
-        /// <summary>Opens the Win Panel and plays the complete Level Complete sequence.</summary>
+        /// <summary>Opens the Win Panel and plays the complete Level Complete sequence with confetti.</summary>
         public void Show(int amount)
         {
             if (isClaiming) return;
@@ -134,6 +150,7 @@ namespace NutBoltSort
             StopAllCoroutines();
             entranceSequence?.Kill();
             transferSequence?.Kill();
+            StopConfetti();
 
             rewardAmount = Mathf.Max(1, amount);
             isShowing = true;
@@ -155,6 +172,7 @@ namespace NutBoltSort
             StopAllCoroutines();
             entranceSequence?.Kill();
             transferSequence?.Kill();
+            StopConfetti();
 
             isShowing = false;
             isClaiming = false;
@@ -177,6 +195,8 @@ namespace NutBoltSort
         {
             if (!isShowing || isClaiming) return;
             isClaiming = true;
+
+            // Block further clicks via raycast blocking without triggering Unity UI's gray disabled tint.
             SetClaimButtonsInteractable(false);
             PlayButtonPress(claimButton != null ? claimButton.transform : null);
             StartCoroutine(ClaimRoutine(rewardAmount));
@@ -219,6 +239,9 @@ namespace NutBoltSort
             if (rewardGranted) yield break;
             rewardGranted = true;
 
+            // Keep panel fully visible and bright while coins are transferring.
+            if (panelGroup != null) panelGroup.alpha = 1f;
+
             int startBalance = PlayerWallet.GetCoins();
             int endBalance = startBalance + Mathf.Max(1, amount);
 
@@ -239,7 +262,8 @@ namespace NutBoltSort
 
             yield return new WaitForSecondsRealtime(0.25f);
 
-            // Smoothly fade out the win panel.
+            // Smoothly fade out the win panel and stop confetti only AFTER coins arrive.
+            StopConfetti();
             if (panelGroup != null)
             {
                 panelGroup.DOFade(0f, 0.20f).SetEase(Ease.InQuad);
@@ -297,11 +321,14 @@ namespace NutBoltSort
             coin.gameObject.SetActive(true);
 
             Vector2 start = GetLayerPoint(rewardCoinPile) + UnityEngine.Random.insideUnitCircle * 18f;
-            Vector2 end = walletRoot != null ? GetLayerPoint(walletRoot) : GetDefaultTopWalletLayerPos();
+            // Target the visible coin number first; WalletRoot is only a fallback.
+            RectTransform walletTarget = walletAmountText != null ? walletAmountText.rectTransform : walletRoot;
+            Vector2 end = walletTarget != null ? GetLayerPoint(walletTarget) : GetDefaultTopWalletLayerPos();
 
-            // Keep the initial pop varied, then fly directly to the wallet.
-            // Both start and end are anchored positions in flyingCoinsLayer space.
-            Vector2 popDirection = (end - start).sqrMagnitude > 0.001f
+            // Both positions are local to flyingCoinsLayer. Keep this animation in
+            // anchored UI space; Transform.DOPath uses world space and sends UI
+            // coins in the wrong direction.
+            Vector2 flightDirection = (end - start).sqrMagnitude > 0.001f
                 ? (end - start).normalized
                 : Vector2.up;
 
@@ -314,12 +341,10 @@ namespace NutBoltSort
             seq.AppendInterval(delay);
 
             // 1. Pop outward slightly from the pile.
-            Vector2 popTarget = start + popDirection * 25f;
+            Vector2 popTarget = start + flightDirection * 25f;
             seq.Append(coin.DOAnchorPos(popTarget, 0.08f).SetEase(Ease.OutQuad));
 
-            // 2. Move in the same UI coordinate space directly to WalletRoot.
-            // DOPath moves a Transform in world space, so it must not be used with
-            // the anchored UI positions returned by GetLayerPoint.
+            // 2. Fly directly to the wallet amount text.
             seq.Append(coin.DOAnchorPos(end, 0.32f).SetEase(Ease.InQuad));
             seq.Join(coin.DOScale(0.75f, 0.32f));
             seq.Join(coin.DOLocalRotate(new Vector3(0f, 0f, UnityEngine.Random.Range(-30f, 30f)), 0.32f));
@@ -390,8 +415,24 @@ namespace NutBoltSort
 
         private void SetClaimButtonsInteractable(bool enabled)
         {
-            if (claimButton != null) claimButton.interactable = enabled;
-            if (claimX2Button != null) claimX2Button.interactable = enabled;
+            // Use CanvasGroup blocksRaycasts so clicks are locked without triggering Unity UI's gray DisabledColor tint.
+            if (claimButtonGroup != null)
+            {
+                claimButtonGroup.blocksRaycasts = enabled;
+            }
+            else if (claimButton != null)
+            {
+                claimButton.interactable = enabled;
+            }
+
+            if (claimX2ButtonGroup != null)
+            {
+                claimX2ButtonGroup.blocksRaycasts = enabled;
+            }
+            else if (claimX2Button != null)
+            {
+                claimX2Button.interactable = enabled;
+            }
         }
 
         private void ResetEntranceState()
@@ -438,7 +479,11 @@ namespace NutBoltSort
             if (button == null) return;
             ((RectTransform)button.transform).anchoredPosition = restPosition + Vector2.down * 30f;
             button.transform.localScale = restScale;
-            if (group != null) group.alpha = 0f;
+            if (group != null)
+            {
+                group.alpha = 0f;
+                group.blocksRaycasts = false;
+            }
         }
 
         private void PlayEntrance()
@@ -464,7 +509,10 @@ namespace NutBoltSort
                 entranceSequence.Insert(ribbonTime + 0.14f, ribbon.DOScale(ribbonRestScale, 0.09f).SetEase(Ease.OutQuad));
             }
 
-            // 3. "LEVEL COMPLETE!" text pops in subtly
+            // 3. Confetti burst - plays around the crown/ribbon pop
+            entranceSequence.InsertCallback(confettiDelay, PlayConfetti);
+
+            // 4. "LEVEL COMPLETE!" text pops in subtly
             if (levelCompleteTextGroup != null)
             {
                 entranceSequence.Insert(ribbonTime + 0.06f, levelCompleteTextGroup.DOFade(1f, 0.16f));
@@ -475,7 +523,7 @@ namespace NutBoltSort
                 entranceSequence.Insert(ribbonTime + 0.19f, levelCompleteText.rectTransform.DOScale(titleRestScale, 0.08f).SetEase(Ease.OutQuad));
             }
 
-            // 4. Reward coin pile pops up
+            // 5. Reward coin pile pops up
             float rewardTime = Mathf.Max(0.42f, entranceSequence.Duration(false) + 0.02f);
             if (rewardCoinPile != null)
             {
@@ -488,7 +536,7 @@ namespace NutBoltSort
                 entranceSequence.Insert(rewardTime + 0.27f, rewardCoinPile.DOLocalRotate(Vector3.zero, 0.05f));
             }
 
-            // 5. Reward amount text fades & pops
+            // 6. Reward amount text fades & pops
             if (rewardAmountGroup != null)
             {
                 entranceSequence.Insert(rewardTime + 0.18f, rewardAmountGroup.DOFade(1f, 0.12f));
@@ -499,7 +547,7 @@ namespace NutBoltSort
                 entranceSequence.Insert(rewardTime + 0.30f, rewardAmountText.rectTransform.DOScale(rewardTextRestScale, 0.08f));
             }
 
-            // 6. Claim buttons slide in
+            // 7. Claim buttons slide in
             float buttonsTime = rewardTime + 0.32f;
             InsertButtonEntrance(entranceSequence, claimButton, claimButtonGroup, claimRestPosition, buttonsTime);
             InsertButtonEntrance(entranceSequence, claimX2Button, claimX2ButtonGroup, claimX2RestPosition, buttonsTime + 0.05f);
@@ -529,6 +577,104 @@ namespace NutBoltSort
                 claimX2Button.onClick.AddListener(OnClaimX2Pressed);
             }
         }
+
+        #region Confetti System
+
+        private void InitializeConfetti()
+        {
+            // Existing scenes assigned the effect as a ParticleSystem. Prefer that
+            // explicit reference instead of accidentally selecting another effect.
+            if (confettiObject == null && confettiParticleSystem != null)
+            {
+                confettiObject = confettiParticleSystem.gameObject;
+            }
+
+            // Auto-locate ConfettiSpawnPoint if not assigned.
+            if (confettiSpawnPoint == null)
+            {
+                var sp = transform.Find("PopupPanel/ConfettiSpawnPoint") ??
+                         transform.Find("ConfettiSpawnPoint") ??
+                         transform.Find("PopupPanel/Crown") ??
+                         transform.Find("Crown");
+                if (sp != null) confettiSpawnPoint = sp;
+            }
+
+            // If confettiObject is not assigned, search in children or confettiSpawnPoint.
+            if (confettiObject == null && confettiSpawnPoint != null)
+            {
+                var ps = confettiSpawnPoint.GetComponentInChildren<ParticleSystem>(true);
+                if (ps != null) confettiObject = ps.gameObject;
+            }
+            if (confettiObject == null)
+            {
+                var ps = GetComponentInChildren<ParticleSystem>(true);
+                if (ps != null) confettiObject = ps.gameObject;
+            }
+
+            // If confettiObject is a project prefab (not instantiated in scene), instantiate once.
+            if (confettiObject != null && !confettiObject.scene.IsValid())
+            {
+                Transform parent = confettiSpawnPoint != null ? confettiSpawnPoint : transform;
+                GameObject instance = Instantiate(confettiObject, parent);
+                instance.name = "Confetti_Celebration (Pooled)";
+                instance.transform.localPosition = Vector3.zero;
+                instance.transform.localRotation = Quaternion.identity;
+                confettiObject = instance;
+            }
+
+            // Cache ALL child particle systems (small, large, circles, etc.)
+            confettiSystems.Clear();
+            if (confettiObject != null)
+            {
+                confettiSystems.AddRange(confettiObject.GetComponentsInChildren<ParticleSystem>(true));
+            }
+
+            StopConfetti();
+        }
+
+        private void PlayConfetti()
+        {
+            if (confettiObject == null || confettiSystems.Count == 0) return;
+
+            confettiObject.SetActive(true);
+            confettiObject.transform.localScale = Vector3.one * confettiScale;
+
+            foreach (var sys in confettiSystems)
+            {
+                if (sys == null) continue;
+
+                var main = sys.main;
+                main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+
+                var renderer = sys.GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                {
+                    renderer.sortingOrder = 50; // Render on top of UI panels
+                    if (canvas != null && !string.IsNullOrEmpty(canvas.sortingLayerName))
+                    {
+                        renderer.sortingLayerName = canvas.sortingLayerName;
+                    }
+                }
+
+                sys.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                sys.Play(true);
+            }
+        }
+
+        private void StopConfetti()
+        {
+            if (confettiSystems.Count == 0) return;
+
+            foreach (var sys in confettiSystems)
+            {
+                if (sys != null)
+                {
+                    sys.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
+            }
+        }
+
+        #endregion
 
         private void AutoDiscoverReferences()
         {
@@ -570,7 +716,7 @@ namespace NutBoltSort
                 var t = transform.Find("PopupPanel/coinReward") ?? transform.Find("PopupPanel/RewardAmountText") ?? transform.Find("coinReward");
                 if (t != null) rewardAmountText = t.GetComponent<TMP_Text>();
             }
-            if (rewardAmountText != null && rewardAmountGroup == null)
+            if (rewardAmountGroup != null)
             {
                 rewardAmountGroup = rewardAmountText.GetComponent<CanvasGroup>() ?? rewardAmountText.gameObject.AddComponent<CanvasGroup>();
             }
@@ -610,7 +756,7 @@ namespace NutBoltSort
                 claimX2ButtonGroup = claimX2Button.GetComponent<CanvasGroup>() ?? claimX2Button.gameObject.AddComponent<CanvasGroup>();
             }
 
-            // Ensure flying coins layer exists on the root canvas on top of everything.
+            // Ensure flying coins layer is parented directly to the root Canvas so it stays on top of all popups and never gets clipped.
             if (flyingCoinsLayer == null && canvas != null)
             {
                 var existingLayer = canvas.transform.Find("FlyingCoinsLayer");
@@ -630,7 +776,13 @@ namespace NutBoltSort
                     flyingCoinsLayer.pivot = new Vector2(0.5f, 0.5f);
                 }
             }
-            if (flyingCoinsLayer != null)
+
+            if (flyingCoinsLayer != null && canvas != null && flyingCoinsLayer.parent != canvas.transform)
+            {
+                flyingCoinsLayer.SetParent(canvas.transform, false);
+                flyingCoinsLayer.SetAsLastSibling();
+            }
+            else if (flyingCoinsLayer != null)
             {
                 flyingCoinsLayer.SetAsLastSibling();
             }
