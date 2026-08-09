@@ -26,6 +26,8 @@ namespace NutBoltSort
         [Header("Top Bar Components")]
         [SerializeField] private Button restartButton;
         [SerializeField] private TMP_Text levelDisplayTextTMP;
+        [SerializeField] private TMP_Text coinDisplayText;
+        [SerializeField] private RectTransform coinDisplayRoot;
 
         [Header("Level Ribbon")]
         [SerializeField] private LevelRibbonController levelRibbon;
@@ -62,7 +64,8 @@ namespace NutBoltSort
         [Tooltip("Assign your Watch Ad image GameObject. Its own artwork supplies the reward text.")]
         [SerializeField] private GameObject expandAdState;
 
-        public bool IsUIOpen => (winPopup != null && winPopup.IsOpen) ||
+        public bool IsUIOpen => (winRewardAnimator != null && winRewardAnimator.IsOpen) ||
+                                (winPopup != null && winPopup.IsOpen) ||
                                 (uiBlocker != null && uiBlocker.blocksRaycasts && uiBlocker.alpha > 0f) ||
                                 (settingsPanelController != null && settingsPanelController.IsOpen);
 
@@ -80,11 +83,24 @@ namespace NutBoltSort
             if (winPopup != null && winPopup.gameObject.activeSelf) winPopup.gameObject.SetActive(false);
             SetUIBlockerActive(false);
             UpdateLevelDisplay();
+            RefreshCoinDisplay(PlayerWallet.GetCoins());
+            PlayerWallet.OnCoinsChanged += RefreshCoinDisplay;
             RefreshActionButtonStates();
 
             // Hide the settings overlay at game start regardless of its state in the editor.
             // This also forces button binding to run if the overlay started disabled.
             settingsPanelController?.HideImmediate();
+        }
+
+        private void OnDestroy()
+        {
+            PlayerWallet.OnCoinsChanged -= RefreshCoinDisplay;
+        }
+
+        public void RefreshCoinDisplay(int newBalance)
+        {
+            if (coinDisplayText != null)
+                coinDisplayText.text = newBalance.ToString("N0");
         }
 
         private void FindManagers()
@@ -176,8 +192,6 @@ namespace NutBoltSort
 
         public void ShowWinPopup()
         {
-            if (winPopup == null) return;
-
             // Defer Win popup until the Settings panel closes to avoid overlap.
             if (settingsPanelController != null && settingsPanelController.IsOpen)
             {
@@ -187,9 +201,20 @@ namespace NutBoltSort
 
             SetUIBlockerActive(true);
 
-            // Open the panel first, then start the reward animation inside the
-            // callback so the entrance sequence runs after UIPopup's fade-in.
-            winPopup.Open(() => winRewardAnimator?.Show(levelRewardAmount));
+            if (winRewardAnimator == null)
+            {
+                if (winPopup != null) winRewardAnimator = winPopup.GetComponent<WinRewardAnimator>();
+                if (winRewardAnimator == null) winRewardAnimator = FindAnyObjectByType<WinRewardAnimator>(FindObjectsInactive.Include);
+            }
+
+            if (winRewardAnimator != null)
+            {
+                winRewardAnimator.Show(levelRewardAmount);
+            }
+            else if (winPopup != null)
+            {
+                winPopup.Open();
+            }
 
             RefreshActionButtonStates();
         }
@@ -237,7 +262,8 @@ namespace NutBoltSort
 
         private void CloseAllPopups()
         {
-            if (winPopup != null && winPopup.IsOpen) winPopup.Close();
+            if (winRewardAnimator != null && winRewardAnimator.IsOpen) winRewardAnimator.HideImmediate();
+            else if (winPopup != null && winPopup.IsOpen) winPopup.Close();
             SetUIBlockerActive(false);
         }
 
@@ -247,11 +273,6 @@ namespace NutBoltSort
             {
                 restartButton.onClick.RemoveAllListeners();
                 restartButton.onClick.AddListener(OnRestartButtonPressed);
-            }
-            if (nextLevelWinButton != null)
-            {
-                nextLevelWinButton.onClick.RemoveAllListeners();
-                nextLevelWinButton.onClick.AddListener(OnNextLevelWinPressed);
             }
             if (undoButton != null)
             {
