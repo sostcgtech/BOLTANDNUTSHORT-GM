@@ -166,7 +166,6 @@
             "name": "Cubemap",
             "scenes": [
               "Assets/BoltColorSort/Scenes/00_Boot.unity",
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity",
               "Assets/BoltColorSort/Scenes/MainMenu.unity"
             ],
             "dependencyType": 0,
@@ -262,9 +261,7 @@
           },
           {
             "name": "LightProbes",
-            "scenes": [
-              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
-            ],
+            "scenes": [],
             "dependencyType": 0,
             "icon": null
           },
@@ -410,7 +407,9 @@
           },
           {
             "name": "ReflectionProbe",
-            "scenes": [],
+            "scenes": [
+              "Assets/BoltColorSort/Scenes/BoltNutSortGM.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },

@@ -33,6 +33,8 @@ namespace NutBoltSort
         [Header("Win Popup")]
         [SerializeField] private UIPopup winPopup;
         [SerializeField] private Button nextLevelWinButton;
+        [SerializeField] private WinRewardAnimator winRewardAnimator;
+        [SerializeField, Min(1)] private int levelRewardAmount = 150;
 
         [Header("Settings")]
         [SerializeField] private SettingsPanelController settingsPanelController;
@@ -184,7 +186,11 @@ namespace NutBoltSort
             }
 
             SetUIBlockerActive(true);
-            winPopup.Open();
+
+            // Open the panel first, then start the reward animation inside the
+            // callback so the entrance sequence runs after UIPopup's fade-in.
+            winPopup.Open(() => winRewardAnimator?.Show(levelRewardAmount));
+
             RefreshActionButtonStates();
         }
 
