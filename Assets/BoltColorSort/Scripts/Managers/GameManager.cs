@@ -363,6 +363,11 @@ namespace NutBoltSort
 
         public void LoadNextLevel()
         {
+            // Claim-based level progression bypasses UIManager.OnNextLevelWinPressed,
+            // which normally removes the full-screen win-popup input blocker.
+            // Always clear it before building the next playable level.
+            uiManager?.SetUIBlockerActive(false);
+
             currentLevelNumber++;
             PlayerPrefs.SetInt(PREFS_LEVEL, currentLevelNumber);
             PlayerPrefs.Save();

@@ -2310,6 +2310,8 @@ MonoBehaviour:
   uiBlocker: {fileID: 1824204811}
   restartButton: {fileID: 943176411}
   levelDisplayTextTMP: {fileID: 573510242}
+  coinDisplayText: {fileID: 0}
+  coinDisplayRoot: {fileID: 0}
   levelRibbon: {fileID: 349716296}
   winPopup: {fileID: 0}
   nextLevelWinButton: {fileID: 1597198086}
@@ -23652,9 +23654,9 @@ RectTransform:
   - {fileID: 1412411756}
   m_Father: {fileID: 1927464711}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 281.869, y: -99.41445}
   m_SizeDelta: {x: 400, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1597198086
@@ -24006,7 +24008,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1633287919
 RectTransform:
   m_ObjectHideFlags: 0
@@ -27626,9 +27628,9 @@ RectTransform:
   - {fileID: 1078336920}
   m_Father: {fileID: 1927464711}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 709.207, y: -99.41445}
   m_SizeDelta: {x: 400, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!225 &1959865087
