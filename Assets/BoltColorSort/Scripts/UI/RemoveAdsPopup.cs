@@ -349,22 +349,30 @@ namespace NutBoltSort
             AudioManager.Play(SfxType.ButtonClick);
             HapticManager.Play(HapticType.Light);
 
-            // TODO: Replace with IAP purchase call when ready.
-            Debug.Log("[RemoveAdsPopup] Remove Ads purchase will be connected later.");
+            if (PurchaseManager.Instance != null)
+            {
+                PurchaseManager.Instance.PurchaseRemoveAds();
+            }
+            else
+            {
+                Debug.Log("[RemoveAdsPopup] PurchaseManager instance not found.");
+            }
             ShowToast("Purchases will be available soon.");
         }
 
-        /// <summary>
-        /// Placeholder for future IAP restore.
-        /// Replace the body of this method when an IAP SDK is connected.
-        /// </summary>
         public void OnRestorePurchasePressed()
         {
             AudioManager.Play(SfxType.ButtonClick);
             HapticManager.Play(HapticType.Light);
 
-            // TODO: Replace with IAP restore call when ready.
-            Debug.Log("[RemoveAdsPopup] Restore purchases will be connected later.");
+            if (PurchaseManager.Instance != null)
+            {
+                PurchaseManager.Instance.RestorePurchases();
+            }
+            else
+            {
+                Debug.Log("[RemoveAdsPopup] PurchaseManager instance not found.");
+            }
             ShowToast("Restore will be available soon.");
         }
 

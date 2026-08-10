@@ -101,10 +101,20 @@ namespace NutBoltSort
 
             AudioManager.EnsureInstance(_coreSystemsRoot);
             HapticManager.EnsureInstance(_coreSystemsRoot);
+            AdManager.EnsureInstance(_coreSystemsRoot);
+            PlayerEconomy.EnsureInstance(_coreSystemsRoot);
+            PurchaseManager.EnsureInstance(_coreSystemsRoot);
 
             Succeeded = AudioManager.Instance != null && HapticManager.Instance != null;
             if (!Succeeded)
                 Debug.LogError("[BootTask_Managers] One or more managers failed to initialise.");
+
+            if (AdManager.Instance == null)
+                Debug.LogWarning("[BootTask_Managers] AdManager failed to initialise.");
+            if (PlayerEconomy.Instance == null)
+                Debug.LogWarning("[BootTask_Managers] PlayerEconomy failed to initialise.");
+            if (PurchaseManager.Instance == null)
+                Debug.LogWarning("[BootTask_Managers] PurchaseManager failed to initialise.");
 
             yield return null;
         }

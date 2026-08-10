@@ -1,10 +1,19 @@
 # ninja log v5
+0	2124	1786275744791336938	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	1c3fbc25e042d011
 5	1193	1786275743851683842	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	5d9c0acb969102df
+3	1994	1786275744661861467	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3bfd10d8a6a60e69
 0	1218	1786275743879974968	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	c2796cb8f1f284bc
 2	1335	1786275743987300531	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	ff6deb9dfee28729
 1	1512	1786275744174236970	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	6328f2b273dc5f10
-8	1571	1786275744234532861	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	84d5c0701f110ff5
-7	1788	1786275744455492125	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	8cafda0c887d755f
-3	1994	1786275744661861467	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3bfd10d8a6a60e69
-0	2124	1786275744791336938	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	1c3fbc25e042d011
 2124	2146	1786275744818988080	/home/sost-cgtech/Documents/QUADBIX/GAMEPROJECTS/NUTBOLT SORT GM/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/504y2d6f/obj/armeabi-v7a/libgame.so	dad9b6551fe95af
+7	1788	1786275744455492125	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	8cafda0c887d755f
+8	1571	1786275744234532861	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	84d5c0701f110ff5
+14	1583	1786401746612396972	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	5d9c0acb969102df
+6	2321	1786401747344982122	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	c2796cb8f1f284bc
+9	2598	1786401747636708119	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	ff6deb9dfee28729
+8	2753	1786401747792818989	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	6328f2b273dc5f10
+15	2789	1786401747840759249	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	8cafda0c887d755f
+14	2836	1786401747886548944	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	3bfd10d8a6a60e69
+17	2842	1786401747892846707	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	84d5c0701f110ff5
+5	3049	1786401748091260733	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	1c3fbc25e042d011
+3049	3079	1786401748139376184	/home/sost-cgtech/Documents/QUADBIX/GAMEPROJECTS/NUTBOLT SORT GM/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/504y2d6f/obj/armeabi-v7a/libgame.so	dad9b6551fe95af

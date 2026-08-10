@@ -209,14 +209,22 @@ namespace NutBoltSort
             SetClaimButtonsInteractable(false);
             PlayButtonPress(claimX2Button != null ? claimX2Button.transform : null);
 
-            if (requestRewardedAd == null || requestRewardedAd.GetPersistentEventCount() == 0)
+            if (AdManager.Instance != null)
             {
-                Debug.LogWarning("[WinRewardAnimator] No rewarded-ad callback is assigned. X2 reward was not granted.", this);
-                OnRewardedAdFailed();
-                return;
+                AdManager.Instance.ShowRewardedAd(
+                    RewardType.WinDoubleCoins,
+                    onRewardGranted: OnRewardedAdSucceeded,
+                    onFailed:        OnRewardedAdFailed);
             }
-
-            requestRewardedAd.Invoke();
+            else if (requestRewardedAd != null && requestRewardedAd.GetPersistentEventCount() > 0)
+            {
+                requestRewardedAd.Invoke();
+            }
+            else
+            {
+                Debug.LogWarning("[WinRewardAnimator] AdManager is null and no requestRewardedAd callback assigned.", this);
+                OnRewardedAdFailed();
+            }
         }
 
         /// <summary>Call this only from the real rewarded-ad success callback.</summary>

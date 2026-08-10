@@ -174,6 +174,7 @@ namespace NutBoltSort
 
             RefreshCoinDisplay(PlayerWallet.GetCoins());
             RefreshLevelText();
+            AdManager.Instance?.ShowBanner();
             PlayEntryAnimation();
 
             // Keep the coin display in sync whenever the balance changes.

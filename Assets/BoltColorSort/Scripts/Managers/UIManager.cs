@@ -87,6 +87,9 @@ namespace NutBoltSort
             PlayerWallet.OnCoinsChanged += RefreshCoinDisplay;
             RefreshActionButtonStates();
 
+            // Show the banner ad in the gameplay scene.
+            AdManager.Instance?.ShowBanner();
+
             // Hide the settings overlay at game start regardless of its state in the editor.
             // This also forces button binding to run if the overlay started disabled.
             settingsPanelController?.HideImmediate();
@@ -202,6 +205,18 @@ namespace NutBoltSort
                 return;
             }
 
+            // Gate: try to show an interstitial ad first (Level 4+).
+            // AdManager calls ShowWinPanelDirect once the ad is closed (or immediately if not available).
+            int level = gameManager != null ? gameManager.CurrentLevelNumber : 1;
+            AdManager.Instance?.TryShowInterstitialThenWinPanel(level, () => ShowWinPanelDirect(levelRewardAmount));
+
+            // If AdManager is not available (no SDK yet) fall through directly.
+            if (AdManager.Instance == null) ShowWinPanelDirect(levelRewardAmount);
+        }
+
+        /// <summary>Opens the Win Panel immediately. Called by AdManager after any interstitial is dismissed.</summary>
+        private void ShowWinPanelDirect(int rewardAmount)
+        {
             SetUIBlockerActive(true);
 
             if (winRewardAnimator == null)
@@ -212,7 +227,7 @@ namespace NutBoltSort
 
             if (winRewardAnimator != null)
             {
-                winRewardAnimator.Show(levelRewardAmount);
+                winRewardAnimator.Show(rewardAmount);
             }
             else if (winPopup != null)
             {

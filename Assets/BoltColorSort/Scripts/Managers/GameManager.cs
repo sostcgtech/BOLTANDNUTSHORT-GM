@@ -412,7 +412,19 @@ namespace NutBoltSort
             if (remainingUndoUses > 0 || isUndoAdRequestActive) return;
             isUndoAdRequestActive = true;
             uiManager?.RefreshUndoAndExpandUI();
-            StartCoroutine(SimulateUndoRewardAd());
+
+            if (AdManager.Instance != null)
+            {
+                AdManager.Instance.ShowRewardedAd(
+                    RewardType.Undo,
+                    onRewardGranted: OnUndoRewardAdSucceeded,
+                    onFailed:        OnUndoRewardAdFailed);
+            }
+            else
+            {
+                // Fallback: no AdManager present — simulate for editor testing.
+                StartCoroutine(SimulateUndoRewardAd());
+            }
         }
 
         /// <summary>Temporary rewarded-ad entry point. Replace only the simulated callback when an ad SDK is added.</summary>
@@ -421,7 +433,19 @@ namespace NutBoltSort
             if (remainingExpandUses > 0 || isExpandAdRequestActive) return;
             isExpandAdRequestActive = true;
             uiManager?.RefreshUndoAndExpandUI();
-            StartCoroutine(SimulateExpandRewardAd());
+
+            if (AdManager.Instance != null)
+            {
+                AdManager.Instance.ShowRewardedAd(
+                    RewardType.Expand,
+                    onRewardGranted: OnExpandRewardAdSucceeded,
+                    onFailed:        OnExpandRewardAdFailed);
+            }
+            else
+            {
+                // Fallback: no AdManager present — simulate for editor testing.
+                StartCoroutine(SimulateExpandRewardAd());
+            }
         }
 
         public void OnUndoRewardAdSucceeded()

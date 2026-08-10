@@ -46,6 +46,26 @@ namespace NutBoltSort
         [Tooltip("Text that displays the player's current coin balance.")]
         [SerializeField] private TMP_Text coinAmountText;
 
+        [Header("Booster Cards")]
+        [SerializeField] private Button undoBoosterButton;
+        [SerializeField] private int undoBoosterCost = 200;
+        [SerializeField] private int undoBoosterAmount = 5;
+
+        [SerializeField] private Button expandBoosterButton;
+        [SerializeField] private int expandBoosterCost = 250;
+        [SerializeField] private int expandBoosterAmount = 1;
+
+        [SerializeField] private Button watchAdBoosterButton;
+        [SerializeField] private int adBoosterUndoReward = 2;
+        [SerializeField] private int adBoosterExpandReward = 1;
+
+        [Header("IAP Products")]
+        [SerializeField] private Button starterPackButton;
+        [SerializeField] private Button removeAdsButton;
+        [SerializeField] private Button coinPackSmallButton;
+        [SerializeField] private Button coinPackMediumButton;
+        [SerializeField] private Button coinPackLargeButton;
+
         [Header("Optional Icon")]
         [Tooltip("RectTransform of the shop icon inside the screen (no animation — kept for layout reference).")]
         [SerializeField] private RectTransform shopIconRect;
@@ -131,6 +151,146 @@ namespace NutBoltSort
                 closeButton.onClick.RemoveAllListeners();
                 closeButton.onClick.AddListener(OnCloseButtonPressed);
             }
+
+            if (undoBoosterButton != null)
+            {
+                undoBoosterButton.onClick.RemoveAllListeners();
+                undoBoosterButton.onClick.AddListener(OnUndoBoosterPressed);
+            }
+
+            if (expandBoosterButton != null)
+            {
+                expandBoosterButton.onClick.RemoveAllListeners();
+                expandBoosterButton.onClick.AddListener(OnExpandBoosterPressed);
+            }
+
+            if (watchAdBoosterButton != null)
+            {
+                watchAdBoosterButton.onClick.RemoveAllListeners();
+                watchAdBoosterButton.onClick.AddListener(OnWatchAdBoosterPressed);
+            }
+
+            if (starterPackButton != null)
+            {
+                starterPackButton.onClick.RemoveAllListeners();
+                starterPackButton.onClick.AddListener(OnStarterPackPressed);
+            }
+
+            if (removeAdsButton != null)
+            {
+                removeAdsButton.onClick.RemoveAllListeners();
+                removeAdsButton.onClick.AddListener(OnRemoveAdsPressed);
+            }
+
+            if (coinPackSmallButton != null)
+            {
+                coinPackSmallButton.onClick.RemoveAllListeners();
+                coinPackSmallButton.onClick.AddListener(() => OnCoinPackPressed(PurchaseManager.ProductIds.CoinsSmall));
+            }
+
+            if (coinPackMediumButton != null)
+            {
+                coinPackMediumButton.onClick.RemoveAllListeners();
+                coinPackMediumButton.onClick.AddListener(() => OnCoinPackPressed(PurchaseManager.ProductIds.CoinsMedium));
+            }
+
+            if (coinPackLargeButton != null)
+            {
+                coinPackLargeButton.onClick.RemoveAllListeners();
+                coinPackLargeButton.onClick.AddListener(() => OnCoinPackPressed(PurchaseManager.ProductIds.CoinsLarge));
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Shop Purchase Handlers
+        // ─────────────────────────────────────────────────────────────────────
+
+        private void OnUndoBoosterPressed()
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            if (PlayerEconomy.Instance != null)
+            {
+                if (PlayerEconomy.Instance.SpendCoins(undoBoosterCost))
+                {
+                    PlayerEconomy.Instance.AddUndo(undoBoosterAmount);
+                    RefreshCoinDisplay();
+                }
+            }
+            else if (PlayerWallet.SpendCoins(undoBoosterCost))
+            {
+                RefreshCoinDisplay();
+            }
+        }
+
+        private void OnExpandBoosterPressed()
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            if (PlayerEconomy.Instance != null)
+            {
+                if (PlayerEconomy.Instance.SpendCoins(expandBoosterCost))
+                {
+                    PlayerEconomy.Instance.AddExpand(expandBoosterAmount);
+                    RefreshCoinDisplay();
+                }
+            }
+            else if (PlayerWallet.SpendCoins(expandBoosterCost))
+            {
+                RefreshCoinDisplay();
+            }
+        }
+
+        private void OnWatchAdBoosterPressed()
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            if (AdManager.Instance != null)
+            {
+                AdManager.Instance.ShowRewardedAd(
+                    RewardType.ShopBooster,
+                    onRewardGranted: () =>
+                    {
+                        PlayerEconomy.Instance?.AddUndo(adBoosterUndoReward);
+                        PlayerEconomy.Instance?.AddExpand(adBoosterExpandReward);
+                        RefreshCoinDisplay();
+                    });
+            }
+            else
+            {
+                PlayerEconomy.Instance?.AddUndo(adBoosterUndoReward);
+                PlayerEconomy.Instance?.AddExpand(adBoosterExpandReward);
+                RefreshCoinDisplay();
+            }
+        }
+
+        private void OnStarterPackPressed()
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            PurchaseManager.Instance?.PurchaseStarterPack();
+            RefreshCoinDisplay();
+        }
+
+        private void OnRemoveAdsPressed()
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            PurchaseManager.Instance?.PurchaseRemoveAds();
+        }
+
+        private void OnCoinPackPressed(string productId)
+        {
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            PurchaseManager.Instance?.PurchaseCoinPack(productId);
+            RefreshCoinDisplay();
         }
 
         // ─────────────────────────────────────────────────────────────────────
