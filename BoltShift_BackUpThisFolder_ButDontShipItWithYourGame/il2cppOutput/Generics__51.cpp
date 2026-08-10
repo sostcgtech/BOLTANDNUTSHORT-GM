@@ -29901,7 +29901,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void InputControl_1__ctor_m84330ABF23BC4476BE
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-// Method Definition Index: 36409
+// Method Definition Index: 36411
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Max_m7FA442918DE37E3A00106D1F2E789D65829792B8_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) 
 {
 	//<source_info:<no-source>:1>

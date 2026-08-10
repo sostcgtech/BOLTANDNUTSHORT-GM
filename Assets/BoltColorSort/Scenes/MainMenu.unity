@@ -1407,7 +1407,7 @@ GameObject:
   - component: {fileID: 108667664}
   - component: {fileID: 108667663}
   m_Layer: 5
-  m_Name: Text_4
+  m_Name: Text_5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5509,14 +5509,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f03c645d3e5d69764a484000080261bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.MainMenuLevelProgress
-  levelPlus5Text: {fileID: 108667663}
-  levelPlus4Text: {fileID: 1553637121}
-  levelPlus3Text: {fileID: 1392543140}
-  levelPlus2Text: {fileID: 1821365782}
-  levelPlus1Text: {fileID: 1265799274}
+  levelPlus5Text: {fileID: 0}
+  levelPlus4Text: {fileID: 0}
+  levelPlus3Text: {fileID: 108667663}
+  levelPlus2Text: {fileID: 1553637121}
+  levelPlus1Text: {fileID: 1392543140}
   currentLevelText: {fileID: 1821365782}
   levelMinus1Text: {fileID: 1265799274}
-  levelMinus2Text: {fileID: 1392543140}
+  levelMinus2Text: {fileID: 0}
   levelMinus1Image: {fileID: 0}
   levelMinus2Image: {fileID: 0}
   currentLevelImage: {fileID: 0}
@@ -16455,13 +16455,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1265799272}
-  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: -0.0041718287, y: 0.0041718287, z: -0.7070945, w: 0.7070945}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3624389}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
+  m_LocalEulerAnglesHint: {x: 0, y: 0.676, z: -90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -21116,7 +21116,7 @@ GameObject:
   - component: {fileID: 1553637122}
   - component: {fileID: 1553637121}
   m_Layer: 5
-  m_Name: Text_3
+  m_Name: Text_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

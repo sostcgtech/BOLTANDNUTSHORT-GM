@@ -126,6 +126,7 @@ extern void Canvas_get_sortingLayerID_m38FE23D0D6A2001F62CA24676298E95BEE968AB6 
 extern void Canvas_set_sortingLayerID_m402DC8D59AAF66A6696BFE682D0B7AF489EA13FE (void);
 extern void Canvas_get_additionalShaderChannels_m3039B1E9ADDCDC514E444A4BB56527FFAC3E6287 (void);
 extern void Canvas_set_additionalShaderChannels_m182712BE72B72BE41FAFE97F2FD79C2476132DB0 (void);
+extern void Canvas_get_sortingLayerName_mEBB0FD08B3B7763947CCB308B55AA3BFD9484B21 (void);
 extern void Canvas_get_rootCanvas_m74DEA02014963B54DF651BE14284BDAFDA61DDFE (void);
 extern void Canvas_get_renderingDisplaySize_mE6F90F0F91200179ED84C6F6905343909FAF6312 (void);
 extern void Canvas_get_externBeginRenderOverlays_m7C0F441E294B15AB12249CAC58E6EF9EB1903099 (void);
@@ -164,6 +165,7 @@ extern void Canvas_get_sortingLayerID_Injected_m13994CAF9A9F1FB3F5122389666975B0
 extern void Canvas_set_sortingLayerID_Injected_mA0C8C8BE2A7BE4ED422A88CD6D056B56EDE87A07 (void);
 extern void Canvas_get_additionalShaderChannels_Injected_m9C0C62C72E90B15DF1C4BDC479D57C1D9A24CBD4 (void);
 extern void Canvas_set_additionalShaderChannels_Injected_mD2C61B16032A292B5EF94E3DDAC0CEAE27E2B2EE (void);
+extern void Canvas_get_sortingLayerName_Injected_m20BBE98E1AD86AB6BED08F2D82CDF5A6C1854A6C (void);
 extern void Canvas_get_rootCanvas_Injected_m6527811DFBA51360FBECDF5ACC822ACA93A816F3 (void);
 extern void Canvas_get_renderingDisplaySize_Injected_mB2EBF5D42D74DAF756662C294038800DB638287F (void);
 extern void Canvas_get_worldCamera_Injected_m20E7777614D7BF74FDEC974A328447BF988FBBA9 (void);
@@ -175,7 +177,7 @@ extern void UISystemProfilerApi_BeginSample_m6AF893A85204DA2129D9D3D75D8A6EDD329
 extern void UISystemProfilerApi_EndSample_mAFBCEDF8073F3FB0E1644482D909F108DBE11F3D (void);
 extern void UISystemProfilerApi_AddMarker_mB0E292213D18AE3770165011E265A57B17FCF90B (void);
 extern void UISystemProfilerApi_AddMarker_Injected_m283D922C84E040D412F5DC712DE6C81FD05AC87E (void);
-static Il2CppMethodPointer s_methodPointers[169] = 
+static Il2CppMethodPointer s_methodPointers[171] = 
 {
 	EmbeddedAttribute__ctor_m37A70E7F80DD9C1B53D11461DBB2C72595A92F52,
 	RefSafetyRulesAttribute__ctor_m5B4CE39037F502458F7D7F02D7817575B0379E6C,
@@ -297,6 +299,7 @@ static Il2CppMethodPointer s_methodPointers[169] =
 	Canvas_set_sortingLayerID_m402DC8D59AAF66A6696BFE682D0B7AF489EA13FE,
 	Canvas_get_additionalShaderChannels_m3039B1E9ADDCDC514E444A4BB56527FFAC3E6287,
 	Canvas_set_additionalShaderChannels_m182712BE72B72BE41FAFE97F2FD79C2476132DB0,
+	Canvas_get_sortingLayerName_mEBB0FD08B3B7763947CCB308B55AA3BFD9484B21,
 	Canvas_get_rootCanvas_m74DEA02014963B54DF651BE14284BDAFDA61DDFE,
 	Canvas_get_renderingDisplaySize_mE6F90F0F91200179ED84C6F6905343909FAF6312,
 	Canvas_get_externBeginRenderOverlays_m7C0F441E294B15AB12249CAC58E6EF9EB1903099,
@@ -335,6 +338,7 @@ static Il2CppMethodPointer s_methodPointers[169] =
 	Canvas_set_sortingLayerID_Injected_mA0C8C8BE2A7BE4ED422A88CD6D056B56EDE87A07,
 	Canvas_get_additionalShaderChannels_Injected_m9C0C62C72E90B15DF1C4BDC479D57C1D9A24CBD4,
 	Canvas_set_additionalShaderChannels_Injected_mD2C61B16032A292B5EF94E3DDAC0CEAE27E2B2EE,
+	Canvas_get_sortingLayerName_Injected_m20BBE98E1AD86AB6BED08F2D82CDF5A6C1854A6C,
 	Canvas_get_rootCanvas_Injected_m6527811DFBA51360FBECDF5ACC822ACA93A816F3,
 	Canvas_get_renderingDisplaySize_Injected_mB2EBF5D42D74DAF756662C294038800DB638287F,
 	Canvas_get_worldCamera_Injected_m20E7777614D7BF74FDEC974A328447BF988FBBA9,
@@ -347,7 +351,7 @@ static Il2CppMethodPointer s_methodPointers[169] =
 	UISystemProfilerApi_AddMarker_mB0E292213D18AE3770165011E265A57B17FCF90B,
 	UISystemProfilerApi_AddMarker_Injected_m283D922C84E040D412F5DC712DE6C81FD05AC87E,
 };
-static const int32_t s_InvokerIndices[169] = 
+static const int32_t s_InvokerIndices[171] = 
 {
 	10534,
 	7943,
@@ -470,6 +474,7 @@ static const int32_t s_InvokerIndices[169] =
 	10239,
 	7943,
 	10071,
+	10071,
 	10521,
 	16036,
 	15792,
@@ -507,6 +512,7 @@ static const int32_t s_InvokerIndices[169] =
 	14830,
 	15405,
 	14830,
+	14827,
 	15453,
 	14827,
 	15453,
@@ -523,7 +529,7 @@ IL2CPP_EXTERN_C const Il2CppCodeGenModule g_UnityEngine_UIModule_CodeGenModule;
 const Il2CppCodeGenModule g_UnityEngine_UIModule_CodeGenModule = 
 {
 	"UnityEngine.UIModule.dll",
-	169,
+	171,
 	s_methodPointers,
 	0,
 	NULL,

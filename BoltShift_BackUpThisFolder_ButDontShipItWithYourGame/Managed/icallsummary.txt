@@ -428,6 +428,7 @@ UnityEngine.Canvas::get_scaleFactor_Injected
 UnityEngine.Canvas::SetExternalCanvasEnabled
 UnityEngine.Canvas::get_pixelRect_Injected
 UnityEngine.Canvas::get_renderingDisplaySize_Injected
+UnityEngine.Canvas::get_sortingLayerName_Injected
 UnityEngine.Canvas::set_additionalShaderChannels_Injected
 UnityEngine.Canvas::set_overrideSorting_Injected
 UnityEngine.Canvas::set_referencePixelsPerUnit_Injected
@@ -1153,6 +1154,7 @@ UnityEngine.Renderer::set_receiveShadows_Injected
 UnityEngine.Renderer::set_shadowCastingMode_Injected
 UnityEngine.Renderer::set_smallMeshCulling_Injected
 UnityEngine.Renderer::set_sortingLayerID_Injected
+UnityEngine.Renderer::set_sortingLayerName_Injected
 UnityEngine.Renderer::set_sortingOrder_Injected
 UnityEngine.Renderer::GetMaterialArray_Injected
 UnityEngine.Rendering.AsyncGPUReadback::Request_Internal_GraphicsBuffer_1_Injected

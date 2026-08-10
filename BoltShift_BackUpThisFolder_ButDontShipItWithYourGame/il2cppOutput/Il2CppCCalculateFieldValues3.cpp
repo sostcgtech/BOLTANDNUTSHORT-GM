@@ -30,3 +30,6 @@ IL2CPP_EXTERN_C_END
 IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable9000[1] = 
 {
 	static_cast<int32_t>(sizeof(RuntimeObject)),};
+IL2CPP_EXTERN_C const int32_t g_FieldOffsetTable9001[1] = 
+{
+	static_cast<int32_t>(sizeof(RuntimeObject)),};
