@@ -104,6 +104,7 @@ namespace NutBoltSort
             AdManager.EnsureInstance(_coreSystemsRoot);
             PlayerEconomy.EnsureInstance(_coreSystemsRoot);
             PurchaseManager.EnsureInstance(_coreSystemsRoot);
+            DailyRewardManager.EnsureInstance(_coreSystemsRoot);
 
             Succeeded = AudioManager.Instance != null && HapticManager.Instance != null;
             if (!Succeeded)

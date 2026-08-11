@@ -110,6 +110,12 @@ namespace NutBoltSort
         [Header("Shop")]
         [SerializeField] private ShopPopup shopPopup;
 
+        [Header("Daily Reward")]
+        [SerializeField] private Button dailyRewardButton;
+        [SerializeField] private GameObject dailyRewardBadge;
+        [SerializeField] private MainMenuButtonAnimator dailyRewardAnimator;
+        [SerializeField] private DailyRewardPanel dailyRewardPanel;
+
         // ─────────────────────────────────────────────────────────────────────
         // Inspector — Transition
         // ─────────────────────────────────────────────────────────────────────
@@ -171,6 +177,7 @@ namespace NutBoltSort
             settingsPanel?.HideImmediate();
             removeAdsPopup?.HideImmediate();
             shopPopup?.HideImmediate();
+            dailyRewardPanel?.HideImmediate();
 
             RefreshCoinDisplay(PlayerWallet.GetCoins());
             RefreshLevelText();
@@ -179,6 +186,11 @@ namespace NutBoltSort
 
             // Keep the coin display in sync whenever the balance changes.
             PlayerWallet.OnCoinsChanged += RefreshCoinDisplay;
+
+            if (DailyRewardManager.Instance != null)
+                DailyRewardManager.Instance.OnStatusChanged += RefreshDailyRewardButtonState;
+
+            RefreshDailyRewardButtonState();
         }
 
         private void Update()
@@ -206,6 +218,12 @@ namespace NutBoltSort
                 return;
             }
 
+            if (dailyRewardPanel != null && dailyRewardPanel.IsOpen)
+            {
+                dailyRewardPanel.Close();
+                return;
+            }
+
             // Nothing open — Back on Main Menu does nothing (exit confirmation out of scope).
         }
 
@@ -217,6 +235,9 @@ namespace NutBoltSort
 
             // Always unsubscribe to avoid memory leaks after scene unload.
             PlayerWallet.OnCoinsChanged -= RefreshCoinDisplay;
+
+            if (DailyRewardManager.Instance != null)
+                DailyRewardManager.Instance.OnStatusChanged -= RefreshDailyRewardButtonState;
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -247,6 +268,12 @@ namespace NutBoltSort
             {
                 shopButton.onClick.RemoveAllListeners();
                 shopButton.onClick.AddListener(OnShopPressed);
+            }
+
+            if (dailyRewardButton != null)
+            {
+                dailyRewardButton.onClick.RemoveAllListeners();
+                dailyRewardButton.onClick.AddListener(OnDailyRewardPressed);
             }
 
             // Coin section + button — opens the Shop popup.
@@ -387,6 +414,8 @@ namespace NutBoltSort
         {
             removeAdsAnimator?.StartIdleAnimation();
             shopAnimator?.StartIdleAnimation();
+            if (DailyRewardManager.Instance != null && DailyRewardManager.Instance.CanClaimReward)
+                dailyRewardAnimator?.StartIdleAnimation();
         }
 
         private void StopIdleAnimations()
@@ -396,6 +425,7 @@ namespace NutBoltSort
 
             removeAdsAnimator?.StopIdleAnimation();
             shopAnimator?.StopIdleAnimation();
+            dailyRewardAnimator?.StopIdleAnimation();
 
             // Snap back to neutral scale so the transition starts cleanly.
             if (gameLogo       != null) gameLogo.localScale       = Vector3.one;
@@ -531,6 +561,33 @@ namespace NutBoltSort
                 shopAnimator.PlayPressAnimation(() => shopPopup?.Open());
             else
                 shopPopup?.Open();
+        }
+
+        private void OnDailyRewardPressed()
+        {
+            if (isLoading) return;
+            if (dailyRewardPanel != null && dailyRewardPanel.IsOpen) return;
+
+            AudioManager.Play(SfxType.ButtonClick);
+            HapticManager.Play(HapticType.Light);
+
+            if (dailyRewardAnimator != null)
+                dailyRewardAnimator.PlayPressAnimation(() => dailyRewardPanel?.Open());
+            else
+                dailyRewardPanel?.Open();
+        }
+
+        public void RefreshDailyRewardButtonState()
+        {
+            bool isAvailable = DailyRewardManager.Instance != null && DailyRewardManager.Instance.CanClaimReward;
+
+            if (dailyRewardBadge != null)
+                dailyRewardBadge.SetActive(isAvailable);
+
+            if (isAvailable)
+                dailyRewardAnimator?.StartIdleAnimation();
+            else
+                dailyRewardAnimator?.StopIdleAnimation();
         }
 
         // ─────────────────────────────────────────────────────────────────────

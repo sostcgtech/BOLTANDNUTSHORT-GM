@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 530b89d954412112388c26b94add4da4, type: 3}
+  m_Name: DailyRewardConfig
+  m_EditorClassIdentifier: Assembly-CSharp::NutBoltSort.DailyRewardConfigSO
+  rewards:
+  - dayNumber: 1
+    coins: 100
+    undo: 0
+    expand: 0
+    rewardIcon: {fileID: 0}
+  - dayNumber: 2
+    coins: 150
+    undo: 0
+    expand: 0
+    rewardIcon: {fileID: 0}
+  - dayNumber: 3
+    coins: 200
+    undo: 0
+    expand: 0
+    rewardIcon: {fileID: 0}
+  - dayNumber: 4
+    coins: 250
+    undo: 0
+    expand: 0
+    rewardIcon: {fileID: 0}
+  - dayNumber: 5
+    coins: 300
+    undo: 0
+    expand: 0
+    rewardIcon: {fileID: 0}
+  - dayNumber: 6
+    coins: 400
+    undo: 0
+    expand: 0
+    rewardIcon: {fileID: 0}
+  - dayNumber: 7
+    coins: 750
+    undo: 2
+    expand: 1
+    rewardIcon: {fileID: 0}

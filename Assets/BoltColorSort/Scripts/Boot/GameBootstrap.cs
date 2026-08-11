@@ -190,6 +190,7 @@ namespace NutBoltSort
             AdManager.EnsureInstance(_coreRoot);
             PlayerEconomy.EnsureInstance(_coreRoot);
             PurchaseManager.EnsureInstance(_coreRoot);
+            DailyRewardManager.EnsureInstance(_coreRoot);
 
             var op = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(SceneNames.MainMenu);
             if (op != null) op.allowSceneActivation = true;
